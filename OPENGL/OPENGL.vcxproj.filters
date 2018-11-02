@@ -13,10 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{a4e15f04-5db3-49d1-8711-e7526a1295c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res\shaders">
+      <UniqueIdentifier>{77a418f3-1614-4a60-b4b8-0a898807d69b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Basic.shader">
+      <Filter>res\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
