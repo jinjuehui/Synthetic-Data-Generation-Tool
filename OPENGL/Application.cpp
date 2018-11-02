@@ -5,6 +5,22 @@
 #include<string>
 #include<sstream>
 
+
+static void GLClearError()
+{
+	while (glGetError() != GL_NO_ERROR);
+}
+
+static void GLCheckError()
+{
+	while (GLenum error = glGetError())
+	{
+		std::cout << "[OpenGL Error] (" << error << ")" << std::endl;
+	}
+}
+
+
+
 struct ShaderProgramSource
 {
 	std::string VertexSource;
@@ -181,8 +197,12 @@ int main(void)
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT);
 		
+		GLClearError();
 		//glDrawArrays(GL_TRIANGLES, 0,6);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,nullptr);
+		glDrawElements(GL_TRIANGLES, 6, GL_INT,nullptr);
+		GLCheckError();
+
+
 		/* TEST DRAW A TRIANGLE
 		glBegin(GL_TRIANGLES);
 		glVertex2f(-0.5f,-0.5f);
