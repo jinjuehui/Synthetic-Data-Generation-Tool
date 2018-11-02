@@ -5,7 +5,15 @@
 #include<string>
 #include<sstream>
 
-static void ParseShader(const std::string& filepath)
+struct ShaderProgramSource
+{
+	std::string VertexSource;
+	std::string FragmentSource;
+};
+
+
+
+static ShaderProgramSource ParseShader(const std::string& filepath)
 {
 	std::ifstream stream(filepath);
 
@@ -36,6 +44,8 @@ static void ParseShader(const std::string& filepath)
 			ss[(int)type] << line << '\n';
 		}
 	}
+
+	return{ ss[0].str(), ss[1].str() };
 }
 
 static unsigned int CompileShader(unsigned int type , const std::string& source)
@@ -134,10 +144,16 @@ int main(void)
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	ShaderProgramSource source = ParseShader("Basic.shader");
+	std::cout << "VERTEX" << std::endl;
+	std::cout << source.VertexSource << std::endl;
+	std::cout << "FRAGMENT" << std::endl;
+	std::cout << source.FragmentSource << std::endl;
 
 
-	unsigned int shader = CreateShader(vertexShader, fragmentShader);
+	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	glUseProgram(shader);
 
 	/* Loop until the user closes the window */
