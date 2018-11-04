@@ -11,6 +11,16 @@
 	x;\
 	ASSERT(GLLogCall(#x, __FILE__, __LINE__))
 
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+}
+
+
 static void GLClearError()
 {
 	while (glGetError() != GL_NO_ERROR);
@@ -123,21 +133,21 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
 int main(void)
 {
 	GLFWwindow* window;
-
-	if (!glfwInit())	/* Initialize the library */
+	
+	if (!glfwInit())	// Initialize the library 
 		return -1;
 
 	//framerate setting
 	//glfwSwapInterval(1);
 
-	window = glfwCreateWindow(640, 480, "Triangle", NULL, NULL);	/* Create a windowed mode window and its OpenGL context */
+	window = glfwCreateWindow(640, 480, "Triangle", NULL, NULL);	// Create a windowed mode window and its OpenGL context 
 	if (!window)
 	{
 		glfwTerminate();
 		return -1;
 	}
 
-	glfwMakeContextCurrent(window);	/* Make the window's context current */
+	glfwMakeContextCurrent(window);	// Make the window's context current 
 
 	if (glewInit() != GLEW_OK)  //initialize the extension loader 
 		std::cout << "Error!" << std::endl;
@@ -182,11 +192,11 @@ int main(void)
 	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	ShaderProgramSource source = ParseShader("Basic.shader");
-	/*std::cout << "VERTEX" << std::endl;
-	std::cout << source.VertexSource << std::endl;
-	std::cout << "FRAGMENT" << std::endl;
-	std::cout << source.FragmentSource << std::endl;
-	*/
+	//std::cout << "VERTEX" << std::endl;
+	//std::cout << source.VertexSource << std::endl;
+	//std::cout << "FRAGMENT" << std::endl;
+	//std::cout << source.FragmentSource << std::endl;
+	
 
 	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	GLCall(glUseProgram(shader));
@@ -197,9 +207,10 @@ int main(void)
 
 	float r = 0.0f;
 	float increment = 0.05f;
-	while (!glfwWindowShouldClose(window))/* Loop until the user closes the window */
+	while (!glfwWindowShouldClose(window)) //Loop until the user closes the window 
 	{
-		/* Render here */
+		
+		GLCall(glfwSetKeyCallback(window, key_callback)); //Render here
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
 		
 		//GLClearError();
@@ -216,24 +227,25 @@ int main(void)
 
 		r += increment;
 
-		/* TEST DRAW A TRIANGLE
-		glBegin(GL_TRIANGLES);
-		glVertex2f(-0.5f,-0.5f);
-		glVertex2f(0.0f, 0.5f);
-		glVertex2f(0.0f, -0.5f);
-		glEnd();
-		*/
+		// TEST DRAW A TRIANGLE
+		//glBegin(GL_TRIANGLES);
+		//glVertex2f(-0.5f,-0.5f);
+		//glVertex2f(0.0f, 0.5f);
+		//glVertex2f(0.0f, -0.5f);
+		//glEnd();
+		//
 		
 
-		/* Swap front and back buffers */
-		GLCall(glfwSwapBuffers(window));
+		
+		GLCall(glfwSwapBuffers(window));// Swap front and back buffers 
 
-		/* Poll for and process events */
-		GLCall(glfwPollEvents());
+		
+		GLCall(glfwPollEvents());//Poll for and process events 
 	}
 
 	GLCall(glDeleteProgram(shader));
 
 	GLCall(glfwTerminate());
 	return 0;
-}
+}  
+
