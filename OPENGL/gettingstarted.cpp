@@ -45,7 +45,7 @@ static const char* vertex_shader_text =
 "varying vec3 color;\n"
 "void main()\n"
 "{\n"
-"    gl_Position = MVP * vec4(vPos, 0.0, 1.0);\n"
+"    gl_Position = MVP * vec4(vPos, 0.0f, 1.0f);\n"
 "    color = vCol;\n"
 "}\n";
 
@@ -53,7 +53,7 @@ static const char* fragment_shader_text =
 "varying vec3 color;\n"
 "void main()\n"
 "{\n"
-"    gl_FragColor = vec4(color, 1.0);\n"
+"    gl_FragColor = vec4(color, 1.0f);\n"
 "}\n";
 
 
@@ -131,6 +131,9 @@ int main(void)
 	GLCall(glAttachShader(program, fragment_shader));
 	GLCall(glLinkProgram(program));
 
+	GLCall(glDeleteShader(vertex_shader));  //delete the shader objects once they are linked into the program object, we nolonger need them anymore
+	GLCall(glDeleteShader(fragment_shader));
+
 	GLCall(mvp_location = glGetUniformLocation(program, "MVP"));
 	GLCall(vpos_location = glGetAttribLocation(program, "vPos"));
 	GLCall(vcol_location = glGetAttribLocation(program, "vCol"));
@@ -142,22 +145,28 @@ int main(void)
 	GLCall(glVertexAttribPointer(vcol_location, 3, GL_FLOAT,GL_FALSE,sizeof(float)*5,(void*)(sizeof(float)*2)));
 
 	//check whether the two shader compiled successfully
-	int vertex_success, fragment_success;
+	int vertex_success, fragment_success, program_success;
 	char infoLog[512];
 	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_success);
 	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &fragment_success);
+	glGetProgramiv(program, GL_LINK_STATUS, &program_success);
 
-	if (!vertex_success || !fragment_success)
+	if (!vertex_success || !fragment_success||!program_success)
 	{
 		if (!vertex_success)
 		{
 			glGetShaderInfoLog(vertex_shader, 512, NULL, infoLog);
 			std::cout << "ERROR::SHADER::VERTEX::COMPILATTION_FAILED\n" << infoLog << std::endl;
 		}
-		else
+		else if (!fragment_success)
 		{
 			glGetShaderInfoLog(fragment_shader,512,NULL, infoLog);
 			std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+		}
+		else
+		{
+			glGetShaderInfoLog(program,512,NULL,infoLog);
+			std::cout << "ERROR::PROGRA::LINK_FAILED" << infoLog << std::endl;
 		}
 	}
 	
