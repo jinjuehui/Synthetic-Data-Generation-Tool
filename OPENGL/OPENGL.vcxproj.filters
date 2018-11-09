@@ -26,7 +26,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gettingstarted.cpp">
+    <ClCompile Include="drawtiangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

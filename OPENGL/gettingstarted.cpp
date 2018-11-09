@@ -2,6 +2,10 @@
 //Objects: a collection of options that represents a subset of OpenGL's state
 //shaders: small programm on on GPU for process graphics pipeline.:
 //         written in OpenGGL Shading Language(GLSL)
+//VAO:Vertex Array Object
+//VBO:Vertex Buffer Object
+//EBO:Element Buffer Object
+
 #include <GL/glew.h>	
 #include <GLFW/glfw3.h>
 
@@ -112,10 +116,10 @@ int main(void)
 
 	std::cout << glGetString(GL_VERSION);
 
-	glfwSwapInterval(1);
+	glfwSwapInterval(1);// The minimum number of screen updates to wait for until the buffers are swapped by glfwSwapBuffers.
 
-	GLCall(glGenBuffers(1, &vertex_buffer));//create buffer object, the buffer type of a vertex buffer object is GL_ARRAY_BUFFER
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER,vertex_buffer));//bind object to context
+	GLCall(glGenBuffers(1, &vertex_buffer));//create buffer object, the buffer type of a vertex buffer object is GL_ARRAY_BUFFER.
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER,vertex_buffer));//bind object to context.
 	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));//Copy the previously defined vertes data into the buffer's memory
 	//					1.type of buffer,  2.bytes, 3.actual data, 4.the data will most likely not change at all. enum{GL_STATIC_DRAW, GL_DYNAMIC_DRAW, GL_STREAM_DRAW}           
 	GLCall(vertex_shader = glCreateShader(GL_VERTEX_SHADER));
@@ -138,8 +142,16 @@ int main(void)
 	GLCall(vpos_location = glGetAttribLocation(program, "vPos"));
 	GLCall(vcol_location = glGetAttribLocation(program, "vCol"));
 
-	GLCall(glEnableVertexAttribArray(vpos_location));
+	GLCall(glEnableVertexAttribArray(vpos_location));//parameter:: vertex attribute location
 	GLCall(glVertexAttribPointer(vpos_location, 2, GL_FLOAT,GL_FALSE,sizeof(float)*5,(void*)(sizeof(float)*2)));
+	//tell OpenGL how it should interpret the vertex data(per vertex attribute) 
+	//first parameter: which attribute we want to configure, the location of the vertex attribute
+	//second: the size of the vertex attribute
+	//third: the type of the data 
+	//fourth: if we want the data tobe normalized
+	//fifth: stride, the space between consecutive vertex attributes
+	//sixth: type void*. this is the offset of where the position data begins in the buffer
+
 
 	GLCall(glEnableVertexAttribArray(vcol_location));
 	GLCall(glVertexAttribPointer(vcol_location, 3, GL_FLOAT,GL_FALSE,sizeof(float)*5,(void*)(sizeof(float)*2)));

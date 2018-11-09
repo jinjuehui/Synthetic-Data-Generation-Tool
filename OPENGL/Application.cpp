@@ -122,7 +122,7 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
 
 	glLinkProgram(program);
 	glValidateProgram(program);
-	glDeleteShader(vs);
+	glDeleteShader(vs);//once linked the shader object won't be needed anymore
 	glDeleteShader(fs);
 
 	return program;
@@ -176,9 +176,15 @@ int main(void)
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));	//specify the data
 	GLCall(glBufferData(GL_ARRAY_BUFFER,12*sizeof(float), positions, GL_STATIC_DRAW));
 	
-	GLCall(glEnableVertexAttribArray(0));
+	GLCall(glEnableVertexAttribArray(0));//0:vertex attribute location
 	GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
-
+	//tell OpenGL how it should interpret the vertex data(per vertex attribute) 
+	//first parameter: which attribute we want to configure, the location of the vertex attribute
+	//second: the size of the vertex attribute
+	//third: the type of the data 
+	//fourth: if we want the data tobe normalized
+	//fifth: stride, the space between consecutive vertex attributes
+	//sixth: type void*. this is the offset of where the position data begins in the buffer
 
 	unsigned int ibo; 
 	GLCall(glGenBuffers(1, &ibo));	//indices buffer object
