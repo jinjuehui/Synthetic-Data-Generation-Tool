@@ -56,15 +56,15 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main()
 {
-	
+//1.create window====================================================================
 	GLFWwindow* window;
 
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
 	
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);//Why it doesn't work with 2,3
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//what does this influence
 
 	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "TRIANGLE",NULL,NULL);
 	if (!window)
@@ -74,7 +74,6 @@ int main()
 	}
 	
 	glfwSetKeyCallback(window, key_callback);
-	
 	glfwMakeContextCurrent(window);
 
 	if (glewInit()!=GLEW_OK)
@@ -85,6 +84,7 @@ int main()
 
 	unsigned int vbo, vertex_shader, fragment_shader, program;
 
+//2.Generate Buffer============================================================================
 	GLCall(glGenBuffers(1, &vbo));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
@@ -92,7 +92,7 @@ int main()
 	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
 
 
-
+//3.create shader
 	GLCall(vertex_shader = glCreateShader(GL_VERTEX_SHADER));
 	GLCall(glShaderSource(vertex_shader,1,&vertex_shader_source,NULL));
 	GLCall(glCompileShader(vertex_shader));
@@ -116,7 +116,7 @@ int main()
 	}
 
 
-
+//4.create program
 	GLCall(program = glCreateProgram());
 	GLCall(glAttachShader(program, vertex_shader));
 	GLCall(glAttachShader(program,fragment_shader));
@@ -132,7 +132,7 @@ int main()
 	glDeleteShader(fragment_shader);
 
 	
-	
+//5. while loop	
 	while (!glfwWindowShouldClose(window))
 	{
 		GLCall(glClearColor(0.2f,0.3f,0.3f,1.0f));
