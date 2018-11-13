@@ -1,8 +1,9 @@
 #include <GL/glew.h>
-#include<GLFW/glfw3.h>
-#include<iostream>
-#include"Renderer.h"
-
+#include <GLFW/glfw3.h>
+#include <iostream>
+#include "Renderer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod)
 {
@@ -60,11 +61,11 @@ int main()
 
 	if (glewInit()!=GLEW_OK)
 	{
-		std::cout << "initialze glew failed" << std::endl;
+		std::cout << "initialize glew failed" << std::endl;
 	}
 	
 	int nrAttributes;
-	unsigned int vbo, vao, vertex_shader, fragment_shader, program;
+	unsigned int vao, vertex_shader, fragment_shader, program;
 
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&nrAttributes);
 	std::cout << "maximum number of vertex attributes supported: " << nrAttributes << std::endl;
@@ -74,9 +75,7 @@ int main()
 	GLCall(glBindVertexArray(vao));
 
 //2.Generate Buffer============================================================================
-	GLCall(glGenBuffers(1, &vbo));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
+	VertexBuffer vbo(vertices,sizeof(vertices));
 	GLCall(glEnableVertexAttribArray(0));
 	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
 
@@ -143,7 +142,7 @@ int main()
 				r = -r;
 
 			color += r;
-			GLCall(glBindVertexArray(vao))
+			GLCall(glBindVertexArray(vao))  
 				GLCall(glDrawArrays(GL_TRIANGLES, 0, 3));
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
