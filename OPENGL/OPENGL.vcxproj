@@ -123,16 +123,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="Basic.shader" />
+    <None Include="FragmentShader.shader" />
+    <None Include="VertexShader.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="drawtiangle.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="VertexBuffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

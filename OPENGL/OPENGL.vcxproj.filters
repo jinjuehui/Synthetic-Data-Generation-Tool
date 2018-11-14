@@ -19,10 +19,19 @@
     <Filter Include="res\shaders">
       <UniqueIdentifier>{77a418f3-1614-4a60-b4b8-0a898807d69b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shader">
+      <UniqueIdentifier>{0c98325a-624a-44c6-942d-0c5baf47baaf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.shader">
       <Filter>res\shaders</Filter>
+    </None>
+    <None Include="VertexShader.shader">
+      <Filter>Source Files\Shader</Filter>
+    </None>
+    <None Include="FragmentShader.shader">
+      <Filter>Source Files\Shader</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -38,16 +47,22 @@
     <ClCompile Include="IndexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Renderer.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Shader.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VertexBuffer.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Renderer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IndexBuffer.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

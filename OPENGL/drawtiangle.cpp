@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "Shader.h"
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod)
 {
@@ -81,53 +82,48 @@ int main()
 
 
 //3.create shader
-	GLCall(vertex_shader = glCreateShader(GL_VERTEX_SHADER));
-	GLCall(glShaderSource(vertex_shader,1,&vertex_shader_source,NULL));
-	GLCall(glCompileShader(vertex_shader));
-	int success;
-	char infoLog[512];
-	GLCall(glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success));
-	if (!success)
-	{
-		glGetShaderInfoLog(vertex_shader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED" << std::endl;
-	}
+	Shader shader_program("Shader/VertexShader.shader","Shader/FragmentShader.shader");
+	//GLCall(vertex_shader = glCreateShader(GL_VERTEX_SHADER));
+	//GLCall(glShaderSource(vertex_shader,1,&vertex_shader_source,NULL));
+	//GLCall(glCompileShader(vertex_shader));
+	//int success;
+	//char infoLog[512];
+	//GLCall(glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success));
+	//if (!success)
+	//{
+	//	glGetShaderInfoLog(vertex_shader, 512, NULL, infoLog);
+	//	std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED" << std::endl;
+	//}
 
-	GLCall(fragment_shader = glCreateShader(GL_FRAGMENT_SHADER));
-	GLCall(glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL));
-	GLCall(glCompileShader(fragment_shader));
-	GLCall(glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success));
-	if (!success)
-	{
-		glGetShaderInfoLog(fragment_shader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED" << std::endl;
-	}
+	//GLCall(fragment_shader = glCreateShader(GL_FRAGMENT_SHADER));
+	//GLCall(glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL));
+	//GLCall(glCompileShader(fragment_shader));
+	//GLCall(glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success));
+	//if (!success)
+	//{
+	//	glGetShaderInfoLog(fragment_shader, 512, NULL, infoLog);
+	//	std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED" << std::endl;
+	//}
 
-	
-		//4.create program
-		GLCall(program = glCreateProgram());
-		GLCall(glAttachShader(program, vertex_shader));
-		GLCall(glAttachShader(program, fragment_shader));
-		GLCall(glLinkProgram(program));
-		GLCall(glGetProgramiv(program, GL_LINK_STATUS, &success));
-		if (!success)
-		{
-			glGetProgramInfoLog(program, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED";
-		}
+	//
+	//	//4.create program
+	//	GLCall(program = glCreateProgram());
+	//	GLCall(glAttachShader(program, vertex_shader));
+	//	GLCall(glAttachShader(program, fragment_shader));
+	//	GLCall(glLinkProgram(program));
+	//	GLCall(glGetProgramiv(program, GL_LINK_STATUS, &success));
+	//	if (!success)
+	//	{
+	//		glGetProgramInfoLog(program, 512, NULL, infoLog);
+	//		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED";
+	//	}
 
-		int fragment_color;
-		fragment_color = glGetUniformLocation(program, "color");
-		GLCall(glUseProgram(program));
-
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-		GLCall(glUseProgram(0));
-		GLCall(glBindVertexArray(0));
-
+		
+		//fragment_color = glGetUniformLocation(program, "color");
+		//GLCall(glUseProgram(program));
 		//glDeleteShader(vertex_shader);
 		//glDeleteShader(fragment_shader);
 		float color = 1.0f, r = 0.01f;
-
 		glfwSwapInterval(1);
 
 		//5. while loop	
@@ -135,20 +131,22 @@ int main()
 		{
 			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 			GLCall(glClear(GL_COLOR_BUFFER_BIT));
-			GLCall(glUseProgram(program));
-			GLCall(glUniform4f(fragment_color, color, -color, 0.5, 1.0f));
+			shader_program.use();
+			//GLCall(glUseProgram(program));
+			shader_program.setFloat("color", color, -color, 0.5, 1.0f);
+			//GLCall(glUniform4f(fragment_color, color, -color, 0.5, 1.0f));
 
 			if (color >= 1 || color <= 0)
 				r = -r;
 
 			color += r;
 			GLCall(glBindVertexArray(vao))  
-				GLCall(glDrawArrays(GL_TRIANGLES, 0, 3));
+			GLCall(glDrawArrays(GL_TRIANGLES, 0, 3));
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
 
 		}
-	glfwTerminate();
+	glfwTerminate();//destroy glcontext
 	exit(EXIT_SUCCESS);
 	return 0;
 
