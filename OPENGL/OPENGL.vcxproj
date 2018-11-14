@@ -127,7 +127,7 @@
     <None Include="VertexShader.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="drawtiangle.cpp" />
+    <ClCompile Include="drawtriangle.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />

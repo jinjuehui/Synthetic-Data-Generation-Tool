@@ -35,9 +35,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="drawtiangle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -48,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="drawtriangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
