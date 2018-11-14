@@ -82,7 +82,7 @@ int main()
 
 
 //3.create shader
-	Shader shader_program("Shader/VertexShader.shader","Shader/FragmentShader.shader");
+	Shader shader_program("VertexShader.shader","FragmentShader.shader");
 	//GLCall(vertex_shader = glCreateShader(GL_VERTEX_SHADER));
 	//GLCall(glShaderSource(vertex_shader,1,&vertex_shader_source,NULL));
 	//GLCall(glCompileShader(vertex_shader));
