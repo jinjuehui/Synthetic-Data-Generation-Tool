@@ -5,6 +5,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
+#include "stb_image.h"
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod)
 {
@@ -15,24 +16,31 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 const float vertices[] =
 {
-	-0.5f, -0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
-	 0.0f, 0.5f, 0.0f
+	-0.5f, -0.5f, 0.0f, 1.0f,0.0f,0.0f, 0.0f,0.0f,
+	 0.5f, -0.5f, 0.0f, 0.0f,1.0f,0.0f, 1.0f,0.0f,
+	 0.5f,  0.5f, 0.0f, 0.0f,0.0f,1.0f, 1.0f,1.0f,
+	-0.5f,  0.5f, 0.0f, 1.0f,0.0f,0.0f, 0.0f,1.0f
 };
 
-const char* vertex_shader_source = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-	"}\0";;
-const char* fragment_shader_source = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-	"uniform vec4 color;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = color;\n"
-	"}\n\0";;
+const unsigned int index[] =
+{
+	0,1,2,
+	2,0,3
+};
+
+//const char* vertex_shader_source = "#version 330 core\n"
+//    "layout (location = 0) in vec3 aPos;\n"
+//    "void main()\n"
+//    "{\n"
+//    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+//	"}\0";;
+//const char* fragment_shader_source = "#version 330 core\n"
+//    "out vec4 FragColor;\n"
+//	"uniform vec4 color;\n"
+//    "void main()\n"
+//    "{\n"
+//    "   FragColor = color;\n"
+//	"}\n\0";;
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -40,7 +48,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main()
 {
-//1.create window====================================================================
+//0.create window====================================================================
 	GLFWwindow* window;
 
 	if (!glfwInit())
@@ -71,17 +79,55 @@ int main()
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&nrAttributes);
 	std::cout << "maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 	
-// Generate Vertex Array Object, useful when dealing with multiple vbo layouts
+//1.Generate Vertex Array Object, useful when dealing with multiple vbo layouts
 	GLCall(glGenVertexArrays(1,&vao));
 	GLCall(glBindVertexArray(vao));
 
 //2.Generate Buffer============================================================================
 	VertexBuffer vbo(vertices,sizeof(vertices));
 	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
+	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0));
+
+	GLCall(glEnableVertexAttribArray(1));
+	GLCall(glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE, 8 * sizeof(float),(void*)(sizeof(float)*3)));
+
+	GLCall(glEnableVertexAttribArray(2));
+	GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 6)));
+
+//3.create vertex array
+	unsigned int eao;
+	GLCall(glGenBuffers(1,&eao));
+	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,eao));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(index),index,GL_STATIC_DRAW));
+
+//4.loading texture image and generate the texture
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels,0);
+
+	unsigned int texture;
+	GLCall(glGenTextures(1,&texture));
+	GLCall(glBindTexture(GL_TEXTURE_2D,texture));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+	if (data)
+	{
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+		GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+	}
+
+	else
+	{
+		std::cout << "Failed to load the texture!" << std::endl;
+	}
+	
+	stbi_image_free(data);
 
 
-//3.create shader
+
+//4.create shader
 	Shader shader_program("VertexShader.shader","FragmentShader.shader");
 	//GLCall(vertex_shader = glCreateShader(GL_VERTEX_SHADER));
 	//GLCall(glShaderSource(vertex_shader,1,&vertex_shader_source,NULL));
@@ -123,7 +169,7 @@ int main()
 		//GLCall(glUseProgram(program));
 		//glDeleteShader(vertex_shader);
 		//glDeleteShader(fragment_shader);
-		float color = 1.0f, r = 0.01f;
+		//float color = 1.0f, r = 0.01f;
 		glfwSwapInterval(1);
 
 		//5. while loop	
@@ -132,16 +178,17 @@ int main()
 			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 			GLCall(glClear(GL_COLOR_BUFFER_BIT));
 			shader_program.use();
+
 			//GLCall(glUseProgram(program));
-			shader_program.setFloat("color", color, -color, 0.5, 1.0f);
+			//shader_program.setFloat("color", color, -color, 0.5, 1.0f);
 			//GLCall(glUniform4f(fragment_color, color, -color, 0.5, 1.0f));
 
-			if (color >= 1 || color <= 0)
+			/*if (color >= 1 || color <= 0)
 				r = -r;
-
-			color += r;
+			color += r;*/
 			GLCall(glBindVertexArray(vao))  
-			GLCall(glDrawArrays(GL_TRIANGLES, 0, 3));
+			//GLCall(glDrawArrays(GL_TRIANGLES, 0, 3));
+			GLCall(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, 0));
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
 
