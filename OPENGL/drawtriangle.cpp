@@ -1,3 +1,4 @@
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -102,15 +103,15 @@ int main()
 
 //4.loading texture image and generate the texture
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels,0);
+	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	unsigned int texture1;
+	GLCall(glGenTextures(1, &texture1));
 
-	unsigned int texture;
-	GLCall(glGenTextures(1,&texture));
-	GLCall(glBindTexture(GL_TEXTURE_2D,texture));
+	GLCall(glBindTexture(GL_TEXTURE_2D, texture1));
 	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
 	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 
 	if (data)
 	{
@@ -122,10 +123,29 @@ int main()
 	{
 		std::cout << "Failed to load the texture!" << std::endl;
 	}
-	
 	stbi_image_free(data);
 
+	
+	unsigned int texture2;
+	GLCall(glGenTextures(1, &texture2));
+	GLCall(glBindTexture(GL_TEXTURE_2D, texture2));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+	data = stbi_load("eye.png", &width, &height, &nrChannels, 0);
 
+	if (data)
+	{
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+		GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+	}
+
+	else
+	{
+		std::cout << "Failed to load the texture!" << std::endl;
+	}
+	stbi_image_free(data);
 
 //4.create shader
 	Shader shader_program("VertexShader.shader","FragmentShader.shader");
@@ -163,21 +183,27 @@ int main()
 	//		glGetProgramInfoLog(program, 512, NULL, infoLog);
 	//		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED";
 	//	}
-
+	
 		
 		//fragment_color = glGetUniformLocation(program, "color");
 		//GLCall(glUseProgram(program));
 		//glDeleteShader(vertex_shader);
 		//glDeleteShader(fragment_shader);
 		//float color = 1.0f, r = 0.01f;
+	
+	shader_program.use();
+	shader_program.setInt("texture1", 0);
+	shader_program.setInt("texture2", 1);
+
 		glfwSwapInterval(1);
+
 
 		//5. while loop	
 		while (!glfwWindowShouldClose(window))
 		{
 			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 			GLCall(glClear(GL_COLOR_BUFFER_BIT));
-			shader_program.use();
+
 
 			//GLCall(glUseProgram(program));
 			//shader_program.setFloat("color", color, -color, 0.5, 1.0f);
@@ -186,8 +212,15 @@ int main()
 			/*if (color >= 1 || color <= 0)
 				r = -r;
 			color += r;*/
-			GLCall(glBindVertexArray(vao))  
+
 			//GLCall(glDrawArrays(GL_TRIANGLES, 0, 3));
+			GLCall(glActiveTexture(GL_TEXTURE0));
+			GLCall(glBindTexture(GL_TEXTURE_2D, texture1));
+			GLCall(glActiveTexture(GL_TEXTURE1));
+			GLCall(glBindTexture(GL_TEXTURE_2D, texture2));
+
+			shader_program.use();
+			GLCall(glBindVertexArray(vao));
 			GLCall(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, 0));
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
