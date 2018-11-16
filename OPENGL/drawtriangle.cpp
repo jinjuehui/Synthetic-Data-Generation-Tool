@@ -8,6 +8,11 @@
 #include "Shader.h"
 #include "stb_image.h"
 
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+
+
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -59,7 +64,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//Why it doesn't work with 2,3
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//what does this influence
 											//if core_profile is chosen, the vertex array object need to be manually created
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "TRIANGLE",NULL,NULL);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "TEST",NULL,NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -148,6 +153,11 @@ int main()
 	}
 	stbi_image_free(data);
 
+//5. Rotation and Translation
+	//glm::mat4 trans(1.0f);
+	//trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	//trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
+
 //4.create shader
 	Shader shader_program("VertexShader.shader","FragmentShader.shader");
 	//GLCall(vertex_shader = glCreateShader(GL_VERTEX_SHADER));
@@ -193,15 +203,16 @@ int main()
 		//float color = 1.0f, r = 0.01f;
 	
 	shader_program.use();
+
 	shader_program.setInt("texture1", 0);
 	shader_program.setInt("texture2", 1);
 
-		glfwSwapInterval(1);
 
-
+		//glfwSwapInterval(1);
 		//5. while loop	
 		while (!glfwWindowShouldClose(window))
 		{
+
 			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 			GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
@@ -219,8 +230,12 @@ int main()
 			GLCall(glBindTexture(GL_TEXTURE_2D, texture1));
 			GLCall(glActiveTexture(GL_TEXTURE1));
 			GLCall(glBindTexture(GL_TEXTURE_2D, texture2));
+			glm::mat4 trans(1.0f);
+			trans = glm::rotate(trans,(float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+			std::cout << "System Time: " << (float)glfwGetTime() << std::endl;
 
 			shader_program.use();
+			shader_program.setMatrix4fv("transform", trans);
 			GLCall(glBindVertexArray(vao));
 			GLCall(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, 0));
 			GLCall(glfwSwapBuffers(window));

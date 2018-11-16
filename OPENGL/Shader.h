@@ -4,7 +4,8 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
-
+#include <glm.hpp>
+#include <gtc/type_ptr.hpp>
 
 class Shader
 {
@@ -21,5 +22,6 @@ public:
 	void setInt(const std::string &name, int value) const;
 	void setFloat(const std::string &name, float v0, float v1, float v2, float v3) const;
 	void setBool(const std::string &name, bool value) const;
+	void setMatrix4fv(const std::string &name, glm::mat4 value);
 
 };
