@@ -103,6 +103,7 @@ int main()
 
 //4.loading texture image and generate the texture
 	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
 	unsigned int texture1;
 	GLCall(glGenTextures(1, &texture1));
@@ -133,11 +134,11 @@ int main()
 	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
 	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-	data = stbi_load("eye.png", &width, &height, &nrChannels, 0);
+	data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
 
 	if (data)
 	{
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
 		GLCall(glGenerateMipmap(GL_TEXTURE_2D));
 	}
 
