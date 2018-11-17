@@ -154,8 +154,10 @@ int main()
 	stbi_image_free(data);
 
 //5. Rotation and Translation
-	//glm::mat4 trans(1.0f);
-	//trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 trans,projs,view;
+	trans = glm::rotate(trans, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	view = glm::translate(view, glm::vec3(0.0f,0.0f,-3.0f));
+	projs = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f,100.0f);
 	//trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
 
 //4.create shader
@@ -206,7 +208,9 @@ int main()
 
 	shader_program.setInt("texture1", 0);
 	shader_program.setInt("texture2", 1);
-
+	shader_program.setMatrix4fv("transform", trans);
+	shader_program.setMatrix4fv("view", view);
+	shader_program.setMatrix4fv("projection", projs);
 
 		//glfwSwapInterval(1);
 		//5. while loop	
@@ -230,12 +234,10 @@ int main()
 			GLCall(glBindTexture(GL_TEXTURE_2D, texture1));
 			GLCall(glActiveTexture(GL_TEXTURE1));
 			GLCall(glBindTexture(GL_TEXTURE_2D, texture2));
-			glm::mat4 trans(1.0f);
-			trans = glm::rotate(trans,(float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-			std::cout << "System Time: " << (float)glfwGetTime() << std::endl;
+			//std::cout << "System Time: " << (float)glfwGetTime() << std::endl;
 
 			shader_program.use();
-			shader_program.setMatrix4fv("transform", trans);
+
 			GLCall(glBindVertexArray(vao));
 			GLCall(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, 0));
 			GLCall(glfwSwapBuffers(window));
