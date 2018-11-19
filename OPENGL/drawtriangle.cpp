@@ -13,6 +13,33 @@
 #include <gtc/type_ptr.hpp>
 
 
+glm::vec3 camera_pose = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+
+void wasd_keyinput(GLFWwindow* window)
+{
+	float camera_speed = 0.1f;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		camera_pose += camera_speed * camera_front;
+	}
+	if (glfwGetKey(window,GLFW_KEY_S) == GLFW_PRESS)
+	{
+		camera_pose -= camera_speed * camera_front;
+	}
+	if (glfwGetKey(window,GLFW_KEY_A) == GLFW_PRESS)
+	{
+		camera_pose -= camera_speed * glm::normalize(glm::cross(camera_front,camera_up));
+	}
+	if (glfwGetKey(window,GLFW_KEY_D) == GLFW_PRESS)
+	{
+		camera_pose += camera_speed * glm::normalize(glm::cross(camera_front,camera_up));
+	}
+}
+
+
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -224,7 +251,7 @@ int main()
 	//trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
 //create camera coordinate:
 	glm::mat4 camera;
-	float radious = 10.0f, camX,camZ;
+	//float radious = 10.0f, camX,camZ;
 
 
 
@@ -307,9 +334,12 @@ int main()
 			//std::cout << "System Time: " << (float)glfwGetTime() << std::endl;
 			//std::cout << "Size of CubePosition[]: " << sizeof(CubePosition)<< std::endl;
 			GLCall(glBindVertexArray(vao));
-			camX = cos(float(glfwGetTime()))*radious;
-			camZ = sin(float(glfwGetTime()))*radious;
-
+			//camX = cos(float(glfwGetTime()))*radious;
+			//camZ = sin(float(glfwGetTime()))*radious;
+			wasd_keyinput(window);
+			camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
+			shader_program.setMatrix4fv("view", camera);
+	
 			for (size_t i = 0; i < 10;i++ )
 			{
 				glm::mat4 trans;
@@ -317,8 +347,7 @@ int main()
 				float angle = i * 50;
 				trans = glm::rotate(trans,  glm::radians(angle), glm::vec3(0.5f, 0.6f, 0.3f));
 				shader_program.setMatrix4fv("transform", trans);
-				camera = glm::lookAt(glm::vec3{ camX,0,camZ }, glm::vec3{ 0.0,0.0,0.0 }, glm::vec3{ 0.0,1.0,0.0 });
-				shader_program.setMatrix4fv("view", camera);
+				//camera = glm::lookAt(glm::vec3{ camX,0,camZ }, glm::vec3{ 0.0,0.0,0.0 }, glm::vec3{ 0.0,1.0,0.0 });
 				GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 
 			}
