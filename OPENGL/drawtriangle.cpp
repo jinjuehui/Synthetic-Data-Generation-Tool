@@ -73,6 +73,25 @@ const float vertices[] = {
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 
+
+//draw multiple cubes define location and rotation aches
+
+glm::vec3 CubePosition[] =
+{
+	glm::vec3(0.0f,  0.0f,  0.0f),
+	glm::vec3(2.0f,  5.0f, -15.0f),
+	glm::vec3(-1.5f, -2.2f, -2.5f),
+	glm::vec3(-3.8f, -2.0f, -12.3f),
+	glm::vec3(2.4f, -0.4f, -3.5f),
+	glm::vec3(-1.7f,  3.0f, -7.5f),
+	glm::vec3(1.3f, -2.0f, -2.5f),
+	glm::vec3(1.5f,  2.0f, -2.5f),
+	glm::vec3(1.5f,  0.2f, -1.5f),
+	glm::vec3(-1.3f,  1.0f, -1.5f)
+};
+
+
+
 //const unsigned int index[] =
 //{
 //	0,1,2,
@@ -257,6 +276,7 @@ int main()
 	shader_program.setMatrix4fv("view", view);
 	shader_program.setMatrix4fv("projection", projs);
 
+
 		//glfwSwapInterval(1);
 	GLCall(glEnable(GL_DEPTH_TEST));
 		//5. while loop	
@@ -281,13 +301,19 @@ int main()
 			GLCall(glActiveTexture(GL_TEXTURE1));
 			GLCall(glBindTexture(GL_TEXTURE_2D, texture2));
 			//std::cout << "System Time: " << (float)glfwGetTime() << std::endl;
-			glm::mat4 trans;
-			trans = glm::rotate(trans,(float)glfwGetTime()*glm::radians(50.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-
-			shader_program.use();
-			shader_program.setMatrix4fv("transform", trans);
+			std::cout << "Size of CubePosition[]: " << sizeof(CubePosition)<< std::endl;
 			GLCall(glBindVertexArray(vao));
-			GLCall(glDrawArrays(GL_TRIANGLES, 0,36));
+			for (size_t i = 0; i < 10;i++ )
+			{
+				glm::mat4 trans;
+				trans = glm::translate(trans, CubePosition[i]);
+				float angle = i * 50;
+				trans = glm::rotate(trans,  glm::radians(angle), glm::vec3(0.5f, 0.6f, 0.3f));
+
+				shader_program.setMatrix4fv("transform", trans);
+				GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+
+			}
 			//GLCall(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, 0));
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
