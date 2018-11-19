@@ -12,14 +12,68 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
 float deltaTime(1.0f), lastFrame(0.0f);
 
 glm::vec3 camera_pose = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
+bool firstMouse(true);
+double lastX(SCR_WIDTH/2), lastY(SCR_HEIGHT/2);
+float yaw(-90.0f), pitch(0.0f),fov(45.0f);
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (fov >= 1.0f && fov <= 45.0f)
+		fov -= yoffset;
+	if (fov <= 1.0f)
+		fov = 1.0f;
+	if (fov >= 45.0f)
+		fov = 45.0f;
+}
 
 
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.05;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (pitch>89.0f)
+	{
+		pitch = 89.0f;
+	}
+	if (pitch<-89.0f)
+	{
+		pitch = -89.0f;
+	}
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw))*cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw))*cos(glm::radians(pitch));
+	camera_front = glm::normalize(front);
+
+}
 
 
 void wasd_keyinput(GLFWwindow* window)
@@ -144,8 +198,7 @@ glm::vec3 CubePosition[] =
 //    "   FragColor = color;\n"
 //	"}\n\0";;
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+
  
 
 int main()
@@ -250,14 +303,16 @@ int main()
 	stbi_image_free(data);
 
 //5. Rotation and Translation
-	glm::mat4 projs;
-	projs = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f,100.0f);
+	/*glm::mat4 projs;
+	projs = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f,100.0f);*/
 	//trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
 //create camera coordinate:
 	glm::mat4 camera;
 	//float radious = 10.0f, camX,camZ;
 
+//create mouse cursor input
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 //4.create shader
 	Shader shader_program("VertexShader.shader","FragmentShader.shader");
@@ -309,7 +364,6 @@ int main()
 	shader_program.setInt("texture2", 1);
 	
 	//shader_program.setMatrix4fv("view", view);
-	shader_program.setMatrix4fv("projection", projs);
 
 
 		//glfwSwapInterval(1);
@@ -344,6 +398,8 @@ int main()
 			deltaTime = currentFrame - deltaTime;
 			lastFrame = currentFrame;
 			wasd_keyinput(window);
+			glfwSetCursorPosCallback(window, mouse_callback);
+			glfwSetScrollCallback(window, scroll_callback);
 			camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
 			shader_program.setMatrix4fv("view", camera);
 	
@@ -354,6 +410,9 @@ int main()
 				float angle = i * 50;
 				trans = glm::rotate(trans,  glm::radians(angle), glm::vec3(0.5f, 0.6f, 0.3f));
 				shader_program.setMatrix4fv("transform", trans);
+				glm::mat4 projs;
+				projs = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+				shader_program.setMatrix4fv("projection", projs);
 				//camera = glm::lookAt(glm::vec3{ camX,0,camZ }, glm::vec3{ 0.0,0.0,0.0 }, glm::vec3{ 0.0,1.0,0.0 });
 				GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 
