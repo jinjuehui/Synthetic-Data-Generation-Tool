@@ -148,13 +148,13 @@ int main()
 	unsigned int vao, vertex_shader, fragment_shader, program;
 
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&nrAttributes);
-	std::cout << "maximum number of vertex attributes supported: " << nrAttributes << std::endl;
+	//std::cout << "maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 	
 //1.Generate Vertex Array Object, useful when dealing with multiple vbo layouts
 	GLCall(glGenVertexArrays(1,&vao));
 	GLCall(glBindVertexArray(vao));
-
-//2.Generate Buffer============================================================================
+	std::cout << glGetString(GL_VERSION) << std::endl;
+	//2.Generate Buffer============================================================================
 	VertexBuffer vbo(vertices,sizeof(vertices));
 	GLCall(glEnableVertexAttribArray(0));
 	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
@@ -219,10 +219,14 @@ int main()
 	stbi_image_free(data);
 
 //5. Rotation and Translation
-	glm::mat4 projs,view;
-	view = glm::translate(view, glm::vec3(0.0f,0.0f,-3.0f));
+	glm::mat4 projs;
 	projs = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f,100.0f);
 	//trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
+//create camera coordinate:
+	glm::mat4 camera;
+	float radious = 10.0f, camX,camZ;
+
+
 
 //4.create shader
 	Shader shader_program("VertexShader.shader","FragmentShader.shader");
@@ -273,7 +277,7 @@ int main()
 	shader_program.setInt("texture1", 0);
 	shader_program.setInt("texture2", 1);
 	
-	shader_program.setMatrix4fv("view", view);
+	//shader_program.setMatrix4fv("view", view);
 	shader_program.setMatrix4fv("projection", projs);
 
 
@@ -301,16 +305,20 @@ int main()
 			GLCall(glActiveTexture(GL_TEXTURE1));
 			GLCall(glBindTexture(GL_TEXTURE_2D, texture2));
 			//std::cout << "System Time: " << (float)glfwGetTime() << std::endl;
-			std::cout << "Size of CubePosition[]: " << sizeof(CubePosition)<< std::endl;
+			//std::cout << "Size of CubePosition[]: " << sizeof(CubePosition)<< std::endl;
 			GLCall(glBindVertexArray(vao));
+			camX = cos(float(glfwGetTime()))*radious;
+			camZ = sin(float(glfwGetTime()))*radious;
+
 			for (size_t i = 0; i < 10;i++ )
 			{
 				glm::mat4 trans;
 				trans = glm::translate(trans, CubePosition[i]);
 				float angle = i * 50;
 				trans = glm::rotate(trans,  glm::radians(angle), glm::vec3(0.5f, 0.6f, 0.3f));
-
 				shader_program.setMatrix4fv("transform", trans);
+				camera = glm::lookAt(glm::vec3{ camX,0,camZ }, glm::vec3{ 0.0,0.0,0.0 }, glm::vec3{ 0.0,1.0,0.0 });
+				shader_program.setMatrix4fv("view", camera);
 				GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 
 			}
