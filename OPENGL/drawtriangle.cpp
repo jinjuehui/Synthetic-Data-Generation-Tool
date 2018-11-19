@@ -20,19 +20,65 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 }
 
-const float vertices[] =
-{
-	-0.5f, -0.5f, 0.0f, 1.0f,0.0f,0.0f, 0.0f,0.0f,
-	 0.5f, -0.5f, 0.0f, 0.0f,1.0f,0.0f, 1.0f,0.0f,
-	 0.5f,  0.5f, 0.0f, 0.0f,0.0f,1.0f, 1.0f,1.0f,
-	-0.5f,  0.5f, 0.0f, 1.0f,0.0f,0.0f, 0.0f,1.0f
+//const float vertices[] =
+//{
+//	-0.5f, -0.5f, 0.0f, 1.0f,0.0f,0.0f, 0.0f,0.0f,
+//	 0.5f, -0.5f, 0.0f, 0.0f,1.0f,0.0f, 1.0f,0.0f,
+//	 0.5f,  0.5f, 0.0f, 0.0f,0.0f,1.0f, 1.0f,1.0f,
+//	-0.5f,  0.5f, 0.0f, 1.0f,0.0f,0.0f, 0.0f,1.0f
+//};
+
+
+const float vertices[] = {
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 
-const unsigned int index[] =
-{
-	0,1,2,
-	2,0,3
-};
+//const unsigned int index[] =
+//{
+//	0,1,2,
+//	3,4,5,
+//
+//};
 
 //const char* vertex_shader_source = "#version 330 core\n"
 //    "layout (location = 0) in vec3 aPos;\n"
@@ -92,19 +138,19 @@ int main()
 //2.Generate Buffer============================================================================
 	VertexBuffer vbo(vertices,sizeof(vertices));
 	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0));
+	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
 
 	GLCall(glEnableVertexAttribArray(1));
-	GLCall(glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE, 8 * sizeof(float),(void*)(sizeof(float)*3)));
+	GLCall(glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE, 5 * sizeof(float),(void*)(sizeof(float)*3)));
 
-	GLCall(glEnableVertexAttribArray(2));
-	GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 6)));
+	//GLCall(glEnableVertexAttribArray(2));
+	//GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 6)));
 
 //3.create vertex array
-	unsigned int eao;
-	GLCall(glGenBuffers(1,&eao));
-	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,eao));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(index),index,GL_STATIC_DRAW));
+	//unsigned int eao;
+	//GLCall(glGenBuffers(1,&eao));
+	//GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,eao));
+	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(index),index,GL_STATIC_DRAW));
 
 //4.loading texture image and generate the texture
 	int width, height, nrChannels;
@@ -154,8 +200,7 @@ int main()
 	stbi_image_free(data);
 
 //5. Rotation and Translation
-	glm::mat4 trans,projs,view;
-	trans = glm::rotate(trans, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 projs,view;
 	view = glm::translate(view, glm::vec3(0.0f,0.0f,-3.0f));
 	projs = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f,100.0f);
 	//trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
@@ -208,17 +253,18 @@ int main()
 
 	shader_program.setInt("texture1", 0);
 	shader_program.setInt("texture2", 1);
-	shader_program.setMatrix4fv("transform", trans);
+	
 	shader_program.setMatrix4fv("view", view);
 	shader_program.setMatrix4fv("projection", projs);
 
 		//glfwSwapInterval(1);
+	GLCall(glEnable(GL_DEPTH_TEST));
 		//5. while loop	
 		while (!glfwWindowShouldClose(window))
 		{
 
 			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
-			GLCall(glClear(GL_COLOR_BUFFER_BIT));
+			GLCall(glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT));
 
 
 			//GLCall(glUseProgram(program));
@@ -235,11 +281,14 @@ int main()
 			GLCall(glActiveTexture(GL_TEXTURE1));
 			GLCall(glBindTexture(GL_TEXTURE_2D, texture2));
 			//std::cout << "System Time: " << (float)glfwGetTime() << std::endl;
+			glm::mat4 trans;
+			trans = glm::rotate(trans,(float)glfwGetTime()*glm::radians(50.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
 			shader_program.use();
-
+			shader_program.setMatrix4fv("transform", trans);
 			GLCall(glBindVertexArray(vao));
-			GLCall(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, 0));
+			GLCall(glDrawArrays(GL_TRIANGLES, 0,36));
+			//GLCall(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, 0));
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
 
