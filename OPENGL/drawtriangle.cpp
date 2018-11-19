@@ -12,15 +12,19 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
+float deltaTime(1.0f), lastFrame(0.0f);
 
 glm::vec3 camera_pose = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 
+
+
+
 void wasd_keyinput(GLFWwindow* window)
 {
-	float camera_speed = 0.1f;
+	float camera_speed = 0.1f*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		camera_pose += camera_speed * camera_front;
@@ -336,6 +340,9 @@ int main()
 			GLCall(glBindVertexArray(vao));
 			//camX = cos(float(glfwGetTime()))*radious;
 			//camZ = sin(float(glfwGetTime()))*radious;
+			float currentFrame = glfwGetTime();
+			deltaTime = currentFrame - deltaTime;
+			lastFrame = currentFrame;
 			wasd_keyinput(window);
 			camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
 			shader_program.setMatrix4fv("view", camera);
