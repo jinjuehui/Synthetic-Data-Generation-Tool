@@ -21,6 +21,7 @@ public:
 	void use();
 	void setInt(const std::string &name, int value) const;
 	void setFloat(const std::string &name, float v0, float v1, float v2, float v3) const;
+	void setFloat(const std::string &name, float value) const;
 	void setBool(const std::string &name, bool value) const;
 	void setMatrix4fv(const std::string &name, glm::mat4 value);
 
