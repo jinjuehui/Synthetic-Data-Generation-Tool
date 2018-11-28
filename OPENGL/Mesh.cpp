@@ -2,11 +2,11 @@
 #include "Renderer.h"
 #include "stb_image.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies, std::vector<Texture> texture)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies, std::vector<Texture> textures)
 {
 	this->Vertecies = vertices;
-	this->Indicies = Indicies;
-	this->Textures = texture;
+	this->Indicies = indicies;
+	this->Textures = textures;
 	setupMesh();
 }
 
@@ -21,15 +21,19 @@ void Mesh::setupMesh()
 	GLCall(glBufferData(GL_ARRAY_BUFFER, Vertecies.size()*sizeof(Vertex), &Vertecies[0],GL_STATIC_DRAW));
 
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER,Indicies.size()*sizeof(int),&Indicies[0],GL_STATIC_DRAW));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER,Indicies.size()*sizeof(unsigned int),&Indicies[0],GL_STATIC_DRAW));
 
 	GLCall(glEnableVertexAttribArray(0));
 	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
 	GLCall(glEnableVertexAttribArray(1));
-	GLCall(glVertexAttribPointer(1, 3, GL_INT, GL_FALSE, sizeof(Indicies), (void*)(3*sizeof(float))));
+	GLCall(glVertexAttribPointer(1, 3, GL_INT, GL_FALSE, sizeof(Vertex), (void*)(3*sizeof(float))));
 	GLCall(glEnableVertexAttribArray(2));
-	GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Textures), (void*)(2*sizeof(float))));
-	
+	GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float))));
+	GLCall(glEnableVertexAttribArray(3));
+	GLCall(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(8 * sizeof(float))));
+	GLCall(glEnableVertexAttribArray(4));
+	GLCall(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(11 * sizeof(float))));
+
 
 	GLCall(glBindVertexArray(0));
 }
@@ -38,6 +42,8 @@ void Mesh::Draw(Shader shader)
 {
 	unsigned int diffuseNr(1);
 	unsigned int specularNr(1);
+	unsigned int normalNr(1);
+	unsigned int heightNr(1);
 
 	for (unsigned int i = 0; i < Textures.size(); i++ )
 	{
@@ -46,23 +52,29 @@ void Mesh::Draw(Shader shader)
 		std::string name = Textures[i].type;
 		if (name == "texture_diffuse")
 			number = std::to_string(diffuseNr++);
-		if (name == "texture_specular")
+		else if (name == "texture_specular")
 			number = std::to_string(specularNr++);
-	
-		GLCall(shader.setFloat(("material." + name + number).c_str(), i));
+		else if (name == "texture_normal")
+			number = std::to_string(normalNr++);
+		else if (name == "texture_height")
+			number = std::to_string(heightNr++);
+		GLCall(shader.use());
+		std::string name_number = name + number;
+		GLCall(shader.setInt(name_number, i));
 		GLCall(glBindTexture(GL_TEXTURE_2D, Textures[i].id));
 
 	}
 
-	GLCall(glActiveTexture(GL_TEXTURE0));
 
 	GLCall(glBindVertexArray(VAO));
 	GLCall(glDrawElements(GL_TRIANGLES,Indicies.size(),GL_UNSIGNED_INT,0));
 	GLCall(glBindVertexArray(0));
+	GLCall(glActiveTexture(GL_TEXTURE0););
+
 
 }
 
-Model::Model(char *path)
+Model::Model(char *path, bool gamma) : gammaCorrection(gamma)
 {
 	loadModel(path);
 }
@@ -75,13 +87,14 @@ void Model::Draw(Shader shader)
 	}
 }
 
-void Model::loadModel(std::string path)
+void Model::loadModel(std::string const &path)
 {
 	Assimp::Importer import;
-	const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 	if (!scene||scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE||!scene->mRootNode)
 	{
 		std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
+		return;
 	}
 	directory = path.substr(0, path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
@@ -123,7 +136,6 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		vector.y = mesh->mNormals[i].y;
 		vector.z = mesh->mNormals[i].z;
 		vertex.Normal = vector;
-		verticies.push_back(vertex);
 
 		//process texture coordinates
 		if (mesh->mTextureCoords[0])
@@ -135,6 +147,19 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		}
 		else
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+
+		//tangent
+		vector.x = mesh->mTangents[i].x;
+		vector.y = mesh->mTangents[i].y;
+		vector.z = mesh->mTangents[i].z;
+		vertex.Tangent = vector;
+
+		//bitangent
+		vector.x = mesh->mBitangents[i].x;
+		vector.y = mesh->mBitangents[i].y;
+		vector.z = mesh->mBitangents[i].z;
+		vertex.Bitangent = vector;
+		verticies.push_back(vertex);
 
 	}
 
@@ -148,21 +173,46 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		}
 	}
 
-	//process materials
-	if (mesh->mMaterialIndex > 0)
-	{
-		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-		textures.insert(textures.end(), diffuseMaps.begin(),diffuseMaps.end());
+	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
+	// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
+	// Same applies to other texture as the following list summarizes:
+	// diffuse: texture_diffuseN
+	// specular: texture_specularN
+	// normal: texture_normalN
 
-		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-	}
+	// 1. diffuse maps
+	std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+	// 2. specular maps
+	std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+	// 3. normal maps
+	std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+	textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+	// 4. height maps
+	std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+	return Mesh(verticies, indicies, textures);
+
+
+	//process materials
+	//if (mesh->mMaterialIndex > 0)
+	//{
+	//	aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+	//	std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+	//	textures.insert(textures.end(), diffuseMaps.begin(),diffuseMaps.end());
+
+	//	std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+	//	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+	//}
+
+	
 
 }
 
 
-unsigned int TextureFromFile(const char *path, const std::string &directory)
+unsigned int TextureFromFile(const char *path, const std::string &directory,bool gamma)
 {
 	std::string filename = std::string(path);
 	filename = directory + '/' + filename;
