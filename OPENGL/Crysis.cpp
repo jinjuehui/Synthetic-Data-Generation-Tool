@@ -34,7 +34,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 float deltaTime(0.0f), lastFrame(0.0f);
 
-glm::vec3 camera_pose = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 camera_pose = glm::vec3(0.0f, 1.5f, 10.0f);
 glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -197,7 +197,7 @@ int main()
 		lastFrame = currentFrame;
 
 		//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
-		GLCall(glClearColor(0.8f, 0.8f, 0.8f, 0.8f));
+		GLCall(glClearColor(0.7f, 0.7f, 0.7f, 1.0f));
 		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
 		shader_program.use();
@@ -207,13 +207,14 @@ int main()
 		//std::cout << "System Time: " << (float)glfwGetTime() << std::endl;
 		//std::cout << "Size of CubePosition[]: " << sizeof(CubePosition)<< std::endl;
 
-		wasd_keyinput(window);
-		glfwSetCursorPosCallback(window, mouse_callback);
-		glfwSetScrollCallback(window, scroll_callback);
+		//wasd_keyinput(window);
+		//glfwSetCursorPosCallback(window, mouse_callback);
+		//glfwSetScrollCallback(window, scroll_callback);
 
 		glm::mat4 model, camera, projection;
 		model = glm::translate(model, glm::vec3(0.0f, -1.75, 0.0f));
-		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+		model = glm::rotate(model, (float)currentFrame,glm::vec3(0.0f,1.0f,0.0f));
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 		camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
 		projection = glm::perspective(glm::radians(fov),800.0f/600.0f,0.1f,100.0f);
 	
