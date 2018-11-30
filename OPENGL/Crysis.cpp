@@ -34,7 +34,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 float deltaTime(0.0f), lastFrame(0.0f);
 
-glm::vec3 camera_pose = glm::vec3(0.0f, 1.5f, 10.0f);
+glm::vec3 camera_pose = glm::vec3(0.0f, 3.0f, 20.0f);
 glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -49,6 +49,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 		fov -= yoffset;
 		std::cout <<"fov: " <<fov << std::endl;
 	}
+
 	if (fov <= 1.0f)
 		fov = 1.0f;
 	if (fov >= 45.0f)
@@ -164,9 +165,6 @@ int main()
 
 	Model nanosuits("mesh/nanosuit/nanosuit.obj");
 
-		
-
-
 
 
 	//5. Rotation and Translation
@@ -192,16 +190,6 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
-
-		//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
-		GLCall(glClearColor(0.7f, 0.7f, 0.7f, 1.0f));
-		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
-		shader_program.use();
-
 
 
 		//std::cout << "System Time: " << (float)glfwGetTime() << std::endl;
@@ -211,23 +199,51 @@ int main()
 		//glfwSetCursorPosCallback(window, mouse_callback);
 		//glfwSetScrollCallback(window, scroll_callback);
 
+
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 		glm::mat4 model, camera, projection;
-		model = glm::translate(model, glm::vec3(0.0f, -1.75, 0.0f));
-		model = glm::rotate(model, (float)currentFrame,glm::vec3(0.0f,1.0f,0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
-		camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
-		projection = glm::perspective(glm::radians(fov),800.0f/600.0f,0.1f,100.0f);
-	
-		shader_program.use();
+		for(int P = 0; P<360.0f;P++)
+		{
+			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
+			camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
+			projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
-		shader_program.setMatrix4fv("model", model);
-		shader_program.setMatrix4fv("projection", projection);
-		shader_program.setMatrix4fv("view", camera);
+			model = glm::rotate(model, glm::radians(1.0f), glm::vec3(1.0f,0.0f,0.0f));
+			
+			//std::cout << "first loop" << std::endl;
+			//std::cout <<" "<< model[0][0] <<" "<< model[0][1] <<" "<< model[0][2] <<" "<< model[0][3] <<" "<< std::endl;
+			//std::cout <<" "<<model[1][0] <<" "<< model[1][1] << " " << model[1][2] <<" "<< model[1][3] << " " << std::endl;
+			//std::cout << " " << model[2][0] << " " << model[2][1] << " " << model[2][2] << " " << model[2][3] << " " << std::endl;
+			//std::cout << " " << model[3][0] << " " << model[3][1] << " " << model[3][2] << " " << model[3][3] << " " << std::endl;
+		
+			for (int Y = 0;Y< 360;Y++)
+			{
 
-		nanosuits.Draw(shader_program);
+				GLCall(glClearColor(0.7f, 0.7f, 0.7f, 1.0f));
+				GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+				model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				/*std::cout<<"second loop:"<<std::endl;
+				std::cout << " " << model[0][0] << " " << model[0][1] << " " << model[0][2] << " " << model[0][3] << " " << std::endl;
+				std::cout << " " << model[1][0] << " " << model[1][1] << " " << model[1][2] << " " << model[1][3] << " " << std::endl;
+				std::cout << " " << model[2][0] << " " << model[2][1] << " " << model[2][2] << " " << model[2][3] << " " << std::endl;
+				std::cout << " " << model[3][0] << " " << model[3][1] << " " << model[3][2] << " " << model[3][3] << " " << std::endl;*/
+				shader_program.use();
+				shader_program.setMatrix4fv("model", model);
+				shader_program.setMatrix4fv("projection", projection);
+				shader_program.setMatrix4fv("view", camera);
+
+				nanosuits.Draw(shader_program);
+				GLCall(glfwSwapBuffers(window));
+				GLCall(glfwPollEvents());
+
+			}
+		}
+		
 		//GLCall(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, 0));
-		GLCall(glfwSwapBuffers(window));
-		GLCall(glfwPollEvents());
 
 	}
 	glfwTerminate();//destroy glcontext
