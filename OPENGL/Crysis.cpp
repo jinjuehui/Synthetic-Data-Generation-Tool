@@ -34,7 +34,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 float deltaTime(0.0f), lastFrame(0.0f);
 
-glm::vec3 camera_pose = glm::vec3(0.0f, 3.0f, 20.0f);
+glm::vec3 camera_pose = glm::vec3(0.0f, 3.0f, 25.0f);
 glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -47,7 +47,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	if (fov >= 1.0f && fov <= 45.0f)
 	{
 		fov -= yoffset;
-		std::cout <<"fov: " <<fov << std::endl;
+		//std::cout <<"fov: " <<fov << std::endl;
 	}
 
 	if (fov <= 1.0f)
@@ -163,7 +163,7 @@ int main()
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	//std::cout << "maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 
-	Model nanosuits("mesh/nanosuit/nanosuit.obj");
+	Model nanosuits("mesh/nanosuit/untitled.obj");
 
 
 
@@ -204,7 +204,7 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 		glm::mat4 model, camera, projection;
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 2.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 		for(int P = 0; P<360.0f;P++)
 		{
@@ -214,7 +214,7 @@ int main()
 
 			model = glm::rotate(model, glm::radians(1.0f), glm::vec3(1.0f,0.0f,0.0f));
 			
-			//std::cout << "first loop" << std::endl;
+			std::cout << "first loop:" <<P<< std::endl;
 			//std::cout <<" "<< model[0][0] <<" "<< model[0][1] <<" "<< model[0][2] <<" "<< model[0][3] <<" "<< std::endl;
 			//std::cout <<" "<<model[1][0] <<" "<< model[1][1] << " " << model[1][2] <<" "<< model[1][3] << " " << std::endl;
 			//std::cout << " " << model[2][0] << " " << model[2][1] << " " << model[2][2] << " " << model[2][3] << " " << std::endl;
