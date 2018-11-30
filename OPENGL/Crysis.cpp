@@ -32,7 +32,7 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-float deltaTime(0.0f), lastFrame(0.0f);
+float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions
 
 glm::vec3 camera_pose = glm::vec3(0.0f, 3.0f, 25.0f);
 glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -42,6 +42,7 @@ bool firstMouse(true);
 double lastX(SCR_WIDTH / 2), lastY(SCR_HEIGHT / 2);
 float yaw(-90.0f), pitch(0.0f), fov(45.0f);
 
+//call back function for mouse scrolling to zoom the view
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	if (fov >= 1.0f && fov <= 45.0f)
@@ -57,7 +58,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 
-
+//call back function for mouse move to view different orientations
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	if (firstMouse)
@@ -96,7 +97,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 }
 
-
+//move the camera forward, backward, sideways
 void wasd_keyinput(GLFWwindow* window)
 {
 	float camera_speed = 2.0f*deltaTime;
@@ -128,13 +129,12 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 
-
-
 int main()
 {
 	//0.create window====================================================================
 	GLFWwindow* window;
 
+	//initialize glfw
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
 
@@ -142,15 +142,15 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//Why it doesn't work with 2,3
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//what does this influence
 											//if core_profile is chosen, the vertex array object need to be manually created
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "TEST", NULL, NULL);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Nanosuits", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
 
-	glfwSetKeyCallback(window, key_callback);
 	glfwMakeContextCurrent(window);
+	glfwSetKeyCallback(window, key_callback);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -167,13 +167,6 @@ int main()
 
 
 
-	//5. Rotation and Translation
-		/*glm::mat4 projs;
-		projs = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f,100.0f);*/
-		//trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
-	//create camera coordinate:
-	//float radious = 10.0f, camX,camZ;
-
 //create mouse cursor input
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -189,16 +182,6 @@ int main()
 	//5. while loop	
 	while (!glfwWindowShouldClose(window))
 	{
-
-
-
-		//std::cout << "System Time: " << (float)glfwGetTime() << std::endl;
-		//std::cout << "Size of CubePosition[]: " << sizeof(CubePosition)<< std::endl;
-
-		//wasd_keyinput(window);
-		//glfwSetCursorPosCallback(window, mouse_callback);
-		//glfwSetScrollCallback(window, scroll_callback);
-
 
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -242,8 +225,6 @@ int main()
 
 			}
 		}
-		
-		//GLCall(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, 0));
 
 	}
 	glfwTerminate();//destroy glcontext
