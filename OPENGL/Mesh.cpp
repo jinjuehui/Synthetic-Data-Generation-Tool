@@ -68,7 +68,7 @@ void Mesh::Draw(Shader shader)
 	}
 
 
-	GLCall(glBindVertexArray(VAO));
+	GLCall(glBindVertexArray(VAO));//VAO specifies which buffer to draw
 	GLCall(glDrawElements(GL_TRIANGLES,Indicies.size(),GL_UNSIGNED_INT,0));
 	GLCall(glBindVertexArray(0));
 	GLCall(glActiveTexture(GL_TEXTURE0););

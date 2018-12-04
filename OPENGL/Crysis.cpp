@@ -127,6 +127,50 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 }
 
+float verticesLight[] = {
+	-0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+
+	-0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+
+	-0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f, -0.5f,
+
+	-0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f
+};
+
 
 int main()
 {
@@ -156,17 +200,38 @@ int main()
 	}
 
 	int nrAttributes;
-
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+
+
+
+	unsigned int VAO_Light,VBO_Light;
+	GLCall(glGenVertexArrays(1,&VAO_Light));
+	GLCall(glGenBuffers(1,&VBO_Light));
+	GLCall(glBindVertexArray(VAO_Light));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER,VBO_Light));
+	GLCall(glBufferData(GL_ARRAY_BUFFER,sizeof(verticesLight),verticesLight,GL_STATIC_DRAW));
+	//VertexBuffer light(verticesLight,sizeof(verticesLight)*sizeof(float));
+	GLCall(glVertexAttribPointer(0,3, GL_FLOAT,GL_FLAT,3*sizeof(float),(void*)0));
+	GLCall(glEnableVertexAttribArray(0));
+	GLCall(glBindVertexArray(0));
+
+
 
 	Model nanosuits("mesh/nanosuit/untitled.obj");
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	Shader shader_program("VertexShader.shader", "FragmentShader.shader");
+	Shader lightning_shader("Lightning_vertex.shader","Lightning_fragment.shader");
 
-	shader_program.use();
 	GLCall(glEnable(GL_DEPTH_TEST));
+	
+	glm::mat4 lamp;
+	glm::vec3 light_position(1.2f, 1.0f, 2.0f);
+	
+	lamp = glm::translate(lamp, light_position);
+
+
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -177,6 +242,8 @@ int main()
 		glm::mat4 model, camera, projection;
 		model = glm::translate(model, glm::vec3(0.0f, 2.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+
+
 		for(int P = 0; P<360.0f;P++)
 		{
 			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
@@ -184,8 +251,8 @@ int main()
 			projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
 			model = glm::rotate(model, glm::radians(1.0f), glm::vec3(1.0f,0.0f,0.0f));
-			
-			std::cout << "first loop:" <<P<< std::endl;
+	
+			//std::cout << "first loop:" <<P<< std::endl;
 			//std::cout <<" "<< model[0][0] <<" "<< model[0][1] <<" "<< model[0][2] <<" "<< model[0][3] <<" "<< std::endl;
 			//std::cout <<" "<<model[1][0] <<" "<< model[1][1] << " " << model[1][2] <<" "<< model[1][3] << " " << std::endl;
 			//std::cout << " " << model[2][0] << " " << model[2][1] << " " << model[2][2] << " " << model[2][3] << " " << std::endl;
@@ -193,7 +260,7 @@ int main()
 		
 			for (int Y = 0;Y< 360;Y++)
 			{
-				GLCall(glClearColor(0.7f, 0.7f, 0.7f, 1.0f));
+				GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 				GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 				model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 				/*std::cout<<"second loop:"<<std::endl;
@@ -205,8 +272,19 @@ int main()
 				shader_program.setMatrix4fv("model", model);
 				shader_program.setMatrix4fv("projection", projection);
 				shader_program.setMatrix4fv("view", camera);
-
 				nanosuits.Draw(shader_program);
+				GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+				GLCall(glBindVertexArray(0));
+
+				GLCall(glUseProgram(0));
+				lightning_shader.use();
+				lightning_shader.setMatrix4fv("model_light", lamp);
+				lightning_shader.setMatrix4fv("projection_light", projection);
+				lightning_shader.setMatrix4fv("view_light", camera);
+			
+				GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Light));
+				GLCall(glBindVertexArray(VAO_Light));
+				GLCall(glDrawArrays(GL_TRIANGLES,0,36));
 				GLCall(glfwSwapBuffers(window));
 				GLCall(glfwPollEvents());
 
