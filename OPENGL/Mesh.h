@@ -13,7 +13,6 @@
 #include "assimp/Importer.hpp"
 
 
-
 	struct Vertex
 	{
 		glm::vec3 Position;
@@ -40,13 +39,13 @@
 
 		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies, std::vector<Texture> textures);
 		void Draw(Shader shader);
-
+		
 	private:
-		unsigned int VAO, VBO, EBO;
+		unsigned int VAO,VBO,EBO;
 		void setupMesh();
 	};
 
-	class Model
+	class Model //this class works as a container to load meshes through ASSIMP and convert to the meshes we defined ourselves
 	{
 	public:
 		Model(char *path,bool gamma = false);
@@ -57,7 +56,7 @@
 		std::string directory;
 		bool gammaCorrection;
 
-		void loadModel(std::string const &path);
+		void loadModel(std::string const &path);//load file use ASSIMP, {proocessNode{processMesh{fill in: 1.position, 2.normal, 3.tangent, 4.bitangent, 5.texture coordinate, 6.indices, 7.four types of textures{loadMaterialTextures}}}},
 		void processNode(aiNode *node, const aiScene *scene);
 		Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 		std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);

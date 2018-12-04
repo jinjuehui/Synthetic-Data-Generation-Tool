@@ -34,7 +34,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions
 
-glm::vec3 camera_pose = glm::vec3(0.0f, 3.0f, 25.0f);
+glm::vec3 camera_pose = glm::vec3(0.0f, 3.0f, 20.0f);
 glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -104,7 +104,6 @@ void wasd_keyinput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		camera_pose += camera_speed * camera_front;
-		//std::cout << "w pressed" << std::endl;
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
@@ -140,8 +139,7 @@ int main()
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//Why it doesn't work with 2,3
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//what does this influence
-											//if core_profile is chosen, the vertex array object need to be manually created
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//if core_profile is chosen, the vertex array object need to be manually created
 	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Nanosuits", NULL, NULL);
 	if (!window)
 	{
@@ -158,28 +156,18 @@ int main()
 	}
 
 	int nrAttributes;
-	unsigned int vao, vertex_shader, fragment_shader, program;
 
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-	//std::cout << "maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 
 	Model nanosuits("mesh/nanosuit/untitled.obj");
 
-
-
-//create mouse cursor input
-
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	//4.create shader
 	Shader shader_program("VertexShader.shader", "FragmentShader.shader");
 
 	shader_program.use();
-	//shader_program.setMatrix4fv("view", view);
-
-	//glfwSwapInterval(1);
 	GLCall(glEnable(GL_DEPTH_TEST));
-	//5. while loop	
+
 	while (!glfwWindowShouldClose(window))
 	{
 
@@ -205,7 +193,6 @@ int main()
 		
 			for (int Y = 0;Y< 360;Y++)
 			{
-
 				GLCall(glClearColor(0.7f, 0.7f, 0.7f, 1.0f));
 				GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 				model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
