@@ -100,7 +100,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 //move the camera forward, backward, sideways
 void wasd_keyinput(GLFWwindow* window)
 {
-	float camera_speed = 2.0f*deltaTime;
+	float camera_speed =0.8f*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		camera_pose += camera_speed * camera_front;
@@ -219,7 +219,7 @@ int main()
 
 	Model nanosuits("mesh/nanosuit/untitled.obj");
 
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	Shader shader_program("VertexShader.shader", "FragmentShader.shader");
 	Shader lightning_shader("Lightning_vertex.shader","Lightning_fragment.shader");
@@ -236,9 +236,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+
 		glm::mat4 model, camera, projection;
 		model = glm::translate(model, glm::vec3(0.0f, 2.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
@@ -260,6 +258,15 @@ int main()
 		
 			for (int Y = 0;Y< 360;Y++)
 			{
+
+				float currentFrame = glfwGetTime();
+				deltaTime = currentFrame - lastFrame;
+				lastFrame = currentFrame;
+				wasd_keyinput(window);
+				glfwSetCursorPosCallback(window, mouse_callback);
+				glfwSetScrollCallback(window, scroll_callback);
+
+
 				GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 				GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 				model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -295,8 +302,6 @@ int main()
 	glfwTerminate();//destroy glcontext
 	exit(EXIT_SUCCESS);
 	return 0;
-
-
 
 
 }
