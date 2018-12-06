@@ -26,7 +26,7 @@ vec3 specular = spec * specularStrength* vec3(1.0f, 1.0f, 1.0f);
 void main()
 {
 
-	float ambientStrength = 0.1f;
+	float ambientStrength = 0.8f;
 	vec3 ambient = ambientStrength * vec3(1.0f,1.0f,1.0f);
 	FragColor = vec4(ambient+diffuse+specular,1)*texture(texture_diffuse1,TexCoords);
 

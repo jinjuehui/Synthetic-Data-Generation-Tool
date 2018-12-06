@@ -34,9 +34,7 @@ const unsigned int SCR_HEIGHT = 768;
 
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions
 
-glm::vec3 camera_pose = glm::vec3(0.0f, 3.0f, 20.0f);
-glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
+
 
 bool firstMouse(true);
 double lastX(SCR_WIDTH / 2), lastY(SCR_HEIGHT / 2);
@@ -80,65 +78,65 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 
 //call back function for mouse move to view different orientations
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-	if (firstMouse)
-	{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
-	}
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos;
-	lastX = xpos;
-	lastY = ypos;
-
-	float sensitivity = 0.05;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	yaw += xoffset;
-	pitch += yoffset;
-
-	if (pitch > 89.0f)
-	{
-		pitch = 89.0f;
-	}
-	if (pitch < -89.0f)
-	{
-		pitch = -89.0f;
-	}
-
-	glm::vec3 front;
-	front.x = cos(glm::radians(yaw))*cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw))*cos(glm::radians(pitch));
-	camera_front = glm::normalize(front);
-
-}
+//void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+//{
+//	if (firstMouse)
+//	{
+//		lastX = xpos;
+//		lastY = ypos;
+//		firstMouse = false;
+//	}
+//
+//	float xoffset = xpos - lastX;
+//	float yoffset = lastY - ypos;
+//	lastX = xpos;
+//	lastY = ypos;
+//
+//	float sensitivity = 0.05;
+//	xoffset *= sensitivity;
+//	yoffset *= sensitivity;
+//
+//	yaw += xoffset;
+//	pitch += yoffset;
+//
+//	if (pitch > 89.0f)
+//	{
+//		pitch = 89.0f;
+//	}
+//	if (pitch < -89.0f)
+//	{
+//		pitch = -89.0f;
+//	}
+//
+//	glm::vec3 front;
+//	front.x = cos(glm::radians(yaw))*cos(glm::radians(pitch));
+//	front.y = sin(glm::radians(pitch));
+//	front.z = sin(glm::radians(yaw))*cos(glm::radians(pitch));
+//	camera_front = glm::normalize(front);
+//
+//}
 
 //move the camera forward, backward, sideways
-void wasd_keyinput(GLFWwindow* window)
-{
-	float camera_speed =0.8f*deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		camera_pose += camera_speed * camera_front;
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		camera_pose -= camera_speed * camera_front;
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		camera_pose -= camera_speed * glm::normalize(glm::cross(camera_front, camera_up));
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		camera_pose += camera_speed * glm::normalize(glm::cross(camera_front, camera_up));
-	}
-}
+//void wasd_keyinput(GLFWwindow* window)
+//{
+//	float camera_speed =0.8f*deltaTime;
+//	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+//	{
+//		camera_pose += camera_speed * camera_front;
+//	}
+//	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+//	{
+//		camera_pose -= camera_speed * camera_front;
+//	}
+//	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+//	{
+//		camera_pose -= camera_speed * glm::normalize(glm::cross(camera_front, camera_up));
+//	}
+//	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+//	{
+//		camera_pose += camera_speed * glm::normalize(glm::cross(camera_front, camera_up));
+//	}
+//}
 
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod)
@@ -248,33 +246,32 @@ int main()
 	GLCall(glEnable(GL_DEPTH_TEST));
 	
 	glm::mat4 lamp;
-	glm::vec3 light_position(1.2f, 1.0f, 20.0f);
+	glm::vec3 light_position(2.0f, 0.0f, 2.0f);
 	
 	lamp = glm::translate(lamp, light_position);
 
 
 
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(window))  //start the game
 	{
 
-
 		glm::mat4 model, camera, projection;
-		model = glm::translate(model, glm::vec3(0.0f, 2.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 
 
 		for(int P = 0; P<360.0f;P++)
 		{
+		
+
+
 			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
-			camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
 			projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
-			rotate_object(model, 1, 1.0f);
-			//model = glm::rotate(model, glm::radians(1.0f), glm::vec3(1.0f,0.0f,0.0f));
 	
-				wasd_keyinput(window);
+				/*wasd_keyinput(window);
 				glfwSetCursorPosCallback(window, mouse_callback);
-				glfwSetScrollCallback(window, scroll_callback);
+				glfwSetScrollCallback(window, scroll_callback);*/
 			//std::cout << "first loop:" <<P<< std::endl;
 			//std::cout <<" "<< model[0][0] <<" "<< model[0][1] <<" "<< model[0][2] <<" "<< model[0][3] <<" "<< std::endl;
 			//std::cout <<" "<<model[1][0] <<" "<< model[1][1] << " " << model[1][2] <<" "<< model[1][3] << " " << std::endl;
@@ -283,6 +280,14 @@ int main()
 		
 			for (int Y = 0;Y< 360;Y++)
 			{
+				float distance(20.0f);
+				glm::vec3 camera_pose = glm::vec3(distance*glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y)), distance*glm::sin(glm::radians((float)P)), distance*glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y)));
+				glm::vec3 camera_pose_xz = glm::vec3(camera_pose.x, 0.0f, camera_pose.z);
+				glm::vec3 camera_front = -camera_pose;
+				glm::vec3 camera_up =- glm::cross( glm::cross(camera_pose,camera_pose_xz),camera_pose);
+				glm::mat4 camera_model = glm::translate(camera_model, camera_pose);
+
+				camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
 
 				float currentFrame = glfwGetTime();
 				deltaTime = currentFrame - lastFrame;
@@ -291,8 +296,7 @@ int main()
 
 				GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 				GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-				rotate_object(model, 2, 1.0f);
-				//model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				//rotate_object(model, 2, 0.1f);
 				/*std::cout<<"second loop:"<<std::endl;
 				std::cout << " " << model[0][0] << " " << model[0][1] << " " << model[0][2] << " " << model[0][3] << " " << std::endl;
 				std::cout << " " << model[1][0] << " " << model[1][1] << " " << model[1][2] << " " << model[1][3] << " " << std::endl;
