@@ -29,8 +29,8 @@
 #include <iostream>
 
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1024;
+const unsigned int SCR_HEIGHT = 768;
 
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions
 
@@ -41,6 +41,27 @@ glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
 bool firstMouse(true);
 double lastX(SCR_WIDTH / 2), lastY(SCR_HEIGHT / 2);
 float yaw(-90.0f), pitch(0.0f), fov(45.0f);
+
+
+
+void rotate_object(glm::mat4 &model, int axis, float velocity)
+{
+	//model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 0.0f, 0.0f));
+
+	switch (axis)
+	{
+		case 1:
+			model = glm::rotate(model, glm::radians(velocity), glm::vec3(1.0f, 0.0f, 0.0f));
+			break;
+		case 2:
+			model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 1.0f, 0.0f));
+			break;
+		case 3:
+			model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 0.0f, 1.0f));
+			break;
+	}
+}
+
 
 //call back function for mouse scrolling to zoom the view
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -227,7 +248,7 @@ int main()
 	GLCall(glEnable(GL_DEPTH_TEST));
 	
 	glm::mat4 lamp;
-	glm::vec3 light_position(1.2f, 1.0f, 2.0f);
+	glm::vec3 light_position(1.2f, 1.0f, 20.0f);
 	
 	lamp = glm::translate(lamp, light_position);
 
@@ -248,8 +269,12 @@ int main()
 			camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
 			projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
-			model = glm::rotate(model, glm::radians(1.0f), glm::vec3(1.0f,0.0f,0.0f));
+			rotate_object(model, 1, 1.0f);
+			//model = glm::rotate(model, glm::radians(1.0f), glm::vec3(1.0f,0.0f,0.0f));
 	
+				wasd_keyinput(window);
+				glfwSetCursorPosCallback(window, mouse_callback);
+				glfwSetScrollCallback(window, scroll_callback);
 			//std::cout << "first loop:" <<P<< std::endl;
 			//std::cout <<" "<< model[0][0] <<" "<< model[0][1] <<" "<< model[0][2] <<" "<< model[0][3] <<" "<< std::endl;
 			//std::cout <<" "<<model[1][0] <<" "<< model[1][1] << " " << model[1][2] <<" "<< model[1][3] << " " << std::endl;
@@ -262,14 +287,12 @@ int main()
 				float currentFrame = glfwGetTime();
 				deltaTime = currentFrame - lastFrame;
 				lastFrame = currentFrame;
-				wasd_keyinput(window);
-				glfwSetCursorPosCallback(window, mouse_callback);
-				glfwSetScrollCallback(window, scroll_callback);
 
 
 				GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 				GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-				model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				rotate_object(model, 2, 1.0f);
+				//model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 				/*std::cout<<"second loop:"<<std::endl;
 				std::cout << " " << model[0][0] << " " << model[0][1] << " " << model[0][2] << " " << model[0][3] << " " << std::endl;
 				std::cout << " " << model[1][0] << " " << model[1][1] << " " << model[1][2] << " " << model[1][3] << " " << std::endl;
@@ -279,6 +302,8 @@ int main()
 				shader_program.setMatrix4fv("model", model);
 				shader_program.setMatrix4fv("projection", projection);
 				shader_program.setMatrix4fv("view", camera);
+				shader_program.setVector3f("lightPos", light_position);
+				shader_program.setVector3f("viewPos",camera_pose);
 				nanosuits.Draw(shader_program);
 				GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 				GLCall(glBindVertexArray(0));

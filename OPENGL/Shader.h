@@ -24,5 +24,5 @@ public:
 	void setFloat(const std::string &name, float value) const;
 	void setBool(const std::string &name, bool value) const;
 	void setMatrix4fv(const std::string &name, glm::mat4 value);
-
+	void Shader::setVector3f(const std::string &name, glm::vec3 value);
 };

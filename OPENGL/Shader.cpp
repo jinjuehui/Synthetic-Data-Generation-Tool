@@ -120,3 +120,10 @@ void Shader::setMatrix4fv(const std::string &name, glm::mat4 value)
 	glUniformMatrix4fv(glGetUniformLocation(shader_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 	//std::cout << "in setMatrix4fv()"<< glm::value_ptr(value) << std::endl;
 }
+
+
+void Shader::setVector3f(const std::string &name, glm::vec3 value)
+{
+	glUniform3f(glGetUniformLocation(shader_ID, name.c_str()),value[0],value[1],value[2]);
+	//std::cout << "in setMatrix4fv()"<< glm::value_ptr(value) << std::endl;
+}
