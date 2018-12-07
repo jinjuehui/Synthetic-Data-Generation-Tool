@@ -193,17 +193,17 @@ float verticesLight[] = {
 
 float background[] = {
 
-	-1.0f, -1.0f, 0.0f, -1.0f, -1.0f,
-	-1.0f,  1.0f, 0.0f, -1.0f,  1.0f,
-	 1.0f, -1.0f, 0.0f,  1.0f, -1.0f,
-	 1.0f,  1.0f, 0.0f,  1.0f,  1.0f
+	-1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+	-1.0f,  0.0f, 1.0f, 0.0f, 1.0f,
+	 1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+	 1.0f,  0.0f, 1.0f, 1.0f, 1.0f
 };
 
-unsigned int indicies[]
-{
-	0,1,2,
-	2,3,1
-};
+//unsigned int indicies[]
+//{
+//	0,1,2,
+//	2,3,1
+//};
 
 
 //TODO:
@@ -257,10 +257,10 @@ int main()
 	unsigned int VAO_Background, VBO_Background,EBO_Background;
 	GLCall(glGenVertexArrays(1, &VAO_Background));
 	GLCall(glGenBuffers(1, &VBO_Background));
-	GLCall(glGenBuffers(1, &EBO_Background));
+	//GLCall(glGenBuffers(1, &EBO_Background));
 	GLCall(glBindVertexArray(VAO_Background));
-	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_Background));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW));
+	//GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_Background));
+	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Background));
 	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(background),background,GL_STATIC_DRAW));
 	GLCall(glEnableVertexAttribArray(0));
@@ -295,7 +295,8 @@ int main()
 	stbi_image_free(data);
 
 	Shader background_shader("background_vertex.shader","background_fragment.shader");
-	background_shader.setInt("texture1", 0);
+	//background_shader.use();
+	//background_shader.setInt("texture1", 0);
 
 
 
@@ -344,13 +345,10 @@ int main()
 		
 			for (int Y = 0;Y< 360;Y++)
 			{
-				
-				GLCall(glActiveTexture(GL_TEXTURE0));
-				GLCall(glBindTexture(GL_TEXTURE_2D,BK1));
 				GLCall(background_shader.use());
-				GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Background));
+				GLCall(glBindTexture(GL_TEXTURE_2D,BK1));
 				GLCall(glBindVertexArray(VAO_Background));
-				GLCall(glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0));
+				GLCall(glDrawArrays(GL_TRIANGLES,0,4));
 
 				
 				
