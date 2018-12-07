@@ -120,7 +120,7 @@ int main(void)
 
 	GLCall(glGenBuffers(1, &vertex_buffer));//create buffer object, the buffer type of a vertex buffer object is GL_ARRAY_BUFFER.
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER,vertex_buffer));//bind object to context.
-	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));//Copy the previously defined vertes data into the buffer's memory
+	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));//Copy the previously defined vertex data into the buffer's memory
 	//					1.type of buffer,  2.bytes, 3.actual data, 4.the data will most likely not change at all. enum{GL_STATIC_DRAW, GL_DYNAMIC_DRAW, GL_STREAM_DRAW}           
 	GLCall(vertex_shader = glCreateShader(GL_VERTEX_SHADER));
 	GLCall(glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL));// 1.shader object, 2.how many strings we're passing as source code, 3.actual source code, 4...not explained
@@ -135,7 +135,7 @@ int main(void)
 	GLCall(glAttachShader(program, fragment_shader));
 	GLCall(glLinkProgram(program));
 
-	GLCall(glDeleteShader(vertex_shader));  //delete the shader objects once they are linked into the program object, we nolonger need them anymore
+	GLCall(glDeleteShader(vertex_shader));  //delete the shader objects once they are linked into the program object, we no longer need them anymore
 	GLCall(glDeleteShader(fragment_shader));
 
 	GLCall(mvp_location = glGetUniformLocation(program, "MVP"));
@@ -148,7 +148,7 @@ int main(void)
 	//first parameter: which attribute we want to configure, the location of the vertex attribute
 	//second: the size of the vertex attribute
 	//third: the type of the data 
-	//fourth: if we want the data tobe normalized
+	//fourth: if we want the data to be normalized
 	//fifth: stride, the space between consecutive vertex attributes
 	//sixth: type void*. this is the offset of where the position data begins in the buffer
 

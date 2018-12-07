@@ -191,6 +191,26 @@ float verticesLight[] = {
 };
 
 
+float background[] = {
+
+	-1.0f, -1.0f, 0.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f, 0.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f, 0.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f, 0.0f,  1.0f,  1.0f
+};
+
+unsigned int indicies[]
+{
+	0,1,2,
+	2,3,1
+};
+
+
+//TODO:
+//1. set pictures as the background of the window
+//2. implement the split window to show both the rendered data and the ground truth data
+//3. optimize all of the VAO and VBOs
+
 int main()
 {
 	//0.create window====================================================================
@@ -233,6 +253,49 @@ int main()
 	GLCall(glVertexAttribPointer(0,3, GL_FLOAT,GL_FLAT,3*sizeof(float),(void*)0));
 	GLCall(glEnableVertexAttribArray(0));
 	GLCall(glBindVertexArray(0));
+
+	unsigned int VAO_Background, VBO_Background,EBO_Background;
+	GLCall(glGenVertexArrays(1, &VAO_Background));
+	GLCall(glGenBuffers(1, &VBO_Background));
+	GLCall(glGenBuffers(1, &EBO_Background));
+	GLCall(glBindVertexArray(VAO_Background));
+	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_Background));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Background));
+	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(background),background,GL_STATIC_DRAW));
+	GLCall(glEnableVertexAttribArray(0));
+	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT,GL_FALSE,5*sizeof(float),(void*)0));
+	GLCall(glEnableVertexAttribArray(1));
+	GLCall(glVertexAttribPointer(1, 2, GL_FLOAT,GL_FALSE,5*sizeof(float),(void*)(3*sizeof(float))));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	GLCall(glBindVertexArray(0));
+	
+	unsigned int BK1;
+	GLCall(glGenTextures(1,&BK1));
+	GLCall(glBindTexture(GL_TEXTURE_2D, BK1));
+	GLCall(glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT));
+	GLCall(glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT));
+	GLCall(glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR));
+	
+	int background_width, background_height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char *data = stbi_load("Crynet_nanosuit.jpg",&background_width,&background_height,&nrChannels,0);
+
+	if (data)
+	{
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, background_width, background_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+		GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+	}
+	else
+	{
+		std::cout << "failed to load background image" << std::endl;
+	}
+
+	stbi_image_free(data);
+
+	Shader background_shader("background_vertex.shader","background_fragment.shader");
+	background_shader.setInt("texture1", 0);
 
 
 
@@ -281,6 +344,16 @@ int main()
 		
 			for (int Y = 0;Y< 360;Y++)
 			{
+				
+				GLCall(glActiveTexture(GL_TEXTURE0));
+				GLCall(glBindTexture(GL_TEXTURE_2D,BK1));
+				GLCall(background_shader.use());
+				GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Background));
+				GLCall(glBindVertexArray(VAO_Background));
+				GLCall(glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0));
+
+				
+				
 				float distance(20.0f);
 				glm::vec3 camera_pose = glm::vec3(distance*glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y)), distance*glm::sin(glm::radians((float)P)), distance*glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y)));
 				glm::vec3 camera_pose_xz = glm::vec3(camera_pose.x, 0.0f, camera_pose.z);

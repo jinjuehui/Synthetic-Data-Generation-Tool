@@ -122,6 +122,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="background_fragment.shader" />
+    <None Include="background_vertex.shader" />
     <None Include="Basic.shader" />
     <None Include="FragmentShader.shader" />
     <None Include="Lightning_fragment.shader" />
