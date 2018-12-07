@@ -241,3 +241,4 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 /OPENGL/mesh
+/OPENGL/vergleichen.cpp

@@ -192,18 +192,22 @@ float verticesLight[] = {
 
 
 float background[] = {
+		 1.0f,	1.0f,	0.0f, 1.0f, 1.0f, // top right
+		 1.0f,  -1.0f,	0.0f, 1.0f, 0.0f, // bottom right
+		-1.0f,	-1.0f,	0.0f, 0.0f, 0.0f, // bottom left
+		-1.0f,	1.0f,	0.0f, 0.0f, 1.0f
 
-	-1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-	-1.0f,  0.0f, 1.0f, 0.0f, 1.0f,
-	 1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-	 1.0f,  0.0f, 1.0f, 1.0f, 1.0f
+	//-1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+	//-1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
+	// 1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+	// 1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
 };
 
-//unsigned int indicies[]
-//{
-//	0,1,2,
-//	2,3,1
-//};
+unsigned int back_indicies[] = 
+{
+	0,1,3,
+	1,2,3
+};
 
 
 //TODO:
@@ -232,177 +236,188 @@ int main()
 
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, key_callback);
-
-	if (glewInit() != GLEW_OK)
-	{
-		std::cout << "initialize glew failed" << std::endl;
-	}
-
-	int nrAttributes;
-	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-
-
-
-	unsigned int VAO_Light,VBO_Light;
-	GLCall(glGenVertexArrays(1,&VAO_Light));
-	GLCall(glGenBuffers(1,&VBO_Light));
-	GLCall(glBindVertexArray(VAO_Light));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER,VBO_Light));
-	GLCall(glBufferData(GL_ARRAY_BUFFER,sizeof(verticesLight),verticesLight,GL_STATIC_DRAW));
-	//VertexBuffer light(verticesLight,sizeof(verticesLight)*sizeof(float));
-	GLCall(glVertexAttribPointer(0,3, GL_FLOAT,GL_FLAT,3*sizeof(float),(void*)0));
-	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glBindVertexArray(0));
-
-	unsigned int VAO_Background, VBO_Background,EBO_Background;
-	GLCall(glGenVertexArrays(1, &VAO_Background));
-	GLCall(glGenBuffers(1, &VBO_Background));
-	//GLCall(glGenBuffers(1, &EBO_Background));
-	GLCall(glBindVertexArray(VAO_Background));
-	//GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_Background));
-	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Background));
-	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(background),background,GL_STATIC_DRAW));
-	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT,GL_FALSE,5*sizeof(float),(void*)0));
-	GLCall(glEnableVertexAttribArray(1));
-	GLCall(glVertexAttribPointer(1, 2, GL_FLOAT,GL_FALSE,5*sizeof(float),(void*)(3*sizeof(float))));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-	GLCall(glBindVertexArray(0));
 	
-	unsigned int BK1;
-	GLCall(glGenTextures(1,&BK1));
-	GLCall(glBindTexture(GL_TEXTURE_2D, BK1));
-	GLCall(glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT));
-	GLCall(glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT));
-	GLCall(glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR));
-	
-	int background_width, background_height, nrChannels;
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char *data = stbi_load("Crynet_nanosuit.jpg",&background_width,&background_height,&nrChannels,0);
-
-	if (data)
-	{
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, background_width, background_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
-		GLCall(glGenerateMipmap(GL_TEXTURE_2D));
-	}
-	else
-	{
-		std::cout << "failed to load background image" << std::endl;
-	}
-
-	stbi_image_free(data);
-
-	Shader background_shader("background_vertex.shader","background_fragment.shader");
-	//background_shader.use();
-	//background_shader.setInt("texture1", 0);
-
-
-
-	Model nanosuits("mesh/nanosuit/untitled.obj");
-
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-	Shader shader_program("VertexShader.shader", "FragmentShader.shader");
-	Shader lightning_shader("Lightning_vertex.shader","Lightning_fragment.shader");
-
-	GLCall(glEnable(GL_DEPTH_TEST));
-	
-	glm::mat4 lamp;
-	glm::vec3 light_position(2.0f, 0.0f, 2.0f);
-	
-	lamp = glm::translate(lamp, light_position);
-
-
-
-	while (!glfwWindowShouldClose(window))  //start the game
-	{
-
-		glm::mat4 model, camera, projection;
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
-
-
-		for(int P = 0; P<360.0f;P++)
+		if (glewInit() != GLEW_OK)
 		{
+			std::cout << "initialize glew failed" << std::endl;
+		}
+
+		int nrAttributes;
+		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+
+
+
+		unsigned int VAO_Light, VBO_Light;
+		GLCall(glGenVertexArrays(1, &VAO_Light));
+		GLCall(glGenBuffers(1, &VBO_Light));
+		GLCall(glBindVertexArray(VAO_Light));
+		GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Light));
+		GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(verticesLight), verticesLight, GL_STATIC_DRAW));
+		//VertexBuffer light(verticesLight,sizeof(verticesLight)*sizeof(float));
+		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
+		GLCall(glEnableVertexAttribArray(0));
+		GLCall(glBindVertexArray(0));
+
+		unsigned int VAO_Background, VBO_Background, EBO_Background;
+		GLCall(glGenVertexArrays(1, &VAO_Background));
+		GLCall(glGenBuffers(1, &VBO_Background));
+		GLCall(glGenBuffers(1, &EBO_Background));
+
+		GLCall(glBindVertexArray(VAO_Background));
+		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_Background));
+		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(back_indicies), back_indicies, GL_STATIC_DRAW));
+		GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Background));
+		GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(background), background, GL_STATIC_DRAW));
+		GLCall(glEnableVertexAttribArray(0));
+		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
+		GLCall(glEnableVertexAttribArray(1));
+		GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
+
+
+		unsigned int BK1;
+		GLCall(glGenTextures(1, &BK1));
+		GLCall(glBindTexture(GL_TEXTURE_2D, BK1));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+		int background_width, background_height, nrChannels;
+		stbi_set_flip_vertically_on_load(true);
+		unsigned char *data = stbi_load("Crynet_nanosuit.jpg", &background_width, &background_height, &nrChannels, 0);//Crynet_nanosuit.jpg
+
+		if (data)
+		{
+			GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, background_width, background_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+			GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+		}
+		else
+		{
+			std::cout << "failed to load background image" << std::endl;
+		}
+
+		stbi_image_free(data);
+
+		Shader background_shader("background_vertex.shader", "background_fragment.shader");
+		background_shader.use();
+		background_shader.setInt("texture1", 0);
+
+
+
+		Model nanosuits("mesh/nanosuit/untitled.obj");
+
+		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+		Shader shader_program("VertexShader.shader", "FragmentShader.shader");
+		Shader lightning_shader("Lightning_vertex.shader", "Lightning_fragment.shader");
+
+
+
+		glm::mat4 lamp,back_position;
+		glm::vec3 light_position(2.0f, 0.0f, 2.0f);
+		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
+
+		lamp = glm::translate(lamp, light_position);
+		back_position = glm::translate(back_position, back_ground_position);
+
 		
+		GLCall(glEnable(GL_DEPTH_TEST));
+
+		while (!glfwWindowShouldClose(window))  //start the game
+		{
+
+			glm::mat4 model, camera, projection;
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 
 
-			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
-			projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+			for (int P = 0; P < 360.0f; P++)
+			{
 
-			glfwSetScrollCallback(window, scroll_callback); 
+
+
+				//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
+				projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+
+				glfwSetScrollCallback(window, scroll_callback);
 
 				/*wasd_keyinput(window);
 				glfwSetCursorPosCallback(window, mouse_callback);
 				glfwSetScrollCallback(window, scroll_callback);*/
-			//std::cout << "first loop:" <<P<< std::endl;
-			//std::cout <<" "<< model[0][0] <<" "<< model[0][1] <<" "<< model[0][2] <<" "<< model[0][3] <<" "<< std::endl;
-			//std::cout <<" "<<model[1][0] <<" "<< model[1][1] << " " << model[1][2] <<" "<< model[1][3] << " " << std::endl;
-			//std::cout << " " << model[2][0] << " " << model[2][1] << " " << model[2][2] << " " << model[2][3] << " " << std::endl;
-			//std::cout << " " << model[3][0] << " " << model[3][1] << " " << model[3][2] << " " << model[3][3] << " " << std::endl;
-		
-			for (int Y = 0;Y< 360;Y++)
-			{
-				GLCall(background_shader.use());
-				GLCall(glBindTexture(GL_TEXTURE_2D,BK1));
-				GLCall(glBindVertexArray(VAO_Background));
-				GLCall(glDrawArrays(GL_TRIANGLES,0,4));
+				std::cout << "first loop:" <<P<< std::endl;
+				std::cout <<" "<< back_position[0][0] <<" "<< back_position[0][1] <<" "<< back_position[0][2] <<" "<< back_position[0][3] <<" "<< std::endl;
+				std::cout <<" "<<back_position[1][0] <<" "<< back_position[1][1] << " " << back_position[1][2] <<" "<< back_position[1][3] << " " << std::endl;
+				std::cout << " " << back_position[2][0] << " " << back_position[2][1] << " " << back_position[2][2] << " " << back_position[2][3] << " " << std::endl;
+				std::cout << " " << back_position[3][0] << " " << back_position[3][1] << " " << back_position[3][2] << " " << back_position[3][3] << " " << std::endl;
 
-				
-				
-				float distance(20.0f);
-				glm::vec3 camera_pose = glm::vec3(distance*glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y)), distance*glm::sin(glm::radians((float)P)), distance*glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y)));
-				glm::vec3 camera_pose_xz = glm::vec3(camera_pose.x, 0.0f, camera_pose.z);
-				glm::vec3 camera_front = -camera_pose;
-				glm::vec3 camera_up =- glm::cross( glm::cross(camera_pose,camera_pose_xz),camera_pose);
-				glm::mat4 camera_model = glm::translate(camera_model, camera_pose);
-
-				camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
-
-				float currentFrame = glfwGetTime();
-				deltaTime = currentFrame - lastFrame;
-				lastFrame = currentFrame;
+				for (int Y = 0; Y < 360; Y++)
+				{
 
 
-				GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
-				GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-				//rotate_object(model, 2, 0.1f);
-				/*std::cout<<"second loop:"<<std::endl;
-				std::cout << " " << model[0][0] << " " << model[0][1] << " " << model[0][2] << " " << model[0][3] << " " << std::endl;
-				std::cout << " " << model[1][0] << " " << model[1][1] << " " << model[1][2] << " " << model[1][3] << " " << std::endl;
-				std::cout << " " << model[2][0] << " " << model[2][1] << " " << model[2][2] << " " << model[2][3] << " " << std::endl;
-				std::cout << " " << model[3][0] << " " << model[3][1] << " " << model[3][2] << " " << model[3][3] << " " << std::endl;*/
-				shader_program.use();
-				shader_program.setMatrix4fv("model", model);
-				shader_program.setMatrix4fv("projection", projection);
-				shader_program.setMatrix4fv("view", camera);
-				shader_program.setVector3f("lightPos", light_position);
-				shader_program.setVector3f("viewPos",camera_pose);
-				nanosuits.Draw(shader_program);
-				GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-				GLCall(glBindVertexArray(0));
+					float distance(20.0f);
+					glm::vec3 camera_pose = glm::vec3(distance*glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y)), distance*glm::sin(glm::radians((float)P)), distance*glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y)));
+					glm::vec3 camera_pose_xz = glm::vec3(camera_pose.x, 0.0f, camera_pose.z);
+					glm::vec3 camera_front = -camera_pose;
+					glm::vec3 camera_up = -glm::cross(glm::cross(camera_pose, camera_pose_xz), camera_pose);
+					glm::mat4 camera_model = glm::translate(camera_model, camera_pose);
 
-				GLCall(glUseProgram(0));
-				lightning_shader.use();
-				lightning_shader.setMatrix4fv("model_light", lamp);
-				lightning_shader.setMatrix4fv("projection_light", projection);
-				lightning_shader.setMatrix4fv("view_light", camera);
-			
-				GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Light));
-				GLCall(glBindVertexArray(VAO_Light));
-				GLCall(glDrawArrays(GL_TRIANGLES,0,36));
-				GLCall(glfwSwapBuffers(window));
-				GLCall(glfwPollEvents());
+					camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
 
+					float currentFrame = glfwGetTime();
+					deltaTime = currentFrame - lastFrame;
+					lastFrame = currentFrame;
+
+					GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+					GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+
+					GLCall(glActiveTexture(GL_TEXTURE0));
+					GLCall(glBindTexture(GL_TEXTURE_2D,BK1));
+					GLCall(glBindVertexArray(VAO_Background));
+					background_shader.use();
+					/*background_shader.setInt("texture1", 0);
+					background_shader.setMatrix4fv("model_back", back_position);
+					background_shader.setMatrix4fv("view", camera);*/
+
+					GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+
+					GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+
+					//rotate_object(model, 2, 0.1f);
+					/*std::cout<<"second loop:"<<std::endl;
+					std::cout << " " << model[0][0] << " " << model[0][1] << " " << model[0][2] << " " << model[0][3] << " " << std::endl;
+					std::cout << " " << model[1][0] << " " << model[1][1] << " " << model[1][2] << " " << model[1][3] << " " << std::endl;
+					std::cout << " " << model[2][0] << " " << model[2][1] << " " << model[2][2] << " " << model[2][3] << " " << std::endl;
+					std::cout << " " << model[3][0] << " " << model[3][1] << " " << model[3][2] << " " << model[3][3] << " " << std::endl;*/
+					shader_program.use();
+					shader_program.setMatrix4fv("model", model);
+					shader_program.setMatrix4fv("projection", projection);
+					shader_program.setMatrix4fv("view", camera);
+					shader_program.setVector3f("lightPos", light_position);
+					shader_program.setVector3f("viewPos", camera_pose);
+					nanosuits.Draw(shader_program);
+					GLCall(glBindVertexArray(0));
+
+					lightning_shader.use();
+					lightning_shader.setMatrix4fv("model_light", lamp);
+					lightning_shader.setMatrix4fv("projection_light", projection);
+					lightning_shader.setMatrix4fv("view_light", camera);
+
+					GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Light));
+					GLCall(glBindVertexArray(VAO_Light));
+					GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+					GLCall(glBindVertexArray(0));
+
+
+					GLCall(glfwSwapBuffers(window));
+					GLCall(glfwPollEvents());
+
+				}
 			}
+
 		}
+		glfwTerminate();//destroy glcontext
+		exit(EXIT_SUCCESS);
+		return 0;
+
 
 	}
-	glfwTerminate();//destroy glcontext
-	exit(EXIT_SUCCESS);
-	return 0;
-
-
-}
