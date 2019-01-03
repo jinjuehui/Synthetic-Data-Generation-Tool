@@ -29,6 +29,7 @@
 #include <iostream>
 
 #define USE_BACKGROUND_IMAGE 0
+#define ROTATE_CAMERA 0
 #define LOAD_PICTURE "mesh/nanosuit/nanosuit.obj"
 
 const unsigned int SCR_WIDTH = 1024;
@@ -42,6 +43,42 @@ bool firstMouse(true);
 double lastX(SCR_WIDTH / 2), lastY(SCR_HEIGHT / 2);
 float yaw(-90.0f), pitch(0.0f), fov(45.0f);
 
+struct CameraOrientation
+{
+	glm::vec3 camera_pose, camera_up, camera_front;
+};
+
+
+
+//rotate camera the function should be used in two for loop, which loop through the Yaw and Pitch angle
+CameraOrientation rotateCamera(int P, int Y,float distance)
+{
+	CameraOrientation setup;
+	//std::cout << "Y= " << Y << std::endl;
+	float x_direction = distance * glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y));
+	float y_direction = distance * glm::sin(glm::radians((float)P));
+	float z_direction = -distance * glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y));
+
+	setup.camera_pose = glm::vec3(x_direction, y_direction, z_direction);
+	glm::vec3 camera_pose_xz = glm::vec3(setup.camera_pose.x, 0.0f, setup.camera_pose.z);
+	setup.camera_front = -setup.camera_pose;
+	setup.camera_up;
+	if ((0 < P&&P <= 90) || (180 <= P && P <= 270) || P == 360)
+	{
+		setup.camera_up = glm::normalize(glm::cross(glm::cross(setup.camera_pose, camera_pose_xz), setup.camera_front));
+		//std::cout << "0<P<=90" << std::endl;
+	}
+
+	if ((90 < P&&P < 180) || (270 < P&&P < 360))
+	{
+		setup.camera_up = glm::normalize(glm::cross(glm::cross(setup.camera_pose, camera_pose_xz), setup.camera_pose));
+		//std::cout << "90<P<=180" << std::endl;
+	}
+
+
+
+	return setup;
+}
 
 
 void rotate_object(glm::mat4 &model, int axis, float velocity)
@@ -361,34 +398,17 @@ int main()
 */
 				for (int Y = 0; Y < 361; Y++)
 				{
-					//std::cout << "Y= " << Y << std::endl;
+
+					CameraOrientation Setup;
 					float distance(20.0f);
-					float x_direction = distance * glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y));
-					float y_direction = distance * glm::sin(glm::radians((float)P));
-					float z_direction = -distance * glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y));
-					/*if (Y%360==0)
-					{
-						std::cout << "x_direction: "<<x_direction <<" y_direction "<<y_direction <<" z_direction" <<z_direction <<std::endl;
-					}*/
-					glm::vec3 camera_pose = glm::vec3(x_direction, y_direction, z_direction);
-					glm::vec3 camera_pose_xz = glm::vec3(camera_pose.x, 0.0f, camera_pose.z);
-					glm::vec3 camera_front = -camera_pose;
-					glm::vec3 camera_up;
-					if ((0<P&&P<= 90)||(180<=P&&P<=270)||P==360)
-					{
-						camera_up = glm::normalize(glm::cross(glm::cross(camera_pose, camera_pose_xz), camera_front));
-						//std::cout << "0<P<=90" << std::endl;
-					}
+					Setup.camera_pose = glm::vec3{0.0f,0.0f,20.0f};
+					Setup.camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-Setup.camera_pose;
+					Setup.camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
 
-					if ((90<P&&P<180)||(270<P&&P<360))
-					{
-						camera_up = glm::normalize(glm::cross(glm::cross(camera_pose, camera_pose_xz), camera_pose));
-						//std::cout << "90<P<=180" << std::endl;
-					}
+					if(ROTATE_CAMERA)
+						Setup=rotateCamera(P, Y, distance);
 
-					glm::mat4 camera_model = glm::translate(camera_model, camera_pose);
-
-					camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
+					camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
 
 					float currentFrame = glfwGetTime();
 					deltaTime = currentFrame - lastFrame;
@@ -424,7 +444,7 @@ int main()
 					shader_program.setMatrix4fv("projection", projection);
 					shader_program.setMatrix4fv("view", camera);
 					shader_program.setVector3f("lightPos", light_position);
-					shader_program.setVector3f("viewPos", camera_pose);
+					shader_program.setVector3f("viewPos", Setup.camera_pose);
 					nanosuits.Draw(shader_program);
 					GLCall(glBindVertexArray(0));
 
