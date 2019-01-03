@@ -25,8 +25,9 @@ void Mesh::setupMesh()
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indicies.size() * sizeof(unsigned int), &Indicies[0], GL_STATIC_DRAW));
 
-
-
+	bool LOAD_COMPLEX_MODEL = false;//TODO: Implement this layout in general way, nonasuits need this layout
+	if (LOAD_COMPLEX_MODEL)
+	{
 		////vertex position
 		GLCall(glEnableVertexAttribArray(0));
 		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
@@ -42,8 +43,14 @@ void Mesh::setupMesh()
 		////bitangent
 		GLCall(glEnableVertexAttribArray(4));
 		GLCall(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(11 * sizeof(float))));
+	}
 
-		//vertex position
+		////vertex position
+		GLCall(glEnableVertexAttribArray(0));
+		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
+		////normal
+		GLCall(glEnableVertexAttribArray(1));
+		GLCall(glVertexAttribPointer(1, 3, GL_INT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float))));
 
 }
 

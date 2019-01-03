@@ -30,7 +30,7 @@
 
 #define USE_BACKGROUND_IMAGE 0
 #define ROTATE_CAMERA 0
-#define LOAD_PICTURE "mesh/nanosuit/nanosuit.obj"
+#define LOAD_MODEL "mesh/nanosuit/chess/queen.obj"
 
 const unsigned int SCR_WIDTH = 1024;
 const unsigned int SCR_HEIGHT = 768;
@@ -53,7 +53,7 @@ struct CameraOrientation
 //rotate camera the function should be used in two for loop, which loop through the Yaw and Pitch angle
 CameraOrientation rotateCamera(int P, int Y,float distance)
 {
-	std::cout << "Camera rotation enabled!" << std::endl;
+	//std::cout << "Camera rotation enabled!" << std::endl;
 	CameraOrientation setup;
 	//std::cout << "Y= " << Y << std::endl;
 	float x_direction = distance * glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y));
@@ -85,7 +85,7 @@ CameraOrientation rotateCamera(int P, int Y,float distance)
 void rotate_object(glm::mat4 &model, int axis, float velocity)
 {
 	//model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 0.0f, 0.0f));
-	std::cout << "Object Rotation Enabled!" << std::endl;
+	//std::cout << "Object Rotation Enabled!" << std::endl;
 	switch (axis)
 	{
 		case 1:
@@ -361,11 +361,15 @@ int main()
 
 
 
-		Model nanosuits(LOAD_PICTURE);//untitled.obj
+		//Model nanosuits(LOAD_MODEL);//untitled.obj
+		Model TrainingObject(LOAD_MODEL);
 
 		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-		Shader shader_program("VertexShader.shader", "FragmentShader.shader");
+		//old shader for nanosuits
+		//Shader shader_program("VertexShader.shader", "FragmentShader.shader");
+
+		Shader Simple_shader("Simple_vertex.shader","Simple_Fragment.shader");
 		Shader lightning_shader("Lightning_vertex.shader", "Lightning_fragment.shader");
 
 
@@ -385,7 +389,7 @@ int main()
 
 			glm::mat4 model, camera, projection;
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-			model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));//for nanosuits default 0.4
+			model = glm::scale(model, glm::vec3(14.0f, 14.0f, 14.0f));//for nanosuits default 0.4
 
 
 			for (int P = 0; P < 361; P++)
@@ -447,13 +451,21 @@ int main()
 					std::cout << " " << model[1][0] << " " << model[1][1] << " " << model[1][2] << " " << model[1][3] << " " << std::endl;
 					std::cout << " " << model[2][0] << " " << model[2][1] << " " << model[2][2] << " " << model[2][3] << " " << std::endl;
 					std::cout << " " << model[3][0] << " " << model[3][1] << " " << model[3][2] << " " << model[3][3] << " " << std::endl;*/
-					shader_program.use();
-					shader_program.setMatrix4fv("model", model);
-					shader_program.setMatrix4fv("projection", projection);
-					shader_program.setMatrix4fv("view", camera);
-					shader_program.setVector3f("lightPos", light_position);
-					shader_program.setVector3f("viewPos", Setup.camera_pose);
-					nanosuits.Draw(shader_program);
+					//shader_program.use();
+					//shader_program.setMatrix4fv("model", model);
+					//shader_program.setMatrix4fv("projection", projection);
+					//shader_program.setMatrix4fv("view", camera);
+					//shader_program.setVector3f("lightPos", light_position);
+					//shader_program.setVector3f("viewPos", Setup.camera_pose);
+					//nanosuits.Draw(shader_program);
+
+					Simple_shader.use();
+					Simple_shader.setMatrix4fv("model", model);
+					Simple_shader.setMatrix4fv("projection", projection);
+					Simple_shader.setMatrix4fv("view", camera);
+					Simple_shader.setVector3f("lightPos", light_position);
+					Simple_shader.setVector3f("viewPos", Setup.camera_pose);
+					TrainingObject.Draw(Simple_shader);
 					GLCall(glBindVertexArray(0));
 
 					lightning_shader.use();
