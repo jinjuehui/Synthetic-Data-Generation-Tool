@@ -28,6 +28,8 @@
 //C++ basics
 #include <iostream>
 
+#define USE_BACKGROUND_IMAGE 0
+#define LOAD_PICTURE "mesh/nanosuit/nanosuit.obj"
 
 const unsigned int SCR_WIDTH = 1024;
 const unsigned int SCR_HEIGHT = 768;
@@ -147,50 +149,50 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 float verticesLight[] = {
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
+	-0.01f, -0.01f, -0.01f,
+	 0.01f, -0.01f, -0.01f,
+	 0.01f,  0.01f, -0.01f,
+	 0.01f,  0.01f, -0.01f,
+	-0.01f,  0.01f, -0.01f,
+	-0.01f, -0.01f, -0.01f,
 
-	-0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
+	-0.01f, -0.01f,  0.01f,
+	 0.01f, -0.01f,  0.01f,
+	 0.01f,  0.01f,  0.01f,
+	 0.01f,  0.01f,  0.01f,
+	-0.01f,  0.01f,  0.01f,
+	-0.01f, -0.01f,  0.01f,
 
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
+	-0.01f,  0.01f,  0.01f,
+	-0.01f,  0.01f, -0.01f,
+	-0.01f, -0.01f, -0.01f,
+	-0.01f, -0.01f, -0.01f,
+	-0.01f, -0.01f,  0.01f,
+	-0.01f,  0.01f,  0.01f,
 
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
+	 0.01f,  0.01f,  0.01f,
+	 0.01f,  0.01f, -0.01f,
+	 0.01f, -0.01f, -0.01f,
+	 0.01f, -0.01f, -0.01f,
+	 0.01f, -0.01f,  0.01f,
+	 0.01f,  0.01f,  0.01f,
 
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f, -0.5f,
+	-0.01f, -0.01f, -0.01f,
+	 0.01f, -0.01f, -0.01f,
+	 0.01f, -0.01f,  0.01f,
+	 0.01f, -0.01f,  0.01f,
+	-0.01f, -0.01f,  0.01f,
+	-0.01f, -0.01f, -0.01f,
 
-	-0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f
+	-0.01f,  0.01f, -0.01f,
+	 0.01f,  0.01f, -0.01f,
+	 0.01f,  0.01f,  0.01f,
+	 0.01f,  0.01f,  0.01f,
+	-0.01f,  0.01f,  0.01f,
+	-0.01f,  0.01f, -0.01f
 };
 
-
+//needed for print an image on the Background
 float background[] = {
 		 1.0f,	1.0f,	0.0f, 1.0f, 1.0f, // top right
 		 1.0f,  -1.0f,	0.0f, 1.0f, 0.0f, // bottom right
@@ -214,6 +216,8 @@ unsigned int back_indicies[] =
 //1. set pictures as the background of the window
 //2. implement the split window to show both the rendered data and the ground truth data
 //3. optimize all of the VAO and VBOs
+
+
 
 int main()
 {
@@ -282,29 +286,34 @@ int main()
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
-		int background_width, background_height, nrChannels;
-		stbi_set_flip_vertically_on_load(true);
-		unsigned char *data = stbi_load("Crynet_nanosuit.jpg", &background_width, &background_height, &nrChannels, 0);//Crynet_nanosuit.jpg
-
-		if (data)
+		//background image setting
+		if (USE_BACKGROUND_IMAGE)
 		{
-			GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, background_width, background_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
-			GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+			int background_width, background_height, nrChannels;
+			stbi_set_flip_vertically_on_load(true);
+			unsigned char *data = stbi_load("Crynet_nanosuit.jpg", &background_width, &background_height, &nrChannels, 0);//Crynet_nanosuit.jpg
+
+			if (data)
+			{
+				GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, background_width, background_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+				GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+			}
+			else
+			{
+				std::cout << "failed to load background image" << std::endl;
+			}
+			stbi_image_free(data);
 		}
-		else
-		{
-			std::cout << "failed to load background image" << std::endl;
-		}
 
-		stbi_image_free(data);
 
-		Shader background_shader("background_vertex.shader", "background_fragment.shader");
-		background_shader.use();
-		background_shader.setInt("texture1", 0);
+			Shader background_shader("background_vertex.shader", "background_fragment.shader");
+			background_shader.use();
+			background_shader.setInt("texture1", 0);
 
 
 
-		Model nanosuits("mesh/nanosuit/cube.obj");//untitled.obj
+
+		Model nanosuits(LOAD_PICTURE);//untitled.obj
 
 		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -318,7 +327,7 @@ int main()
 		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
 
 		lamp = glm::translate(lamp, light_position);
-		back_position = glm::translate(back_position, back_ground_position);
+		//back_position = glm::translate(back_position, back_ground_position);
 
 		
 		GLCall(glEnable(GL_DEPTH_TEST));
@@ -352,8 +361,6 @@ int main()
 */
 				for (int Y = 0; Y < 360; Y++)
 				{
-
-
 					float distance(20.0f);
 					glm::vec3 camera_pose = glm::vec3(distance*glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y)), distance*glm::sin(glm::radians((float)P)), distance*glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y)));
 					glm::vec3 camera_pose_xz = glm::vec3(camera_pose.x, 0.0f, camera_pose.z);
@@ -367,20 +374,24 @@ int main()
 					deltaTime = currentFrame - lastFrame;
 					lastFrame = currentFrame;
 
-					GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+					GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
 					GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-					GLCall(glActiveTexture(GL_TEXTURE0));
-					GLCall(glBindTexture(GL_TEXTURE_2D,BK1));
-					GLCall(glBindVertexArray(VAO_Background));
-					background_shader.use();
-					/*background_shader.setInt("texture1", 0);
-					background_shader.setMatrix4fv("model_back", back_position);
-					background_shader.setMatrix4fv("view", camera);*/
+					//use background image
+					if (USE_BACKGROUND_IMAGE)
+					{
+						GLCall(glActiveTexture(GL_TEXTURE0));
+						GLCall(glBindTexture(GL_TEXTURE_2D,BK1));
+						GLCall(glBindVertexArray(VAO_Background));
+						background_shader.use();
+						/*background_shader.setInt("texture1", 0);
+						background_shader.setMatrix4fv("model_back", back_position);
+						background_shader.setMatrix4fv("view", camera);*/
 
-					GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+						GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 
-					GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+						GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+					}
 
 					//rotate_object(model, 2, 0.1f);
 					/*std::cout<<"second loop:"<<std::endl;
@@ -406,7 +417,6 @@ int main()
 					GLCall(glBindVertexArray(VAO_Light));
 					GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 					GLCall(glBindVertexArray(0));
-
 
 					GLCall(glfwSwapBuffers(window));
 					GLCall(glfwPollEvents());
