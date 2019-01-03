@@ -20,58 +20,63 @@ void Mesh::setupMesh()
 
 	GLCall(glBindVertexArray(VAO));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-	GLCall(glBufferData(GL_ARRAY_BUFFER, Vertecies.size()*sizeof(Vertex), &Vertecies[0],GL_STATIC_DRAW));
+	GLCall(glBufferData(GL_ARRAY_BUFFER, Vertecies.size() * sizeof(Vertex), &Vertecies[0], GL_STATIC_DRAW));
 
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER,Indicies.size()*sizeof(unsigned int),&Indicies[0],GL_STATIC_DRAW));
-
-	//vertex position
-	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
-	//normal
-	GLCall(glEnableVertexAttribArray(1));
-	GLCall(glVertexAttribPointer(1, 3, GL_INT, GL_FALSE, sizeof(Vertex), (void*)(3*sizeof(float))));
-	//texture coordinate
-	GLCall(glEnableVertexAttribArray(2));
-	GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float))));
-	//tangent
-	GLCall(glEnableVertexAttribArray(3));
-	GLCall(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(8 * sizeof(float))));
-	//bitangent
-	GLCall(glEnableVertexAttribArray(4));
-	GLCall(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(11 * sizeof(float))));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indicies.size() * sizeof(unsigned int), &Indicies[0], GL_STATIC_DRAW));
 
 
-	GLCall(glBindVertexArray(0));
+
+		////vertex position
+		GLCall(glEnableVertexAttribArray(0));
+		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
+		////normal
+		GLCall(glEnableVertexAttribArray(1));
+		GLCall(glVertexAttribPointer(1, 3, GL_INT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float))));
+		////texture coordinate
+		GLCall(glEnableVertexAttribArray(2));
+		GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float))));
+		////tangent
+		GLCall(glEnableVertexAttribArray(3));
+		GLCall(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(8 * sizeof(float))));
+		////bitangent
+		GLCall(glEnableVertexAttribArray(4));
+		GLCall(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(11 * sizeof(float))));
+
+		//vertex position
+
 }
 
-void Mesh::Draw(Shader shader)
+void Mesh::Draw(Shader shader, bool norm_key, bool texture_key, bool tangent_key)
 {
 	unsigned int diffuseNr(1);
 	unsigned int specularNr(1);
 	unsigned int normalNr(1);
 	unsigned int heightNr(1);
 
-	for (unsigned int i = 0; i < Textures.size(); i++ )
+	if (texture_key)
 	{
-		GLCall(glActiveTexture(GL_TEXTURE0+i));
-		std::string number;
-		std::string name = Textures[i].type;
-		if (name == "texture_diffuse")
-			number = std::to_string(diffuseNr++);
-		else if (name == "texture_specular")
-			number = std::to_string(specularNr++);
-		else if (name == "texture_normal")
-			number = std::to_string(normalNr++);
-		else if (name == "texture_height")
-			number = std::to_string(heightNr++);
-		GLCall(shader.use());
-		std::string name_number = name + number;
-		GLCall(shader.setInt(name_number, i));
-		GLCall(glBindTexture(GL_TEXTURE_2D, Textures[i].id));
+		for (unsigned int i = 0; i < Textures.size(); i++ )
+		{
+			GLCall(glActiveTexture(GL_TEXTURE0+i));
+			std::string number;
+			std::string name = Textures[i].type;
+			if (name == "texture_diffuse")
+				number = std::to_string(diffuseNr++);
+			else if (name == "texture_specular")
+				number = std::to_string(specularNr++);
+			else if (name == "texture_normal")
+				number = std::to_string(normalNr++);
+			else if (name == "texture_height")
+				number = std::to_string(heightNr++);
+			GLCall(shader.use());
+			std::string name_number = name + number;
+			GLCall(shader.setInt(name_number, i));
+			GLCall(glBindTexture(GL_TEXTURE_2D, Textures[i].id));
+
+		}
 
 	}
-
 
 	GLCall(glBindVertexArray(VAO));//VAO specifies which buffer to draw
 	GLCall(glDrawElements(GL_TRIANGLES,Indicies.size(),GL_UNSIGNED_INT,0));
@@ -90,7 +95,7 @@ void Model::Draw(Shader shader)
 {
 	for (int i=0; i<meshes.size(); i++)
 	{
-		meshes[i].Draw(shader);
+		meshes[i].Draw(shader,norm_key,texture_key,tangent_key);
 	}
 }
 
@@ -103,6 +108,10 @@ void Model::loadModel(std::string const &path)
 		std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
 		return;
 	}
+	else
+	{
+		std::cout << "Model imported!" << std::endl;
+	}
 	directory = path.substr(0, path.find_last_of('/'));  //directory = mesh/nanosuit/  as the name only path
 	processNode(scene->mRootNode, scene);
 
@@ -110,6 +119,7 @@ void Model::loadModel(std::string const &path)
 
 void Model::processNode(aiNode *node, const aiScene *scene)
 {
+	std::cout << "Processing Node!" << std::endl;
 	for (unsigned int i=0; i<node->mNumMeshes;i++)
 	{
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -139,14 +149,16 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		//process normals
 		if (mesh->HasNormals())
 		{
-		vertex.Normal.x = mesh->mNormals[i].x;
-		vertex.Normal.y = mesh->mNormals[i].y;
-		vertex.Normal.z = mesh->mNormals[i].z;
+			norm_key = true;
+			vertex.Normal.x = mesh->mNormals[i].x;
+			vertex.Normal.y = mesh->mNormals[i].y;
+			vertex.Normal.z = mesh->mNormals[i].z;
 		}
 
 		//process texture coordinates
 		if (mesh->mTextureCoords[0])
 		{
+			texture_key = true;
 			vertex.TexCoords.x= mesh->mTextureCoords[0][i].x;
 			vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
 		}
@@ -156,14 +168,15 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		//tangent
 		if (mesh->HasTangentsAndBitangents())
 		{
-		vertex.Tangent.x = mesh->mTangents[i].x;
-		vertex.Tangent.y = mesh->mTangents[i].y;
-		vertex.Tangent.z = mesh->mTangents[i].z;
+			tangent_key = true;
+			vertex.Tangent.x = mesh->mTangents[i].x;
+			vertex.Tangent.y = mesh->mTangents[i].y;
+			vertex.Tangent.z = mesh->mTangents[i].z;
 		
 		//bitangent
-		vertex.Bitangent.x = mesh->mBitangents[i].x;
-		vertex.Bitangent.y = mesh->mBitangents[i].y;
-		vertex.Bitangent.z = mesh->mBitangents[i].z;
+			vertex.Bitangent.x = mesh->mBitangents[i].x;
+			vertex.Bitangent.y = mesh->mBitangents[i].y;
+			vertex.Bitangent.z = mesh->mBitangents[i].z;
 		}
 
 		verticies.push_back(vertex);

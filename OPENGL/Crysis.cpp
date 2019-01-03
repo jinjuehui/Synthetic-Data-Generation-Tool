@@ -53,6 +53,7 @@ struct CameraOrientation
 //rotate camera the function should be used in two for loop, which loop through the Yaw and Pitch angle
 CameraOrientation rotateCamera(int P, int Y,float distance)
 {
+	std::cout << "Camera rotation enabled!" << std::endl;
 	CameraOrientation setup;
 	//std::cout << "Y= " << Y << std::endl;
 	float x_direction = distance * glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y));
@@ -84,7 +85,7 @@ CameraOrientation rotateCamera(int P, int Y,float distance)
 void rotate_object(glm::mat4 &model, int axis, float velocity)
 {
 	//model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 0.0f, 0.0f));
-
+	std::cout << "Object Rotation Enabled!" << std::endl;
 	switch (axis)
 	{
 		case 1:
@@ -274,6 +275,10 @@ int main()
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
+	else
+	{
+		std::cout << "Window creation succeed!" << std::endl;
+	}
 
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, key_callback);
@@ -282,6 +287,10 @@ int main()
 		{
 			std::cout << "initialize glew failed" << std::endl;
 		}
+		else
+		{
+			std::cout << "glew initialization succeed!" << std::endl;
+		}
 
 		int nrAttributes;
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
@@ -289,6 +298,7 @@ int main()
 
 
 		unsigned int VAO_Light, VBO_Light;
+		std::cout << "create Light buffers and layout!" << std::endl;
 		GLCall(glGenVertexArrays(1, &VAO_Light));
 		GLCall(glGenBuffers(1, &VBO_Light));
 		GLCall(glBindVertexArray(VAO_Light));
@@ -299,6 +309,7 @@ int main()
 		GLCall(glEnableVertexAttribArray(0));
 		GLCall(glBindVertexArray(0));
 
+		std::cout << "create Background buffers and layout!" << std::endl;
 		unsigned int VAO_Background, VBO_Background, EBO_Background;
 		GLCall(glGenVertexArrays(1, &VAO_Background));
 		GLCall(glGenBuffers(1, &VBO_Background));
@@ -368,7 +379,7 @@ int main()
 
 		
 		GLCall(glEnable(GL_DEPTH_TEST));
-
+		std::cout << "rendering..." << std::endl;
 		while (!glfwWindowShouldClose(window))  //start the game
 		{
 
@@ -379,9 +390,6 @@ int main()
 
 			for (int P = 0; P < 361; P++)
 			{
-				std::cout << "P= " << P << std::endl;
-
-
 				//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
 				projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
