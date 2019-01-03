@@ -337,12 +337,12 @@ int main()
 
 			glm::mat4 model, camera, projection;
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-			model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+			model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));//for nanosuits default 0.4
 
 
-			for (int P = 0; P < 360.0f; P++)
+			for (int P = 0; P < 361; P++)
 			{
-
+				std::cout << "P= " << P << std::endl;
 
 
 				//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
@@ -359,13 +359,33 @@ int main()
 				std::cout << " " << back_position[2][0] << " " << back_position[2][1] << " " << back_position[2][2] << " " << back_position[2][3] << " " << std::endl;
 				std::cout << " " << back_position[3][0] << " " << back_position[3][1] << " " << back_position[3][2] << " " << back_position[3][3] << " " << std::endl;
 */
-				for (int Y = 0; Y < 360; Y++)
+				for (int Y = 0; Y < 361; Y++)
 				{
+					//std::cout << "Y= " << Y << std::endl;
 					float distance(20.0f);
-					glm::vec3 camera_pose = glm::vec3(distance*glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y)), distance*glm::sin(glm::radians((float)P)), distance*glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y)));
+					float x_direction = distance * glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y));
+					float y_direction = distance * glm::sin(glm::radians((float)P));
+					float z_direction = -distance * glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y));
+					/*if (Y%360==0)
+					{
+						std::cout << "x_direction: "<<x_direction <<" y_direction "<<y_direction <<" z_direction" <<z_direction <<std::endl;
+					}*/
+					glm::vec3 camera_pose = glm::vec3(x_direction, y_direction, z_direction);
 					glm::vec3 camera_pose_xz = glm::vec3(camera_pose.x, 0.0f, camera_pose.z);
 					glm::vec3 camera_front = -camera_pose;
-					glm::vec3 camera_up = -glm::cross(glm::cross(camera_pose, camera_pose_xz), camera_pose);
+					glm::vec3 camera_up;
+					if ((0<P&&P<= 90)||(180<=P&&P<=270)||P==360)
+					{
+						camera_up = glm::normalize(glm::cross(glm::cross(camera_pose, camera_pose_xz), camera_front));
+						//std::cout << "0<P<=90" << std::endl;
+					}
+
+					if ((90<P&&P<180)||(270<P&&P<360))
+					{
+						camera_up = glm::normalize(glm::cross(glm::cross(camera_pose, camera_pose_xz), camera_pose));
+						//std::cout << "90<P<=180" << std::endl;
+					}
+
 					glm::mat4 camera_model = glm::translate(camera_model, camera_pose);
 
 					camera = glm::lookAt(camera_pose, camera_pose + camera_front, camera_up);
