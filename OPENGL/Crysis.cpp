@@ -304,7 +304,7 @@ int main()
 
 
 
-		Model nanosuits("mesh/nanosuit/untitled.obj");
+		Model nanosuits("mesh/nanosuit/cube.obj");//untitled.obj
 
 		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -344,12 +344,12 @@ int main()
 				/*wasd_keyinput(window);
 				glfwSetCursorPosCallback(window, mouse_callback);
 				glfwSetScrollCallback(window, scroll_callback);*/
-				std::cout << "first loop:" <<P<< std::endl;
+				/*std::cout << "first loop:" <<P<< std::endl;
 				std::cout <<" "<< back_position[0][0] <<" "<< back_position[0][1] <<" "<< back_position[0][2] <<" "<< back_position[0][3] <<" "<< std::endl;
 				std::cout <<" "<<back_position[1][0] <<" "<< back_position[1][1] << " " << back_position[1][2] <<" "<< back_position[1][3] << " " << std::endl;
 				std::cout << " " << back_position[2][0] << " " << back_position[2][1] << " " << back_position[2][2] << " " << back_position[2][3] << " " << std::endl;
 				std::cout << " " << back_position[3][0] << " " << back_position[3][1] << " " << back_position[3][2] << " " << back_position[3][3] << " " << std::endl;
-
+*/
 				for (int Y = 0; Y < 360; Y++)
 				{
 

@@ -25,14 +25,19 @@ void Mesh::setupMesh()
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER,Indicies.size()*sizeof(unsigned int),&Indicies[0],GL_STATIC_DRAW));
 
+	//vertex position
 	GLCall(glEnableVertexAttribArray(0));
 	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
+	//normal
 	GLCall(glEnableVertexAttribArray(1));
 	GLCall(glVertexAttribPointer(1, 3, GL_INT, GL_FALSE, sizeof(Vertex), (void*)(3*sizeof(float))));
+	//texture coordinate
 	GLCall(glEnableVertexAttribArray(2));
 	GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float))));
+	//tangent
 	GLCall(glEnableVertexAttribArray(3));
 	GLCall(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(8 * sizeof(float))));
+	//bitangent
 	GLCall(glEnableVertexAttribArray(4));
 	GLCall(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(11 * sizeof(float))));
 
@@ -132,9 +137,12 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		vertex.Position.z = mesh->mVertices[i].z;
 		
 		//process normals
+		if (mesh->HasNormals())
+		{
 		vertex.Normal.x = mesh->mNormals[i].x;
 		vertex.Normal.y = mesh->mNormals[i].y;
 		vertex.Normal.z = mesh->mNormals[i].z;
+		}
 
 		//process texture coordinates
 		if (mesh->mTextureCoords[0])
@@ -146,14 +154,18 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 
 		//tangent
+		if (mesh->HasTangentsAndBitangents())
+		{
 		vertex.Tangent.x = mesh->mTangents[i].x;
 		vertex.Tangent.y = mesh->mTangents[i].y;
 		vertex.Tangent.z = mesh->mTangents[i].z;
-
+		
 		//bitangent
 		vertex.Bitangent.x = mesh->mBitangents[i].x;
 		vertex.Bitangent.y = mesh->mBitangents[i].y;
 		vertex.Bitangent.z = mesh->mBitangents[i].z;
+		}
+
 		verticies.push_back(vertex);
 
 	}
