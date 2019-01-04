@@ -28,12 +28,12 @@
 
 
 //Triggers and Keys
-#define USE_BACKGROUND_IMAGE 1
-#define ROTATE_CAMERA 1
+#define USE_BACKGROUND_IMAGE 0
+#define ROTATE_CAMERA 0
 #define LOAD_MODEL "mesh/nanosuit/chess/king.obj"
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/cube_reference.obj"
-bool STATIC_CAMERA_VIEW = true;
-bool ENABLE_USER_INPUT_TO_CONTRO_CAMERA = !STATIC_CAMERA_VIEW;
+bool STATIC_CAMERA_VIEW = false;
+bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 
 //parameters
 	//Screen Parameters:
@@ -48,16 +48,16 @@ bool ENABLE_USER_INPUT_TO_CONTRO_CAMERA = !STATIC_CAMERA_VIEW;
 	//Drawing object	
 		glm::mat4 lamp, back_position;
 		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
-		glm::vec3 light_color = {1.0f,1.0f,1.0f};  
-		glm::vec3 light_position(2.0f,1.0f,0.0f);
+		glm::vec3 light_color = {1.0f,1.0f,1.0f};
+		glm::vec3 light_position(2.0f,0.0f,-1.0f);
 		glm::vec3 Object_color = {1.0f,0.5f,0.31f};
 
 //camera setup with default parameters
 struct CameraOrientation
 {
 	glm::vec3 camera_pose = glm::vec3{ 0.0f,10.0f,20.0f };
-	glm::vec3 camera_up = glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose;//the target camera look at - camera position
-	glm::vec3 camera_front = glm::vec3{ 0.0f,1.0f,0.0f };
+	glm::vec3 camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose;//the target camera look at - camera position
+	glm::vec3 camera_up = glm::vec3{ 0.0f,0.1f,0.0f };
 
 };
 
@@ -165,17 +165,16 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	front.x = cos(glm::radians(yaw))*cos(glm::radians(pitch));
 	front.y = sin(glm::radians(pitch));
 	front.z = sin(glm::radians(yaw))*cos(glm::radians(pitch));
-	Setup.camera_front = glm::normalize(front);
+	Setup.camera_front =glm::normalize(front);
 
 }
 
 //move the camera forward, backward, sideways
 void wasd_keyinput(GLFWwindow* window)
 {
-	float camera_speed =0.8f*deltaTime;
+	float camera_speed =10.0f*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		std::cout << "w pressed" << std::endl;
 		Setup.camera_pose += camera_speed * Setup.camera_front;
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -190,6 +189,14 @@ void wasd_keyinput(GLFWwindow* window)
 	{
 		Setup.camera_pose += camera_speed * glm::normalize(glm::cross(Setup.camera_front, Setup.camera_up));
 	}
+   if (glfwGetKey(window, GLFW_KEY_SPACE)== GLFW_PRESS)
+   {
+	   Setup.camera_pose += camera_speed * Setup.camera_up;
+   }
+   if (glfwGetKey(window,GLFW_KEY_R)==GLFW_PRESS)
+   {
+	   Setup.camera_pose -= camera_speed * Setup.camera_up;
+   }
 }
 
 
@@ -296,7 +303,7 @@ int main()
 
 	glfwMakeContextCurrent(window);
 
-	if (ENABLE_USER_INPUT_TO_CONTRO_CAMERA)
+	if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
 	{
 		std::cout << "use ESC to exit the Window" << std::endl;
 		glfwSetKeyCallback(window, key_callback);
@@ -383,7 +390,7 @@ int main()
 		//Model nanosuits(LOAD_MODEL);//untitled.obj
 		Model TrainingObject(LOAD_MODEL);
 		Model ReferenceObject(LOAD_CUBE_REFERENCE);
-		if (ENABLE_USER_INPUT_TO_CONTRO_CAMERA)
+		if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
 		{
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			std::cout << "user Input Enabled.." << std::endl;
@@ -402,7 +409,7 @@ int main()
 
 
 		lamp = glm::translate(lamp, light_position);
-		lamp = glm::scale(lamp, glm::vec3{10.0f,10.0f,10.0f});
+		lamp = glm::scale(lamp, glm::vec3(10.0f,10.0f,10.0f));
 		//back_position = glm::translate(back_position, back_ground_position);
 
 		
@@ -425,12 +432,6 @@ int main()
 				//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
 				projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
-				if (ENABLE_USER_INPUT_TO_CONTRO_CAMERA)
-				{
-					wasd_keyinput(window);
-					glfwSetCursorPosCallback(window, mouse_callback);
-					glfwSetScrollCallback(window, scroll_callback);
-				}
 				/*std::cout << "first loop:" <<P<< std::endl;
 				std::cout <<" "<< back_position[0][0] <<" "<< back_position[0][1] <<" "<< back_position[0][2] <<" "<< back_position[0][3] <<" "<< std::endl;
 				std::cout <<" "<<back_position[1][0] <<" "<< back_position[1][1] << " " << back_position[1][2] <<" "<< back_position[1][3] << " " << std::endl;
@@ -439,12 +440,18 @@ int main()
 */
 				for (int Y = 0; Y < 361; Y++)
 				{
-					if (ENABLE_USER_INPUT_TO_CONTRO_CAMERA==false&&STATIC_CAMERA_VIEW==true)
+					if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
+					{
+						wasd_keyinput(window);
+						glfwSetCursorPosCallback(window, mouse_callback);
+						glfwSetScrollCallback(window, scroll_callback);
+					}
+					float currentFrame = glfwGetTime();
+					deltaTime = currentFrame - lastFrame;
+					lastFrame = currentFrame;
+					if (STATIC_CAMERA_VIEW==true)
 					{
 						float distance = 20.0f;
-						//Setup.camera_pose = glm::vec3{ 0.0f,10.0f,20.0f };
-						//Setup.camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-Setup.camera_pose;
-						//Setup.camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
 
 						if(ROTATE_CAMERA)
 							Setup=rotateCamera(P, Y, distance);
@@ -452,9 +459,6 @@ int main()
 					}
 					camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
 
-					float currentFrame = glfwGetTime();
-					deltaTime = currentFrame - lastFrame;
-					lastFrame = currentFrame;
 
 					GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 					GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
