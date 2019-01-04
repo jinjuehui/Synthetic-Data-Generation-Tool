@@ -1,5 +1,3 @@
-
-
 //OpenGL extension
 #include <GL/glew.h>
 
@@ -30,8 +28,8 @@
 
 
 //Triggers and Keys
-#define USE_BACKGROUND_IMAGE 0
-#define ROTATE_CAMERA 0
+#define USE_BACKGROUND_IMAGE 1
+#define ROTATE_CAMERA 1
 #define LOAD_MODEL "mesh/nanosuit/chess/king.obj"
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/cube_reference.obj"
 bool STATIC_CAMERA_VIEW = true;
@@ -49,9 +47,9 @@ bool ENABLE_USER_INPUT_TO_CONTRO_CAMERA = !STATIC_CAMERA_VIEW;
 		float yaw(-90.0f), pitch(0.0f), fov(45.0f);
 	//Drawing object	
 		glm::mat4 lamp, back_position;
-		glm::vec3 back_ground_position(1.0f, 1.0f, 1.0f);
+		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
 		glm::vec3 light_color = {1.0f,1.0f,1.0f};
-		glm::vec3 light_position(2.0f, 1.0f, 0.0f);
+		glm::vec3 light_position(2.0f,1.0f,0.0f);
 		glm::vec3 Object_color = {1.0f,0.5f,0.31f};
 
 //camera setup with default parameters
@@ -85,7 +83,7 @@ CameraOrientation rotateCamera(int P, int Y,float distance)
 		//std::cout << "0<P<=90" << std::endl;
 	}
 
-	if ((90 < P&&P < 180) || (270 < P&&P < 360))
+	if ((90 < P&&P < 180) || (270 < P&&P < 360)||P==0)
 	{
 		setup.camera_up = glm::normalize(glm::cross(glm::cross(setup.camera_pose, camera_pose_xz), setup.camera_pose));
 		//std::cout << "90<P<=180" << std::endl;
@@ -177,6 +175,7 @@ void wasd_keyinput(GLFWwindow* window)
 	float camera_speed =0.8f*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
+		std::cout << "w pressed" << std::endl;
 		Setup.camera_pose += camera_speed * Setup.camera_front;
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -443,15 +442,15 @@ int main()
 					if (ENABLE_USER_INPUT_TO_CONTRO_CAMERA==false&&STATIC_CAMERA_VIEW==true)
 					{
 						float distance = 20.0f;
-						Setup.camera_pose = glm::vec3{ 0.0f,10.0f,20.0f };
-						Setup.camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-Setup.camera_pose;
-						Setup.camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
+						//Setup.camera_pose = glm::vec3{ 0.0f,10.0f,20.0f };
+						//Setup.camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-Setup.camera_pose;
+						//Setup.camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
 
 						if(ROTATE_CAMERA)
 							Setup=rotateCamera(P, Y, distance);
 
-						camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
 					}
+					camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
 
 					float currentFrame = glfwGetTime();
 					deltaTime = currentFrame - lastFrame;
