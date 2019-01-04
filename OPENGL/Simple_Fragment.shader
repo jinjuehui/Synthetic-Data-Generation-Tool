@@ -5,26 +5,27 @@ in vec3 Normal;
 
 uniform vec3 lightPos;
 uniform vec3 viewPos;
-
+uniform vec3 LightColor;
+uniform vec3 ObjectColor;
 
 vec3 norm = normalize(Normal);
 vec3 lightDirection = normalize(lightPos - fragPosition);
 
 float diff = max(dot(norm, lightDirection), 0.0f);
-vec3 diffuse = diff * vec3(1.0f, 1.0f, 1.0f);
+vec3 diffuse = diff * LightColor;
 
-float specularStrength = 0.9;
+float specularStrength = 0.1;
 vec3 viewDir = normalize(viewPos - fragPosition);
 vec3 reflectLight = reflect(-lightDirection, norm);
 
-float spec = pow(max(dot(reflectLight, viewDir), 0.0f), 302);
-vec3 specular = spec * specularStrength* vec3(1.0f, 1.0f, 1.0f);
+float spec = pow(max(dot(reflectLight, viewDir), 0.0f), 3);
+vec3 specular = spec * specularStrength* LightColor;
 
 void main()
 {
 
 	float ambientStrength = 0.8f;
-	vec3 ambient = ambientStrength * vec3(1.0f, 1.0f, 1.0f);
-	FragColor = vec4(ambient + diffuse + specular, 1)*vec4(0.6f,0.6f,0.6f,1.0f);
+	vec3 ambient = ambientStrength * LightColor;
+	FragColor = vec4(ambient + diffuse + specular, 1)*vec4(ObjectColor,1.0f);
 
 }

@@ -28,27 +28,42 @@
 //C++ basics
 #include <iostream>
 
+
+//Triggers and Keys
 #define USE_BACKGROUND_IMAGE 0
 #define ROTATE_CAMERA 0
-#define LOAD_MODEL "mesh/nanosuit/chess/queen.obj"
+#define LOAD_MODEL "mesh/nanosuit/chess/king.obj"
+#define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/cube_reference.obj"
+bool STATIC_CAMERA_VIEW = true;
+bool ENABLE_USER_INPUT_TO_CONTRO_CAMERA = !STATIC_CAMERA_VIEW;
 
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 768;
+//parameters
+	//Screen Parameters:
+		const unsigned int SCR_WIDTH = 1024;
+		const unsigned int SCR_HEIGHT = 768;
+	//System Time:
+		float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
+	//User Input Mouse and cursor
+		bool firstMouse(true);
+		double lastX(SCR_WIDTH / 2), lastY(SCR_HEIGHT / 2);
+		float yaw(-90.0f), pitch(0.0f), fov(45.0f);
+	//Drawing object	
+		glm::mat4 lamp, back_position;
+		glm::vec3 back_ground_position(1.0f, 1.0f, 1.0f);
+		glm::vec3 light_color = {1.0f,1.0f,1.0f};
+		glm::vec3 light_position(2.0f, 1.0f, 0.0f);
+		glm::vec3 Object_color = {1.0f,0.5f,0.31f};
 
-float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions
-
-
-
-bool firstMouse(true);
-double lastX(SCR_WIDTH / 2), lastY(SCR_HEIGHT / 2);
-float yaw(-90.0f), pitch(0.0f), fov(45.0f);
-
+//camera setup with default parameters
 struct CameraOrientation
 {
-	glm::vec3 camera_pose, camera_up, camera_front;
+	glm::vec3 camera_pose = glm::vec3{ 0.0f,10.0f,20.0f };
+	glm::vec3 camera_up = glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose;//the target camera look at - camera position
+	glm::vec3 camera_front = glm::vec3{ 0.0f,1.0f,0.0f };
+
 };
 
-
+CameraOrientation Setup;
 
 //rotate camera the function should be used in two for loop, which loop through the Yaw and Pitch angle
 CameraOrientation rotateCamera(int P, int Y,float distance)
@@ -118,65 +133,65 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 
 //call back function for mouse move to view different orientations
-//void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-//{
-//	if (firstMouse)
-//	{
-//		lastX = xpos;
-//		lastY = ypos;
-//		firstMouse = false;
-//	}
-//
-//	float xoffset = xpos - lastX;
-//	float yoffset = lastY - ypos;
-//	lastX = xpos;
-//	lastY = ypos;
-//
-//	float sensitivity = 0.05;
-//	xoffset *= sensitivity;
-//	yoffset *= sensitivity;
-//
-//	yaw += xoffset;
-//	pitch += yoffset;
-//
-//	if (pitch > 89.0f)
-//	{
-//		pitch = 89.0f;
-//	}
-//	if (pitch < -89.0f)
-//	{
-//		pitch = -89.0f;
-//	}
-//
-//	glm::vec3 front;
-//	front.x = cos(glm::radians(yaw))*cos(glm::radians(pitch));
-//	front.y = sin(glm::radians(pitch));
-//	front.z = sin(glm::radians(yaw))*cos(glm::radians(pitch));
-//	camera_front = glm::normalize(front);
-//
-//}
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.05;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (pitch > 89.0f)
+	{
+		pitch = 89.0f;
+	}
+	if (pitch < -89.0f)
+	{
+		pitch = -89.0f;
+	}
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw))*cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw))*cos(glm::radians(pitch));
+	Setup.camera_front = glm::normalize(front);
+
+}
 
 //move the camera forward, backward, sideways
-//void wasd_keyinput(GLFWwindow* window)
-//{
-//	float camera_speed =0.8f*deltaTime;
-//	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-//	{
-//		camera_pose += camera_speed * camera_front;
-//	}
-//	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-//	{
-//		camera_pose -= camera_speed * camera_front;
-//	}
-//	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-//	{
-//		camera_pose -= camera_speed * glm::normalize(glm::cross(camera_front, camera_up));
-//	}
-//	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-//	{
-//		camera_pose += camera_speed * glm::normalize(glm::cross(camera_front, camera_up));
-//	}
-//}
+void wasd_keyinput(GLFWwindow* window)
+{
+	float camera_speed =0.8f*deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		Setup.camera_pose += camera_speed * Setup.camera_front;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		Setup.camera_pose -= camera_speed * Setup.camera_front;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		Setup.camera_pose -= camera_speed * glm::normalize(glm::cross(Setup.camera_front, Setup.camera_up));
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		Setup.camera_pose += camera_speed * glm::normalize(glm::cross(Setup.camera_front, Setup.camera_up));
+	}
+}
 
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod)
@@ -281,7 +296,12 @@ int main()
 	}
 
 	glfwMakeContextCurrent(window);
-	glfwSetKeyCallback(window, key_callback);
+
+	if (ENABLE_USER_INPUT_TO_CONTRO_CAMERA)
+	{
+		std::cout << "use ESC to exit the Window" << std::endl;
+		glfwSetKeyCallback(window, key_callback);
+	}
 	
 		if (glewInit() != GLEW_OK)
 		{
@@ -363,8 +383,14 @@ int main()
 
 		//Model nanosuits(LOAD_MODEL);//untitled.obj
 		Model TrainingObject(LOAD_MODEL);
-
-		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		Model ReferenceObject(LOAD_CUBE_REFERENCE);
+		if (ENABLE_USER_INPUT_TO_CONTRO_CAMERA)
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			std::cout << "user Input Enabled.." << std::endl;
+			std::cout << "now you can move the camera view through keys: W,A,S,D " << std::endl;
+			std::cout << "mouse to zoom.." << std::endl;
+		}
 
 		//old shader for nanosuits
 		//Shader shader_program("VertexShader.shader", "FragmentShader.shader");
@@ -374,11 +400,10 @@ int main()
 
 
 
-		glm::mat4 lamp,back_position;
-		glm::vec3 light_position(2.0f, 0.0f, 2.0f);
-		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
+
 
 		lamp = glm::translate(lamp, light_position);
+		lamp = glm::scale(lamp, glm::vec3{10.0f,10.0f,10.0f});
 		//back_position = glm::translate(back_position, back_ground_position);
 
 		
@@ -387,9 +412,13 @@ int main()
 		while (!glfwWindowShouldClose(window))  //start the game
 		{
 
-			glm::mat4 model, camera, projection;
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-			model = glm::scale(model, glm::vec3(14.0f, 14.0f, 14.0f));//for nanosuits default 0.4
+			glm::mat4 chess_piece,cube, camera, projection;
+			chess_piece  = glm::translate(chess_piece, glm::vec3(0.0f, 0.0f, 0.0f));
+			chess_piece  = glm::scale(chess_piece, glm::vec3(14.0f, 14.0f, 14.0f));//for nanosuits default 0.4
+
+			cube = glm::translate(cube, glm::vec3(5.0f, 0.0f, 0.0f));
+			cube = glm::scale(cube, glm::vec3(10.0f, 10.0f, 10.0f));//for nanosuits default 0.4
+
 
 
 			for (int P = 0; P < 361; P++)
@@ -397,11 +426,12 @@ int main()
 				//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
 				projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
-				glfwSetScrollCallback(window, scroll_callback);
-
-				/*wasd_keyinput(window);
-				glfwSetCursorPosCallback(window, mouse_callback);
-				glfwSetScrollCallback(window, scroll_callback);*/
+				if (ENABLE_USER_INPUT_TO_CONTRO_CAMERA)
+				{
+					wasd_keyinput(window);
+					glfwSetCursorPosCallback(window, mouse_callback);
+					glfwSetScrollCallback(window, scroll_callback);
+				}
 				/*std::cout << "first loop:" <<P<< std::endl;
 				std::cout <<" "<< back_position[0][0] <<" "<< back_position[0][1] <<" "<< back_position[0][2] <<" "<< back_position[0][3] <<" "<< std::endl;
 				std::cout <<" "<<back_position[1][0] <<" "<< back_position[1][1] << " " << back_position[1][2] <<" "<< back_position[1][3] << " " << std::endl;
@@ -410,23 +440,24 @@ int main()
 */
 				for (int Y = 0; Y < 361; Y++)
 				{
+					if (ENABLE_USER_INPUT_TO_CONTRO_CAMERA==false&&STATIC_CAMERA_VIEW==true)
+					{
+						float distance = 20.0f;
+						Setup.camera_pose = glm::vec3{ 0.0f,10.0f,20.0f };
+						Setup.camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-Setup.camera_pose;
+						Setup.camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
 
-					CameraOrientation Setup;
-					float distance(20.0f);
-					Setup.camera_pose = glm::vec3{0.0f,0.0f,20.0f};
-					Setup.camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-Setup.camera_pose;
-					Setup.camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
+						if(ROTATE_CAMERA)
+							Setup=rotateCamera(P, Y, distance);
 
-					if(ROTATE_CAMERA)
-						Setup=rotateCamera(P, Y, distance);
-
-					camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
+						camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
+					}
 
 					float currentFrame = glfwGetTime();
 					deltaTime = currentFrame - lastFrame;
 					lastFrame = currentFrame;
 
-					GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
+					GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 					GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
 					//use background image
@@ -457,21 +488,28 @@ int main()
 					//shader_program.setMatrix4fv("view", camera);
 					//shader_program.setVector3f("lightPos", light_position);
 					//shader_program.setVector3f("viewPos", Setup.camera_pose);
+					//shader_program.setVector3f("LightColor",light_color);
 					//nanosuits.Draw(shader_program);
 
 					Simple_shader.use();
-					Simple_shader.setMatrix4fv("model", model);
+					Simple_shader.setMatrix4fv("model", chess_piece);
 					Simple_shader.setMatrix4fv("projection", projection);
 					Simple_shader.setMatrix4fv("view", camera);
 					Simple_shader.setVector3f("lightPos", light_position);
 					Simple_shader.setVector3f("viewPos", Setup.camera_pose);
+					Simple_shader.setVector3f("LightColor", light_color);
+					Simple_shader.setVector3f("ObjectColor", Object_color);
 					TrainingObject.Draw(Simple_shader);
+					Simple_shader.use();//called every time when draw a new object with the same shader 
+					Simple_shader.setMatrix4fv("model", cube);
+					ReferenceObject.Draw(Simple_shader);
 					GLCall(glBindVertexArray(0));
 
 					lightning_shader.use();
 					lightning_shader.setMatrix4fv("model_light", lamp);
 					lightning_shader.setMatrix4fv("projection_light", projection);
 					lightning_shader.setMatrix4fv("view_light", camera);
+					lightning_shader.setVector3f("LightColor", light_color);
 
 					GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Light));
 					GLCall(glBindVertexArray(VAO_Light));
