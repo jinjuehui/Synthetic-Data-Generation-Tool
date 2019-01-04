@@ -48,7 +48,7 @@ bool ENABLE_USER_INPUT_TO_CONTRO_CAMERA = !STATIC_CAMERA_VIEW;
 	//Drawing object	
 		glm::mat4 lamp, back_position;
 		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
-		glm::vec3 light_color = {1.0f,1.0f,1.0f};
+		glm::vec3 light_color = {1.0f,1.0f,1.0f};  
 		glm::vec3 light_position(2.0f,1.0f,0.0f);
 		glm::vec3 Object_color = {1.0f,0.5f,0.31f};
 
