@@ -49,7 +49,7 @@ bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 		glm::mat4 lamp, back_position;
 		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
 		glm::vec3 light_color = {1.0f,1.0f,1.0f};
-		glm::vec3 light_position(2.0f,0.0f,-1.0f);
+		glm::vec3 light_position(5.0f,0.0f,-5.0f);
 		glm::vec3 Object_color = {1.0f,0.5f,0.31f};
 
 //camera setup with default parameters
@@ -172,7 +172,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 //move the camera forward, backward, sideways
 void wasd_keyinput(GLFWwindow* window)
 {
-	float camera_speed =10.0f*deltaTime;
+	float camera_speed =5.0f*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		Setup.camera_pose += camera_speed * Setup.camera_front;
@@ -402,6 +402,7 @@ int main()
 		//Shader shader_program("VertexShader.shader", "FragmentShader.shader");
 
 		Shader Simple_shader("Simple_vertex.shader","Simple_Fragment.shader");
+
 		Shader lightning_shader("Lightning_vertex.shader", "Lightning_fragment.shader");
 
 
@@ -409,7 +410,7 @@ int main()
 
 
 		lamp = glm::translate(lamp, light_position);
-		lamp = glm::scale(lamp, glm::vec3(10.0f,10.0f,10.0f));
+		lamp = glm::scale(lamp, glm::vec3(1.0f,1.0f,1.0f));
 		//back_position = glm::translate(back_position, back_ground_position);
 
 		
@@ -505,6 +506,12 @@ int main()
 					TrainingObject.Draw(Simple_shader);
 					Simple_shader.use();//called every time when draw a new object with the same shader 
 					Simple_shader.setMatrix4fv("model", cube);
+					Simple_shader.setMatrix4fv("projection", projection);
+					Simple_shader.setMatrix4fv("view", camera);
+					Simple_shader.setVector3f("lightPos", light_position);
+					Simple_shader.setVector3f("viewPos", Setup.camera_pose);
+					Simple_shader.setVector3f("LightColor", light_color);
+					Simple_shader.setVector3f("ObjectColor", Object_color);
 					ReferenceObject.Draw(Simple_shader);
 					GLCall(glBindVertexArray(0));
 
