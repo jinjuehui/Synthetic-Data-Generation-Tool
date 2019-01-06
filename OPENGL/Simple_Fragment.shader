@@ -3,6 +3,23 @@ out vec4 FragColor;
 in vec3 fragPosition;
 in vec3 Normal;
 
+struct Material {
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	float shininess;
+};
+
+struct Light {
+	vec3 position;
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+
+};
+
+
+
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform vec3 LightColor;
@@ -12,7 +29,7 @@ uniform vec3 ObjectColor;
 void main()
 {
 
-	float ambientStrength = 0.5f;
+	float ambientStrength = 0.1f;
 	vec3 ambient = ambientStrength * LightColor;
 
 	vec3 norm = normalize(Normal);

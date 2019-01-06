@@ -34,6 +34,8 @@
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/cube_reference.obj"
 bool STATIC_CAMERA_VIEW = false;
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
+bool ROTATE_LIGHT = true;
+
 
 //parameters
 	//Screen Parameters:
@@ -49,7 +51,7 @@ bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 		glm::mat4 lamp, back_position;
 		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
 		glm::vec3 light_color = {1.0f,1.0f,1.0f};
-		glm::vec3 light_position(5.0f,0.0f,-5.0f);
+		glm::vec3 light_position(2.0f,0.0f,5.0f);
 		glm::vec3 Object_color = {1.0f,0.5f,0.31f};
 
 //camera setup with default parameters
@@ -67,6 +69,7 @@ CameraOrientation Setup;
 CameraOrientation rotateCamera(int P, int Y,float distance)
 {
 	//std::cout << "Camera rotation enabled!" << std::endl;
+
 	CameraOrientation setup;
 	//std::cout << "Y= " << Y << std::endl;
 	float x_direction = distance * glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y));
@@ -94,6 +97,18 @@ CameraOrientation rotateCamera(int P, int Y,float distance)
 	return setup;
 }
 
+
+glm::mat4 rotateLight(glm::mat4 light_model, int P, int Y, float distance)
+{
+	float x_direction = distance * glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y));
+	float y_direction = distance * glm::sin(glm::radians((float)P));
+	float z_direction = -distance * glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y));
+	
+	light_position = glm::vec3{ x_direction,y_direction,z_direction };
+	
+	light_model = glm::translate(light_model, glm::vec3{x_direction,y_direction,z_direction});
+	return light_model;
+}
 
 void rotate_object(glm::mat4 &model, int axis, float velocity)
 {
@@ -410,8 +425,9 @@ int main()
 
 
 		lamp = glm::translate(lamp, light_position);
-		lamp = glm::scale(lamp, glm::vec3(1.0f,1.0f,1.0f));
+		lamp = glm::scale(lamp, glm::vec3(100.0f,100.0f,100.0f));
 		//back_position = glm::translate(back_position, back_ground_position);
+
 
 		
 		GLCall(glEnable(GL_DEPTH_TEST));
@@ -478,6 +494,11 @@ int main()
 						GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 
 						GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+					}
+
+					if (ROTATE_LIGHT)
+					{
+						lamp=rotateLight(lamp, P, Y ,5.0f);
 					}
 
 					//rotate_object(model, 2, 0.1f);
