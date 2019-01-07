@@ -54,7 +54,7 @@ bool ROTATE_LIGHT = false;
 		glm::vec3 light_position(5.0f,0.0f,2.0f);
 
 		glm::vec3 Object_position = { 5.0f, 0.0f, 0.0f };
-		glm::vec3 Object_color = {1.0f,0.5f,0.31f};
+		glm::vec3 Object_color = {1.0f,0.0f,0.0f};//1.0f,0.5f,0.31f
 		glm::vec3 Object_specular = { 0.5,0.5,0.5 };
 		float Object_shininess(32.0f);
 
@@ -551,7 +551,7 @@ int main()
 			glm::mat4 chess_piece = glm::mat4(1.0f);
 			glm::mat4 cube = glm::mat4(1.0f);
 			glm::mat4 camera = glm::mat4(1.0f);
-			glm::mat4 projection = glm::mat4(1.0f);;
+			glm::mat4 projection = glm::mat4(1.0f);
 			chess_piece  = glm::translate(chess_piece, glm::vec3(0.0f, 0.0f, 0.0f));
 			chess_piece  = glm::scale(chess_piece, glm::vec3(14.0f, 14.0f, 14.0f));//for nanosuits default 0.4
 
@@ -563,7 +563,7 @@ int main()
 			for (int P = 0; P < 361; P++)
 			{
 				//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
-				projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+				projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
 				/*std::cout << "first loop:" <<P<< std::endl;
 				std::cout <<" "<< back_position[0][0] <<" "<< back_position[0][1] <<" "<< back_position[0][2] <<" "<< back_position[0][3] <<" "<< std::endl;
@@ -655,7 +655,7 @@ int main()
 					Simple_shader.setVector3f("material.ambient", Object_color);
 					Simple_shader.setVector3f("material.diffuse", Object_color);
 					Simple_shader.setVector3f("material.specular", Object_specular);
-					Simple_shader.setFloat("material.shininess",Object_shininess);
+					Simple_shader.setFloat("material.shininess", Object_shininess);
 					Simple_shader.setVector3f("light.position", light_position);
 					Simple_shader.setVector3f("light.ambient", glm::vec3{ 0.2f,0.2f,0.2f });
 					Simple_shader.setVector3f("light.diffuse", glm::vec3{ 0.5f,0.5f,0.5f });
@@ -669,7 +669,6 @@ int main()
 					lightning_shader.setMatrix4fv("view_light", camera);
 					lightning_shader.setVector3f("LightColor", light_color);
 
-					GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Light));
 					GLCall(glBindVertexArray(VAO_Light));
 					GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 					GLCall(glBindVertexArray(0));
