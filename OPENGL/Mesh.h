@@ -17,9 +17,9 @@
 	{
 		glm::vec3 Position;
 		glm::vec3 Normal;
-		glm::vec2 TexCoords;
-		glm::vec3 Tangent;
-		glm::vec3 Bitangent;
+		//glm::vec2 TexCoords;
+		//glm::vec3 Tangent;
+		//glm::vec3 Bitangent;
 	};
 
 
@@ -38,6 +38,8 @@
 		std::vector<Texture> Textures;
 
 		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies, std::vector<Texture> textures);
+		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies);
+
 		void Draw(Shader shader,bool norm_key, bool texture_key, bool tangent_key);
 		
 	private:

@@ -31,10 +31,10 @@
 #define USE_BACKGROUND_IMAGE 0
 #define ROTATE_CAMERA 0
 #define LOAD_MODEL "mesh/nanosuit/chess/king.obj"
-#define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/cube_reference.obj"
+#define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
 bool STATIC_CAMERA_VIEW = false;
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
-bool ROTATE_LIGHT = true;
+bool ROTATE_LIGHT = false;
 
 
 //parameters
@@ -51,8 +51,101 @@ bool ROTATE_LIGHT = true;
 		glm::mat4 lamp, back_position;
 		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
 		glm::vec3 light_color = {1.0f,1.0f,1.0f};
-		glm::vec3 light_position(2.0f,0.0f,5.0f);
+		glm::vec3 light_position(5.0f,0.0f,2.0f);
+
+		glm::vec3 Object_position = { 5.0f, 0.0f, 0.0f };
 		glm::vec3 Object_color = {1.0f,0.5f,0.31f};
+		glm::vec3 Object_specular = { 0.5,0.5,0.5 };
+		float Object_shininess(32.0f);
+
+
+
+/*float cube_vertex[] = {
+			   -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+				0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+				0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+				0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			   -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			   -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+			   -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+				0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+				0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+				0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			   -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			   -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+			   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+			   -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+			   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+			   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+			   -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+			   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+				0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+				0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+				0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+				0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+				0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+				0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+			   -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+				0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+				0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+				0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+			   -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+			   -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+			   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+				0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+				0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+				0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+			   -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+			   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+		};*/
+
+		float cube_vertex[] = {
+		0.1f,	-0.1f,	-0.1f,	0.0f,	-1.0f,	-0.0f,
+		0.1f,	-0.1f,	0.1f,	0.0f,	-1.0f,	-0.0f,
+		-0.1f,	-0.1f,	0.1f,	0.0f,	-1.0f,	-0.0f,
+		-0.1f,	-0.1f,	-0.1f,  0.0f,	-1.0f,	-0.0f,
+		0.1f,	0.1f,	-0.1f,  0.0f,    1.0f,	0.0f,
+		-0.1f,	0.1f,	-0.1f,	0.0f,	1.0f,	0.0f,
+		-0.1f,	0.1f,	0.1f,	0.0f,	1.0f,	0.0f,
+		0.1f,	0.1f,	0.1f,	0.0f,	1.0f,	0.0f,
+		0.1f,	-0.1f,	-0.1f,	1.0f,	0.0f,	0.0f,
+		0.1f,	0.1f,	-0.1f,	1.0f,	0.0f,	0.0f,
+		0.1f,	0.1f,	0.1f,	1.0f,	0.0f,	0.0f,
+		0.1f,	-0.1f,	0.1f,	1.0f,	0.0f,	0.0f,
+		0.1f,	-0.1f,	0.1f,	-0.0f,	-0.0f,	1.0f,
+		0.1f,	0.1f,	0.1f,	-0.0f,	-0.0f,	1.0f,
+		-0.1f,	0.1f,	0.1f,	-0.0f,	-0.0f,	1.0f,
+		-0.1f,	-0.1f,	0.1f,	-0.0f,	-0.0f,	1.0f,
+		-0.1f,	-0.1f,	0.1f,	-1.0f,	-0.0f,	-0.0f,
+		-0.1f,	0.1f,	0.1f,	-1.0f,	-0.0f,	-0.0f,
+		-0.1f,	0.1f,	-0.1f,	-1.0f,	-0.0f,	-0.0f,
+		-0.1f,	-0.1f,	-0.1f,	-1.0f,	-0.0f,	-0.0f,
+		0.1f,	0.1f,	-0.1f,	0.0f,	0.0f,	-1.0f,
+		0.1f,	-0.1f,	-0.1f,	0.0f,	0.0f,	-1.0f,
+		-0.1f,	-0.1f,	-0.1f,	0.0f,	0.0f,	-1.0f,
+		-0.1f,	0.1f,	-0.1f,	0.0f,	0.0f,	-1.0f
+
+		};
+
+		unsigned int indicies_cube[] = {
+		 0,  1,  2,
+		 0,  2,  3,
+		 4,  5,  6,
+		 4,  6,  7,
+		 8,  9,  10,
+		 8,  10,  11,
+		 12,  13,  14,
+		 12,  14,  15,
+		 16,  17,  18,
+		 16,  18,  19,
+		 20,  21,  22,
+		 20,  22,  23
+		};
 
 //camera setup with default parameters
 struct CameraOrientation
@@ -206,11 +299,11 @@ void wasd_keyinput(GLFWwindow* window)
 	}
    if (glfwGetKey(window, GLFW_KEY_SPACE)== GLFW_PRESS)
    {
-	   Setup.camera_pose += camera_speed * Setup.camera_up;
+	   Setup.camera_pose += 2*camera_speed * Setup.camera_up;
    }
    if (glfwGetKey(window,GLFW_KEY_R)==GLFW_PRESS)
    {
-	   Setup.camera_pose -= camera_speed * Setup.camera_up;
+	   Setup.camera_pose -= 2*camera_speed * Setup.camera_up;
    }
 }
 
@@ -350,6 +443,26 @@ int main()
 		GLCall(glEnableVertexAttribArray(0));
 		GLCall(glBindVertexArray(0));
 
+		unsigned int VAO_cube, VBO_cube,EBO_cube;
+		GLCall(glGenVertexArrays(1,&VAO_cube));
+		GLCall(glGenBuffers(1,&VBO_cube));
+		GLCall(glGenBuffers(1, &EBO_cube));
+
+		GLCall(glBindVertexArray(VAO_cube));
+		GLCall(glBindBuffer(GL_ARRAY_BUFFER,VBO_cube));
+		GLCall(glBufferData(GL_ARRAY_BUFFER,sizeof(cube_vertex),cube_vertex,GL_STATIC_DRAW));
+		
+		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO_cube));
+		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies_cube), indicies_cube, GL_STATIC_DRAW));
+
+		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0));
+		GLCall(glEnableVertexAttribArray(0));
+		GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))));
+		GLCall(glEnableVertexAttribArray(1));
+		GLCall(glBindBuffer(GL_ARRAY_BUFFER,0));
+		GLCall(glBindVertexArray(0));
+
+
 		std::cout << "create Background buffers and layout!" << std::endl;
 		unsigned int VAO_Background, VBO_Background, EBO_Background;
 		GLCall(glGenVertexArrays(1, &VAO_Background));
@@ -361,10 +474,10 @@ int main()
 		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(back_indicies), back_indicies, GL_STATIC_DRAW));
 		GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Background));
 		GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(background), background, GL_STATIC_DRAW));
-		GLCall(glEnableVertexAttribArray(0));
 		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
-		GLCall(glEnableVertexAttribArray(1));
+		GLCall(glEnableVertexAttribArray(0));
 		GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
+		GLCall(glEnableVertexAttribArray(1));
 
 
 		unsigned int BK1;
@@ -403,8 +516,8 @@ int main()
 
 
 		//Model nanosuits(LOAD_MODEL);//untitled.obj
-		Model TrainingObject(LOAD_MODEL);
-		Model ReferenceObject(LOAD_CUBE_REFERENCE);
+		//Model TrainingObject(LOAD_MODEL);
+		//Model ReferenceObject(LOAD_CUBE_REFERENCE);
 		if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
 		{
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -425,7 +538,7 @@ int main()
 
 
 		lamp = glm::translate(lamp, light_position);
-		lamp = glm::scale(lamp, glm::vec3(100.0f,100.0f,100.0f));
+		lamp = glm::scale(lamp, glm::vec3(10.0f,10.0f,10.0f));
 		//back_position = glm::translate(back_position, back_ground_position);
 
 
@@ -435,11 +548,14 @@ int main()
 		while (!glfwWindowShouldClose(window))  //start the game
 		{
 
-			glm::mat4 chess_piece,cube, camera, projection;
+			glm::mat4 chess_piece = glm::mat4(1.0f);
+			glm::mat4 cube = glm::mat4(1.0f);
+			glm::mat4 camera = glm::mat4(1.0f);
+			glm::mat4 projection = glm::mat4(1.0f);;
 			chess_piece  = glm::translate(chess_piece, glm::vec3(0.0f, 0.0f, 0.0f));
 			chess_piece  = glm::scale(chess_piece, glm::vec3(14.0f, 14.0f, 14.0f));//for nanosuits default 0.4
 
-			cube = glm::translate(cube, glm::vec3(5.0f, 0.0f, 0.0f));
+			cube = glm::translate(cube, Object_position);
 			cube = glm::scale(cube, glm::vec3(10.0f, 10.0f, 10.0f));//for nanosuits default 0.4
 
 
@@ -516,25 +632,36 @@ int main()
 					//shader_program.setVector3f("LightColor",light_color);
 					//nanosuits.Draw(shader_program);
 
-					Simple_shader.use();
+				/*	Simple_shader.use();
 					Simple_shader.setMatrix4fv("model", chess_piece);
 					Simple_shader.setMatrix4fv("projection", projection);
 					Simple_shader.setMatrix4fv("view", camera);
-					Simple_shader.setVector3f("lightPos", light_position);
 					Simple_shader.setVector3f("viewPos", Setup.camera_pose);
-					Simple_shader.setVector3f("LightColor", light_color);
-					Simple_shader.setVector3f("ObjectColor", Object_color);
-					TrainingObject.Draw(Simple_shader);
-					Simple_shader.use();//called every time when draw a new object with the same shader 
+					Simple_shader.setVector3f("material.ambient", Object_color);
+					Simple_shader.setVector3f("material.diffuse", Object_color);
+					Simple_shader.setVector3f("material.specular", Object_specular);
+					Simple_shader.setFloat("material.shininess", Object_shininess);
+					Simple_shader.setVector3f("light.position", light_position);
+					Simple_shader.setVector3f("light.ambient", glm::vec3{0.2f,0.2f,0.2f});
+					Simple_shader.setVector3f("light.diffuse", glm::vec3{ 0.5f,0.5f,0.5f });
+					Simple_shader.setVector3f("light.specular", light_color);
+					TrainingObject.Draw(Simple_shader);*/
+					
+					/*Simple_shader.use();//called every time when draw a new object with the same shader 
 					Simple_shader.setMatrix4fv("model", cube);
 					Simple_shader.setMatrix4fv("projection", projection);
 					Simple_shader.setMatrix4fv("view", camera);
-					Simple_shader.setVector3f("lightPos", light_position);
 					Simple_shader.setVector3f("viewPos", Setup.camera_pose);
-					Simple_shader.setVector3f("LightColor", light_color);
-					Simple_shader.setVector3f("ObjectColor", Object_color);
+					Simple_shader.setVector3f("material.ambient", Object_color);
+					Simple_shader.setVector3f("material.diffuse", Object_color);
+					Simple_shader.setVector3f("material.specular", Object_specular);
+					Simple_shader.setFloat("material.shininess",Object_shininess);
+					Simple_shader.setVector3f("light.position", light_position);
+					Simple_shader.setVector3f("light.ambient", glm::vec3{ 0.2f,0.2f,0.2f });
+					Simple_shader.setVector3f("light.diffuse", glm::vec3{ 0.5f,0.5f,0.5f });
+					Simple_shader.setVector3f("light.specular", light_color);
 					ReferenceObject.Draw(Simple_shader);
-					GLCall(glBindVertexArray(0));
+					GLCall(glBindVertexArray(0));*/
 
 					lightning_shader.use();
 					lightning_shader.setMatrix4fv("model_light", lamp);
@@ -546,6 +673,30 @@ int main()
 					GLCall(glBindVertexArray(VAO_Light));
 					GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 					GLCall(glBindVertexArray(0));
+
+					//draw reference cube data, in order to check whether imported vertex data correctly generated by blender
+					glm::mat4 cube2 = glm::mat4(1.0f);
+					cube2 = glm::translate(cube2, Object_position);
+					cube2 = glm::scale(cube2, glm::vec3(5.0f));
+					Simple_shader.use();
+					Simple_shader.setMatrix4fv("model", cube2);
+					Simple_shader.setMatrix4fv("projection", projection);
+					Simple_shader.setMatrix4fv("view", camera);
+					Simple_shader.setVector3f("viewPos", Setup.camera_pose);
+					Simple_shader.setVector3f("material.ambient", Object_color);
+					Simple_shader.setVector3f("material.diffuse", Object_color);
+					Simple_shader.setVector3f("material.specular", Object_specular);
+					Simple_shader.setFloat("material.shininess", Object_shininess);
+					Simple_shader.setVector3f("light.position", light_position);
+					Simple_shader.setVector3f("light.ambient", glm::vec3{ 0.2f,0.2f,0.2f });
+					Simple_shader.setVector3f("light.diffuse", glm::vec3{ 0.5f,0.5f,0.5f });
+					Simple_shader.setVector3f("light.specular", light_color);
+					
+					//std::cout << "length of array[]: "<<sizeof(indicies_cube) << std::endl;
+					GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_cube));
+					GLCall(glBindVertexArray(VAO_cube));
+					GLCall(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+					//GLCall(glDrawArrays(GL_TRIANGLES, 0, 36);
 
 					GLCall(glfwSwapBuffers(window));
 					GLCall(glfwPollEvents());

@@ -2,7 +2,37 @@
 #include "Renderer.h"
 #include "stb_image.h"
 
+bool DEBUG = true;
 
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies)
+{
+	this->Vertecies = vertices;//it looks like there s no problem without "this" pointer
+	this->Indicies = indicies;
+
+	if (DEBUG)
+	{
+			std::cout << "vertices: " << std::endl;
+		for (int i = 0; i < vertices.size(); i++ )
+		{
+			std::cout << "	" << vertices[i].Position.x<< "	" << vertices[i].Position.y<< "	" << vertices[i].Position.z<< "	" 
+			<< vertices[i].Normal.x << "	" << vertices[i].Normal.y << "	" << vertices[i].Normal.z << "	"<< std::endl;
+		
+		}
+		std::cout << std::endl;
+
+
+		std::cout << "Indicies: "<<std::endl;
+		for (int i = 0; i < indicies.size(); i++)
+		{
+			std::cout << " " << indicies[i] << " ";
+
+		}
+		std::cout<<std::endl;
+	}
+
+
+	setupMesh();
+}
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies, std::vector<Texture> textures)
 {
@@ -46,11 +76,11 @@ void Mesh::setupMesh()
 	}
 
 		////vertex position
-		GLCall(glEnableVertexAttribArray(0));
 		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
+		GLCall(glEnableVertexAttribArray(0));
 		////normal
-		GLCall(glEnableVertexAttribArray(1));
 		GLCall(glVertexAttribPointer(1, 3, GL_INT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float))));
+		GLCall(glEnableVertexAttribArray(1));
 
 }
 
@@ -63,9 +93,9 @@ void Mesh::Draw(Shader shader, bool norm_key, bool texture_key, bool tangent_key
 
 	if (texture_key)
 	{
-		for (unsigned int i = 0; i < Textures.size(); i++ )
+		for (unsigned int i = 0; i < Textures.size(); i++)
 		{
-			GLCall(glActiveTexture(GL_TEXTURE0+i));
+			GLCall(glActiveTexture(GL_TEXTURE0 + i));
 			std::string number;
 			std::string name = Textures[i].type;
 			if (name == "texture_diffuse")
@@ -88,7 +118,7 @@ void Mesh::Draw(Shader shader, bool norm_key, bool texture_key, bool tangent_key
 	GLCall(glBindVertexArray(VAO));//VAO specifies which buffer to draw
 	GLCall(glDrawElements(GL_TRIANGLES,Indicies.size(),GL_UNSIGNED_INT,0));
 	GLCall(glBindVertexArray(0));
-	GLCall(glActiveTexture(GL_TEXTURE0););
+	//GLCall(glActiveTexture(GL_TEXTURE0););
 
 
 }
@@ -162,29 +192,29 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 			vertex.Normal.z = mesh->mNormals[i].z;
 		}
 
-		//process texture coordinates
-		if (mesh->mTextureCoords[0])
-		{
-			texture_key = true;
-			vertex.TexCoords.x= mesh->mTextureCoords[0][i].x;
-			vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
-		}
-		else
-			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+		////process texture coordinates
+		//if (mesh->mTextureCoords[0])
+		//{
+		//	texture_key = true;
+		//	vertex.TexCoords.x= mesh->mTextureCoords[0][i].x;
+		//	vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
+		//}
+		//else
+		//	vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 
-		//tangent
-		if (mesh->HasTangentsAndBitangents())
-		{
-			tangent_key = true;
-			vertex.Tangent.x = mesh->mTangents[i].x;
-			vertex.Tangent.y = mesh->mTangents[i].y;
-			vertex.Tangent.z = mesh->mTangents[i].z;
-		
-		//bitangent
-			vertex.Bitangent.x = mesh->mBitangents[i].x;
-			vertex.Bitangent.y = mesh->mBitangents[i].y;
-			vertex.Bitangent.z = mesh->mBitangents[i].z;
-		}
+		////tangent
+		//if (mesh->HasTangentsAndBitangents())
+		//{
+		//	tangent_key = true;
+		//	vertex.Tangent.x = mesh->mTangents[i].x;
+		//	vertex.Tangent.y = mesh->mTangents[i].y;
+		//	vertex.Tangent.z = mesh->mTangents[i].z;
+		//
+		////bitangent
+		//	vertex.Bitangent.x = mesh->mBitangents[i].x;
+		//	vertex.Bitangent.y = mesh->mBitangents[i].y;
+		//	vertex.Bitangent.z = mesh->mBitangents[i].z;
+		//}
 
 		verticies.push_back(vertex);
 
@@ -200,7 +230,9 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		}
 	}
 
-	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	if (mesh->mTextureCoords[0])
+	{
+		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 	// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
 	// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
 	// Same applies to other texture as the following list summarizes:
@@ -208,20 +240,22 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	// specular: texture_specularN
 	// normal: texture_normalN
 
-	// 1. diffuse maps
-	std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());//insert a vector into another vector, don't use push_back but insert. 
-	// 2. specular maps
-	std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-	// 3. normal maps
-	std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-	textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-	// 4. height maps
-	std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+		// 1. diffuse maps
+		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());//insert a vector into another vector, don't use push_back but insert. 
+		// 2. specular maps
+		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+		// 3. normal maps
+		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+		// 4. height maps
+		std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+		return Mesh(verticies, indicies, textures);//convert all the members from ASSIMP to Mesh class
+	}
 	
-	return Mesh(verticies, indicies, textures);//convert all the members from ASSIMP to Mesh class
+	return Mesh(verticies, indicies);
 
 
 	//process materials

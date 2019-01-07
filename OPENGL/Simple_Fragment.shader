@@ -15,35 +15,29 @@ struct Light {
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
-
 };
 
-
-
-uniform vec3 lightPos;
 uniform vec3 viewPos;
-uniform vec3 LightColor;
-uniform vec3 ObjectColor;
-
+uniform Material material;
+uniform Light light;
 
 void main()
 {
 
-	float ambientStrength = 0.1f;
-	vec3 ambient = ambientStrength * LightColor;
+	vec3 ambient = light.ambient*material.ambient;
 
 	vec3 norm = normalize(Normal);
-	vec3 lightDirection = normalize(lightPos - fragPosition);
+	vec3 lightDirection = normalize(light.position - fragPosition);
 
 	float diff = max(dot(norm, lightDirection), 0.0f);
-	vec3 diffuse = diff * LightColor;
+	vec3 diffuse = light.diffuse * (diff*material.diffuse);
 
 	float specularStrength = 0.5f;
 	vec3 viewDir = normalize(viewPos - fragPosition);
 	vec3 reflectLight = reflect(-lightDirection, norm);
 
-	float spec = pow(max(dot(viewDir,reflectLight), 0.0f), 256);
-	vec3 specular = spec * specularStrength * LightColor;
-	FragColor = vec4(ambient + diffuse + specular, 1)*vec4(ObjectColor,1.0f);
+	float spec = pow(max(dot(viewDir,reflectLight), 0.0f), material.shininess);
+	vec3 specular = light.specular *( spec * material.specular);
+	FragColor = vec4(ambient + diffuse + specular, 1);
 
 }
