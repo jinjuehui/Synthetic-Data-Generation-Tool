@@ -16,6 +16,14 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+//image output
+//#include <IL/il.h>/
+#include <IL/devil_internal_exports.h>
+//#include <IL/ilu.h>
+#include <IL/ilut.h>
+//#include <IL/ilut_config.h>
+
+
 //self defined headers
 #include "Renderer.h"
 #include "VertexBuffer.h"
@@ -353,6 +361,19 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 }
 
+
+void takeScreenshot(const char* screenshotFile)
+{
+	ILuint imageID = ilGenImage();
+	ilBindImage(imageID);
+	ilutGLScreen();
+	ilEnable(IL_FILE_OVERWRITE);
+	ilSaveImage(screenshotFile);
+	ilDeleteImage(imageID);
+	//printf("Screenshot saved to: %s\n", screenshotFile);
+}
+
+
 float verticesLight[] = {
 	-0.01f, -0.01f, -0.01f,
 	 0.01f, -0.01f, -0.01f,
@@ -499,6 +520,7 @@ int main()
 // 
 // 	glfwMakeContextCurrent(window[0]);
 
+
 		unsigned int VAO_Light, VBO_Light;
 		std::cout << "create Light buffers and layout!" << std::endl;
 		GLCall(glGenVertexArrays(1, &VAO_Light));
@@ -608,7 +630,6 @@ int main()
 		lamp = glm::scale(lamp, glm::vec3(10.0f,10.0f,10.0f));
 		//back_position = glm::translate(back_position, back_ground_position);
 
-
 		
 		GLCall(glEnable(GL_DEPTH_TEST));
 		std::cout << "rendering..." << std::endl;
@@ -625,6 +646,7 @@ int main()
 
 			cube = glm::translate(cube, glm::vec3(3.0f,0.0f,0.0f));
 			cube = glm::scale(cube, glm::vec3(5.0f, 5.0f, 5.0f));//for nanosuits default 0.4
+
 
 
 
@@ -710,9 +732,9 @@ int main()
 						multiple_lightning_shader.setMatrix4fv("projection", projection);
 						multiple_lightning_shader.setMatrix4fv("model", cube);
 						
-						dirLight.ambient = glm::vec3{0.05f,0.05f,0.05f};
-						dirLight.diffuse= glm::vec3{ 0.4f,0.4f,0.4f };
-						dirLight.specular = glm::vec3{ 0.5f,0.5f,0.5f };
+						dirLight.ambient = glm::vec3{0.15f,0.15f,0.15f};
+						dirLight.diffuse= glm::vec3{0.4f,0.4f,0.4f};
+						dirLight.specular = glm::vec3{0.5f,0.5f,0.5f};
 
 						multiple_lightning_shader.setVector3f("directionlight.direction", dirLight.light_direction);
 						multiple_lightning_shader.setVector3f("directionlight.ambient", dirLight.ambient);
@@ -911,9 +933,18 @@ int main()
 						lightning_shader.setMatrix4fv("model_light", lamp);
 						GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 
+
 					}
 
-	
+// 					iluInit();
+ 					ilInit();
+					ilutRenderer(ILUT_OPENGL);
+
+					std::string number = std::to_string(Y+P*10);
+					std::string picture = "data/image.png";
+					picture.insert(10, number);
+					takeScreenshot(picture.c_str());
+
 
 					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());
