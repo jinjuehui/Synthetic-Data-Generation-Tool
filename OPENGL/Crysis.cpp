@@ -684,7 +684,7 @@ int main()
 					Simple_shader.setVector3f("light.ambient", lightning.ambient);
 					Simple_shader.setVector3f("light.diffuse", lightning.diffuse);
 					Simple_shader.setVector3f("light.specular", lightning.light_color);
-					TrainingObject.Draw(Simple_shader);
+					//TrainingObject.Draw(Simple_shader);
 
 					multiple_lightning_shader.use();
 
@@ -764,7 +764,9 @@ int main()
 					
 					ReferenceObject.Draw(multiple_lightning_shader);
 
-
+					multiple_lightning_shader.use();
+					multiple_lightning_shader.setMatrix4fv("model", chess_piece);
+					TrainingObject.Draw(multiple_lightning_shader);
 
 
 					//Simple_shader.use();//called every time when draw a new object with the same shader 
@@ -813,19 +815,22 @@ int main()
 					glm::mat4 cube2 = glm::mat4(1.0f);
 					cube2 = glm::translate(cube2, glm::vec3{4.0f,0.0f,0.0f});
 					cube2 = glm::scale(cube2, glm::vec3(5.0f));
-					Simple_shader.use();
-					Simple_shader.setMatrix4fv("model", cube2);
-					Simple_shader.setMatrix4fv("projection", projection);
-					Simple_shader.setMatrix4fv("view", camera);
-					Simple_shader.setVector3f("viewPos", Setup.camera_pose);
-					Simple_shader.setVector3f("material.ambient", Object_color);
-					Simple_shader.setVector3f("material.diffuse", Object_color);
-					Simple_shader.setVector3f("material.specular", Object_specular);
-					Simple_shader.setFloat("material.shininess", Object_shininess);
-					Simple_shader.setVector3f("light.position", light_position);
-					Simple_shader.setVector3f("light.ambient", lightning.ambient);
-					Simple_shader.setVector3f("light.diffuse", lightning.diffuse);
-					Simple_shader.setVector3f("light.specular", lightning.light_color);
+					multiple_lightning_shader.use();
+					multiple_lightning_shader.setMatrix4fv("model", cube2);
+
+// 					Simple_shader.use();
+// 					Simple_shader.setMatrix4fv("model", cube2);
+// 					Simple_shader.setMatrix4fv("projection", projection);
+// 					Simple_shader.setMatrix4fv("view", camera);
+// 					Simple_shader.setVector3f("viewPos", Setup.camera_pose);
+// 					Simple_shader.setVector3f("material.ambient", Object_color);
+// 					Simple_shader.setVector3f("material.diffuse", Object_color);
+// 					Simple_shader.setVector3f("material.specular", Object_specular);
+// 					Simple_shader.setFloat("material.shininess", Object_shininess);
+// 					Simple_shader.setVector3f("light.position", light_position);
+// 					Simple_shader.setVector3f("light.ambient", lightning.ambient);
+// 					Simple_shader.setVector3f("light.diffuse", lightning.diffuse);
+// 					Simple_shader.setVector3f("light.specular", lightning.light_color);
 					
 					//std::cout << "length of array[]: "<<sizeof(indicies_cube) << std::endl;
 					GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_cube));
