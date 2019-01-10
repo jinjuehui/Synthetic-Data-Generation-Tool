@@ -27,8 +27,9 @@
 #include <iostream>
 
 
+
 //Triggers and Keys
-#define USE_BACKGROUND_IMAGE 0
+#define USE_BACKGROUND_IMAGE 1
 #define ROTATE_CAMERA 0
 #define LOAD_MODEL "mesh/nanosuit/chess/king.obj"
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
@@ -36,6 +37,31 @@ bool STATIC_CAMERA_VIEW = false;
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
 
+
+struct light 
+{
+	glm::vec3 light_color = {1.0f,1.0f,1.0f};
+	glm::vec3 light_direction = { -0.2,-1.0f,-0.3f };
+	glm::vec3 light_position = {5.0f,0.0f,2.0f};
+
+	glm::vec3 ambient = { 0.2f,0.2f,0.2f };
+	glm::vec3 diffuse = {0.1f,0.1f,0.1f};
+	glm::vec3 specular = light_color;
+
+	float constantoffset = 1.0f;
+	float linearfactor = 0.09f;
+	float quadraticfactor = 0.032f;
+
+	float cutoff = glm::cos(glm::radians(12.5f));
+	float outercutoff = glm::cos(glm::radians(15.0f));
+} dirLight, pointLight, spotLight,lightning;
+
+glm::vec3 light_positions[] =
+{	glm::vec3(5.0f,0.0f,1.0f),
+	glm::vec3(10.0f,2.0f,3.0f),
+	glm::vec3(6.0f,4.0f,15.0f),
+	glm::vec3(-2.0f,10.0f,7.0f)
+};
 
 //parameters
 	//Screen Parameters:
@@ -49,15 +75,15 @@ bool ROTATE_LIGHT = false;
 		float yaw(-90.0f), pitch(0.0f), fov(45.0f);
 	//Drawing object	
 		glm::mat4 lamp, back_position;
+		
+
 		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
-		glm::vec3 light_color = {1.0f,1.0f,1.0f};
 		glm::vec3 light_position(5.0f,0.0f,2.0f);
 
 		glm::vec3 Object_position = { 5.0f, 0.0f, 0.0f };
 		glm::vec3 Object_color = {1.0f,0.0f,0.0f};//1.0f,0.5f,0.31f
 		glm::vec3 Object_specular = { 0.5,0.5,0.5 };
 		float Object_shininess(32.0f);
-
 
 
 /*float cube_vertex[] = {
@@ -283,11 +309,11 @@ void wasd_keyinput(GLFWwindow* window)
 	float camera_speed =5.0f*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		Setup.camera_pose += camera_speed * Setup.camera_front;
+		Setup.camera_pose += camera_speed * glm::normalize(Setup.camera_front);
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		Setup.camera_pose -= camera_speed * Setup.camera_front;
+		Setup.camera_pose -= camera_speed * glm::normalize(Setup.camera_front);
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
@@ -299,13 +325,13 @@ void wasd_keyinput(GLFWwindow* window)
 	}
    if (glfwGetKey(window, GLFW_KEY_SPACE)== GLFW_PRESS)
    {
-	   Setup.camera_pose += 2*camera_speed * Setup.camera_up;
+	   Setup.camera_pose += camera_speed * glm::normalize(Setup.camera_up);
    }
    if (glfwGetKey(window,GLFW_KEY_R)==GLFW_PRESS)
    {
-	   Setup.camera_pose -= 2*camera_speed * Setup.camera_up;
+	   Setup.camera_pose -= camera_speed * glm::normalize(Setup.camera_up);
    }
-}
+};
 
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod)
@@ -398,7 +424,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//Why it doesn't work with 2,3
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//if core_profile is chosen, the vertex array object need to be manually created
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Nanosuits", NULL, NULL);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Rendering", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -533,7 +559,7 @@ int main()
 
 		Shader lightning_shader("Lightning_vertex.shader", "Lightning_fragment.shader");
 
-
+		Shader multiple_lightning_shader("multipleLightSource_vertex.shader","multipleLightSource_fragment.shader");
 
 
 
@@ -629,7 +655,7 @@ int main()
 					//shader_program.setMatrix4fv("view", camera);
 					//shader_program.setVector3f("lightPos", light_position);
 					//shader_program.setVector3f("viewPos", Setup.camera_pose);
-					//shader_program.setVector3f("LightColor",light_color);
+					//shader_program.setVector3f("LightColor",lightning.light_color);
 					//nanosuits.Draw(shader_program);
 
 					Simple_shader.use();
@@ -641,37 +667,147 @@ int main()
 					Simple_shader.setVector3f("material.diffuse", Object_color);
 					Simple_shader.setVector3f("material.specular", Object_specular);
 					Simple_shader.setFloat("material.shininess", Object_shininess);
+					Simple_shader.setBool("SIMPLE_LIGHTNING",true);
+					//for direction Light:
+					Simple_shader.setVector3f("light.direction",glm::vec3{-0.2,-1.0f,0.3f});
+					//for point Light:
+					Simple_shader.setFloat("light.constantoffset",1.0f);
+					Simple_shader.setFloat("light.ambient", 0.09f);
+					Simple_shader.setFloat("light.constantoffset", 0.032f);
+					//for flash light(spotlight located at the viewer's position:
+					//Simple_shader.setVector3f("light.position",Setup.pose);
+					//Simple_shader.setVector3f("light.direction",camera.front);
+					//Simple_shader.setVector3f("light.cutoff",glm::cos(glm::radians(12.5f)));
+
+					//end
 					Simple_shader.setVector3f("light.position", light_position);
-					Simple_shader.setVector3f("light.ambient", glm::vec3{0.2f,0.2f,0.2f});
-					Simple_shader.setVector3f("light.diffuse", glm::vec3{ 0.5f,0.5f,0.5f });
-					Simple_shader.setVector3f("light.specular", light_color);
+					Simple_shader.setVector3f("light.ambient", lightning.ambient);
+					Simple_shader.setVector3f("light.diffuse", lightning.diffuse);
+					Simple_shader.setVector3f("light.specular", lightning.light_color);
 					TrainingObject.Draw(Simple_shader);
+
+					multiple_lightning_shader.use();
+
+					multiple_lightning_shader.setMatrix4fv("view", camera);
+					multiple_lightning_shader.setVector3f("viewPos", Setup.camera_pose);
+					multiple_lightning_shader.setMatrix4fv("projection", projection);
+					multiple_lightning_shader.setMatrix4fv("model", cube);
 					
-					Simple_shader.use();//called every time when draw a new object with the same shader 
-					Simple_shader.setMatrix4fv("model", cube);
-					Simple_shader.setMatrix4fv("projection", projection);
-					Simple_shader.setMatrix4fv("view", camera);
-					Simple_shader.setVector3f("viewPos", Setup.camera_pose);
-					Simple_shader.setVector3f("material.ambient", Object_color);
-					Simple_shader.setVector3f("material.diffuse", Object_color);
-					Simple_shader.setVector3f("material.specular", Object_specular);
-					Simple_shader.setFloat("material.shininess", Object_shininess);
-					Simple_shader.setVector3f("light.position", light_position);
-					Simple_shader.setVector3f("light.ambient", glm::vec3{ 0.2f,0.2f,0.2f });
-					Simple_shader.setVector3f("light.diffuse", glm::vec3{ 0.5f,0.5f,0.5f });
-					Simple_shader.setVector3f("light.specular", light_color);
-					ReferenceObject.Draw(Simple_shader);
-					GLCall(glBindVertexArray(0));
+					dirLight.ambient = glm::vec3{0.05f,0.05f,0.05f};
+					dirLight.diffuse= glm::vec3{ 0.4f,0.4f,0.4f };
+					dirLight.specular = glm::vec3{ 0.5f,0.5f,0.5f };
+
+					multiple_lightning_shader.setVector3f("directionlight.direction", dirLight.light_direction);
+					multiple_lightning_shader.setVector3f("directionlight.ambient", dirLight.ambient);
+					multiple_lightning_shader.setVector3f("directionlight.diffuse", dirLight.diffuse);
+					multiple_lightning_shader.setVector3f("directionlight.specular", dirLight.specular);
+
+					//std::cout << "number of the light sources: " << (int)((sizeof(light_positions) / sizeof(glm::vec3))) << std::endl;
+					
+					pointLight.ambient = glm::vec3{0.05f,0.05f,0.05f};
+					pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
+					pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f};
+
+					for (int i=0; i<(int)((sizeof(light_positions)/sizeof(glm::vec3)));i++)
+					{
+
+						std::string number = std::to_string(i);
+						std::string uniform_position = "pointlights[].position";
+						std::string uniform_ambient = "pointlights[].ambient";
+						std::string uniform_diffuse = "pointlights[].diffuse";
+						std::string uniform_specular = "pointlights[].specular";
+						std::string uniform_constantoffset = "pointlights[].constantoffset";
+						std::string uniform_linearfactor = "pointlights[].linearfactor";
+						std::string uniform_quadraticfactor = "pointlights[].quadraticfactor";
+						uniform_position.insert(12, number);
+						uniform_ambient.insert(12, number);
+						uniform_diffuse.insert(12, number);
+						uniform_specular.insert(12, number);
+						uniform_constantoffset.insert(12, number);
+						uniform_linearfactor.insert(12, number);
+						uniform_quadraticfactor.insert(12, number);
+
+						//std::cout << uniform_position << std::endl;
+
+
+						multiple_lightning_shader.setVector3f(uniform_position, light_positions[i]);
+						multiple_lightning_shader.setVector3f(uniform_ambient, pointLight.ambient);
+						multiple_lightning_shader.setVector3f(uniform_diffuse, pointLight.diffuse);
+						multiple_lightning_shader.setVector3f(uniform_specular, pointLight.specular);
+						multiple_lightning_shader.setFloat(uniform_constantoffset, pointLight.constantoffset);
+						multiple_lightning_shader.setFloat(uniform_linearfactor, pointLight.linearfactor);
+						multiple_lightning_shader.setFloat(uniform_quadraticfactor, pointLight.quadraticfactor);
+
+					}
+
+					spotLight.ambient = glm::vec3{0.0f,0.0f,0.0f};
+					spotLight.diffuse = glm::vec3{ 1.0f,1.0f,1.0f};
+					spotLight.specular = glm::vec3{ 1.0f,1.0f,1.0f};
+
+
+					multiple_lightning_shader.setVector3f("spotlight.position",Setup.camera_pose);
+					multiple_lightning_shader.setVector3f("spotlight.direction", Setup.camera_front);
+					multiple_lightning_shader.setVector3f("spotlight.ambient", spotLight.ambient);
+					multiple_lightning_shader.setVector3f("spotlight.diffuse", spotLight.diffuse);
+					multiple_lightning_shader.setVector3f("spotlight.specular", spotLight.specular);
+					multiple_lightning_shader.setFloat("spotlight.constantoffset", spotLight.constantoffset);
+					multiple_lightning_shader.setFloat("spotlight.linearfactor", spotLight.linearfactor);
+					multiple_lightning_shader.setFloat("spotlight.quadraticfactor", spotLight.quadraticfactor);
+					multiple_lightning_shader.setFloat("spotlight.cutoff", spotLight.cutoff);
+					multiple_lightning_shader.setFloat("spotlight.outercutoff", spotLight.outercutoff);
+
+
+					multiple_lightning_shader.setVector3f("material.ambient", Object_color);
+					multiple_lightning_shader.setVector3f("material.diffuse", Object_color);
+					multiple_lightning_shader.setVector3f("material.specular", Object_specular);
+					multiple_lightning_shader.setFloat("material.shininess", Object_shininess);
+					
+					ReferenceObject.Draw(multiple_lightning_shader);
+
+
+
+
+					//Simple_shader.use();//called every time when draw a new object with the same shader 
+					//Simple_shader.setMatrix4fv("model", cube);
+					//Simple_shader.setMatrix4fv("projection", projection);
+					//Simple_shader.setMatrix4fv("view", camera);
+					//Simple_shader.setVector3f("viewPos", Setup.camera_pose);
+					//Simple_shader.setVector3f("material.ambient", Object_color);
+					//Simple_shader.setVector3f("material.diffuse", Object_color);
+					//Simple_shader.setVector3f("material.specular", Object_specular);
+					//Simple_shader.setFloat("material.shininess", Object_shininess);
+					//Simple_shader.setVector3f("light.position", light_position);
+					//Simple_shader.setVector3f("light.ambient", lightning.ambient);
+					//Simple_shader.setVector3f("light.diffuse", lightning.diffuse);
+					//Simple_shader.setVector3f("light.specular", lightning.light_color);
+					//ReferenceObject.Draw(Simple_shader);
+					//GLCall(glBindVertexArray(0));
+
+// 					lightning_shader.use();
+// 					lightning_shader.setMatrix4fv("model_light", lamp);
+// 					lightning_shader.setMatrix4fv("projection_light", projection);
+// 					lightning_shader.setMatrix4fv("view_light", camera);
+// 					lightning_shader.setVector3f("LightColor", lightning.light_color);
+// 
+// 					GLCall(glBindVertexArray(VAO_Light));
+// 					GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+// 					GLCall(glBindVertexArray(0));
 
 					lightning_shader.use();
-					lightning_shader.setMatrix4fv("model_light", lamp);
 					lightning_shader.setMatrix4fv("projection_light", projection);
 					lightning_shader.setMatrix4fv("view_light", camera);
-					lightning_shader.setVector3f("LightColor", light_color);
-
+					lightning_shader.setVector3f("LightColor", lightning.light_color);
 					GLCall(glBindVertexArray(VAO_Light));
-					GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
-					GLCall(glBindVertexArray(0));
+					for (int i=0; i<sizeof(light_positions)/sizeof(glm::vec3);i++)
+					{
+						lamp = glm::mat4(1.0f);
+						lamp = glm::translate(lamp, light_positions[i]);
+						lamp = glm::scale(lamp, glm::vec3{ 5.0f,5.0f,5.0f });
+						lightning_shader.setMatrix4fv("model_light", lamp);
+						GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+
+
+					}
 
 					//draw reference cube data, in order to check whether imported vertex data correctly generated by blender
 					glm::mat4 cube2 = glm::mat4(1.0f);
@@ -687,9 +823,9 @@ int main()
 					Simple_shader.setVector3f("material.specular", Object_specular);
 					Simple_shader.setFloat("material.shininess", Object_shininess);
 					Simple_shader.setVector3f("light.position", light_position);
-					Simple_shader.setVector3f("light.ambient", glm::vec3{ 0.2f,0.2f,0.2f });
-					Simple_shader.setVector3f("light.diffuse", glm::vec3{ 0.5f,0.5f,0.5f });
-					Simple_shader.setVector3f("light.specular", light_color);
+					Simple_shader.setVector3f("light.ambient", lightning.ambient);
+					Simple_shader.setVector3f("light.diffuse", lightning.diffuse);
+					Simple_shader.setVector3f("light.specular", lightning.light_color);
 					
 					//std::cout << "length of array[]: "<<sizeof(indicies_cube) << std::endl;
 					GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_cube));

@@ -128,6 +128,8 @@
     <None Include="FragmentShader.shader" />
     <None Include="Lightning_fragment.shader" />
     <None Include="Lightning_vertex.shader" />
+    <None Include="multipleLightSource_fragment.shader" />
+    <None Include="multipleLightSource_vertex.shader" />
     <None Include="Simple_Fragment.shader" />
     <None Include="Simple_vertex.shader" />
     <None Include="VertexShader.shader" />
