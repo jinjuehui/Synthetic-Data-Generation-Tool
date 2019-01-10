@@ -31,15 +31,30 @@
 
 
 //Triggers and Keys
-#define LOAD_MODEL "mesh/nanosuit/chess/king.obj"
+#define LOAD_MODEL "mesh/nanosuit/chess/queen.obj"
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
 #define USE_BACKGROUND_IMAGE true
-#define ROTATE_CAMERA false
+#define ROTATE_CAMERA true
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
-bool STATIC_CAMERA_VIEW = false;
+bool STATIC_CAMERA_VIEW = true;
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
+
+//parameters
+//Screen Parameters:
+const unsigned int SCR_WIDTH = 1024;
+const unsigned int SCR_HEIGHT = 768;
+//System Time:
+float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
+//User Input Mouse and cursor
+bool firstMouse(true);
+double lastX(SCR_WIDTH / 2), lastY(SCR_HEIGHT / 2);
+float yaw(-90.0f), pitch(0.0f), fov(45.0f);
+//Drawing object	
+glm::mat4 lamp, back_position;
+glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
+glm::vec3 light_position(1.0f,0.0f,2.0f);
 
 
 struct light 
@@ -78,28 +93,6 @@ struct Object
 	glm::vec3 specular{0.7f,0.7f,0.7f};
 	float shininess = 0.25f;
 }train_object,reference_object;
-
-//parameters
-	//Screen Parameters:
-		const unsigned int SCR_WIDTH = 1024;
-		const unsigned int SCR_HEIGHT = 768;
-	//System Time:
-		float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
-	//User Input Mouse and cursor
-		bool firstMouse(true);
-		double lastX(SCR_WIDTH / 2), lastY(SCR_HEIGHT / 2);
-		float yaw(-90.0f), pitch(0.0f), fov(45.0f);
-	//Drawing object	
-		glm::mat4 lamp, back_position;
-		
-
-		glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
-		glm::vec3 light_position(1.0f,0.0f,2.0f);
-
-		glm::vec3 Object_position = { 5.0f, 0.0f, 0.0f };
-		glm::vec3 Object_color = {1.0f,0.0f,0.0f};//1.0f,0.5f,0.31f
-		glm::vec3 Object_specular = { 0.5,0.5,0.5 };
-		float Object_shininess(32.0f);
 
 
 /*float cube_vertex[] = {
