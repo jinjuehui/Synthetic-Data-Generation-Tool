@@ -207,6 +207,7 @@ CameraOrientation rotateCamera(int P, int Y,float distance)
 	glm::vec3 camera_pose_xz = glm::vec3(setup.camera_pose.x, 0.0f, setup.camera_pose.z);
 	setup.camera_front = -setup.camera_pose;
 	setup.camera_up;
+
 	if ((0 < P&&P <= 90) || (180 <= P && P <= 270) || P == 360)
 	{
 		setup.camera_up = glm::normalize(glm::cross(glm::cross(setup.camera_pose, camera_pose_xz), setup.camera_front));
@@ -345,8 +346,11 @@ void wasd_keyinput(GLFWwindow* window)
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{	
+		std::cout << "escape pressed!" << std::endl;
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
-
+		//glfwTerminate();
+	}
 }
 
 float verticesLight[] = {
@@ -419,11 +423,17 @@ unsigned int back_indicies[] =
 //3. optimize all of the VAO and VBOs
 
 
+//void window_size_callback(GLFWwindow* window, int width, int height)
+//{
+//	glfwGetWindowSize(window, &width, &height);
+//}
+
+
 
 int main()
 {
 	//0.create window====================================================================
-	GLFWwindow* window;
+	GLFWwindow* window[2];
 
 	//initialize glfw
 	if (!glfwInit())
@@ -432,8 +442,11 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//Why it doesn't work with 2,3
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//if core_profile is chosen, the vertex array object need to be manually created
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Rendering", NULL, NULL);
-	if (!window)
+	window[0] = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, u8"Rendering 正在进行渲染...", NULL, NULL);
+	//window[1] = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, u8"GroundTruth 正在进行渲染...", NULL, NULL);
+
+	//setting up the first window
+	if (!window[0])
 	{
 		glfwTerminate();
 		exit(EXIT_FAILURE);
@@ -443,27 +456,48 @@ int main()
 		std::cout << "Window creation succeed!" << std::endl;
 	}
 
-	glfwMakeContextCurrent(window);
-
-	if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
-	{
-		std::cout << "use ESC to exit the Window" << std::endl;
-		glfwSetKeyCallback(window, key_callback);
-	}
+	glfwMakeContextCurrent(window[0]);
+	//glfwSetWindowSizeCallback(window[0], window_size_callback);
+	std::cout << "use ESC to exit the Window" << std::endl;
+	glfwSetKeyCallback(window[0], key_callback);
+	glfwSetWindowPos(window[0], 500, 500);
 	
-		if (glewInit() != GLEW_OK)
-		{
-			std::cout << "initialize glew failed" << std::endl;
-		}
-		else
-		{
-			std::cout << "glew initialization succeed!" << std::endl;
-		}
+	if (glewInit() != GLEW_OK)
+	{
+		std::cout << "initialize glew failed" << std::endl;
+	}
+	else
+	{
+		std::cout << "glew initialization succeed!" << std::endl;
+	}
 
-		int nrAttributes;
-		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-
-
+// 	//setting up the second window
+// 	if (!window[1])
+// 	{
+// 		glfwTerminate();
+// 		exit(EXIT_FAILURE);
+// 	}
+// 	else
+// 	{
+// 		std::cout << "Window creation succeed!" << std::endl;
+// 	}
+// 
+// 	glfwMakeContextCurrent(window[1]);
+// 	//glfwSetWindowSizeCallback(window[1], window_size_callback);
+// 	std::cout << "use ESC to exit the Window" << std::endl;
+// 	glfwSetKeyCallback(window[1], key_callback);
+// 	glfwSetWindowPos(window[1], 1524, 500);
+// 	if (glewInit() != GLEW_OK)
+// 	{
+// 		std::cout << "initialize glew failed" << std::endl;
+// 	}
+// 	else
+// 	{
+// 		std::cout << "glew initialization succeed!" << std::endl;
+// 	}
+// 
+// 
+// 	glfwMakeContextCurrent(window[0]);
 
 		unsigned int VAO_Light, VBO_Light;
 		std::cout << "create Light buffers and layout!" << std::endl;
@@ -512,8 +546,6 @@ int main()
 		GLCall(glEnableVertexAttribArray(0));
 		GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
 		GLCall(glEnableVertexAttribArray(1));
-
-
 		unsigned int BK1;
 		GLCall(glGenTextures(1, &BK1));
 		GLCall(glBindTexture(GL_TEXTURE_2D, BK1));
@@ -533,6 +565,7 @@ int main()
 			{
 				GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, background_width, background_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
 				GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+
 			}
 			else
 			{
@@ -554,7 +587,7 @@ int main()
 		Model ReferenceObject(LOAD_CUBE_REFERENCE);
 		if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
 		{
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			glfwSetInputMode(window[0], GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			std::cout << "user Input Enabled.." << std::endl;
 			std::cout << "now you can move the camera view through keys: W,A,S,D " << std::endl;
 			std::cout << "mouse to zoom.." << std::endl;
@@ -579,8 +612,9 @@ int main()
 		
 		GLCall(glEnable(GL_DEPTH_TEST));
 		std::cout << "rendering..." << std::endl;
-		while (!glfwWindowShouldClose(window))  //start the game
+		while (!glfwWindowShouldClose(window[0]))  //start the game
 		{
+			//GLCall(glViewport(0,0,1024,768));
 
 			glm::mat4 chess_piece = glm::mat4(1.0f);
 			glm::mat4 cube = glm::mat4(1.0f);
@@ -609,14 +643,14 @@ int main()
 				{
 					if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
 					{
-						wasd_keyinput(window);
-						glfwSetCursorPosCallback(window, mouse_callback);
-						glfwSetScrollCallback(window, scroll_callback);
+						wasd_keyinput(window[0]);
+						glfwSetCursorPosCallback(window[0], mouse_callback);
+						glfwSetScrollCallback(window[0], scroll_callback);
 					}
 					float currentFrame = glfwGetTime();
 					deltaTime = currentFrame - lastFrame;
 					lastFrame = currentFrame;
-					if (STATIC_CAMERA_VIEW==true)
+					if (STATIC_CAMERA_VIEW == true)
 					{
 						float distance = 20.0f;
 
@@ -644,6 +678,7 @@ int main()
 						GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 
 						GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+
 					}
 
 					if (ROTATE_LIGHT)
@@ -880,7 +915,7 @@ int main()
 
 	
 
-					GLCall(glfwSwapBuffers(window));
+					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());
 
 				}//<---Y loop
