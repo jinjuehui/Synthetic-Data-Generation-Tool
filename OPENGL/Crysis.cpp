@@ -883,13 +883,14 @@ int main()
 					GLCall(glfwSwapBuffers(window));
 					GLCall(glfwPollEvents());
 
-				}
-			}
+				}//<---Y loop
+			
+			}//<--P loop
+			glfwTerminate();//destroy glcontext
 
-		}
-		glfwTerminate();//destroy glcontext
+		}//<--while loop
 		exit(EXIT_SUCCESS);
 		return 0;
 
 
-	}
+	}//<--end of main
