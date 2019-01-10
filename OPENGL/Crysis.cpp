@@ -8,6 +8,8 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
+#include <gtc/random.hpp>
+
 
 //OpenGL mesh loader
 #include <assimp/Importer.hpp>
@@ -57,10 +59,10 @@ struct light
 } dirLight, pointLight, spotLight,lightning;
 
 glm::vec3 light_positions[] =
-{	glm::vec3(5.0f,0.0f,1.0f),
-	glm::vec3(10.0f,2.0f,3.0f),
-	glm::vec3(6.0f,4.0f,15.0f),
-	glm::vec3(-2.0f,10.0f,7.0f)
+{	glm::ballRand(10.0),
+	glm::ballRand(15.0),
+	glm::ballRand(20.0),
+	glm::ballRand(50.0)
 };
 
 //parameters
@@ -710,7 +712,7 @@ int main()
 
 					for (int i=0; i<(int)((sizeof(light_positions)/sizeof(glm::vec3)));i++)
 					{
-
+						light_positions[i] = glm::ballRand(15.0f);
 						std::string number = std::to_string(i);
 						std::string uniform_position = "pointlights[].position";
 						std::string uniform_ambient = "pointlights[].ambient";
@@ -804,7 +806,7 @@ int main()
 					{
 						lamp = glm::mat4(1.0f);
 						lamp = glm::translate(lamp, light_positions[i]);
-						lamp = glm::scale(lamp, glm::vec3{ 5.0f,5.0f,5.0f });
+						lamp = glm::scale(lamp, glm::vec3{ 10.0f,10.0f,10.0f });
 						lightning_shader.setMatrix4fv("model_light", lamp);
 						GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 
