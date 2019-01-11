@@ -17,12 +17,10 @@
 #include <assimp/postprocess.h>
 
 //image output
-//#include <IL/il.h>/
 #include <IL/devil_internal_exports.h>
-//#include <IL/ilu.h>
 #include <IL/ilut.h>
-//#include <IL/ilut_config.h>
 
+#include <FreeImage.h>
 
 //self defined headers
 #include "Renderer.h"
@@ -44,7 +42,7 @@
 #define USE_BACKGROUND_IMAGE true
 #define ROTATE_CAMERA true
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
-#define USE_SIMPLE_LIGHTNING_MODEL true
+#define USE_SIMPLE_LIGHTNING_MODEL false
 bool STATIC_CAMERA_VIEW = true;
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
@@ -373,6 +371,21 @@ void takeScreenshot(const char* screenshotFile)
 	//printf("Screenshot saved to: %s\n", screenshotFile);
 }
 
+void screenshot_freeimage(const char* screenshotFile, int width, int height ) {
+
+	// Make the BYTE array, factor of 3 because it's RBG.
+	BYTE* pixels = new BYTE[3 * width * height];
+
+	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+	// Convert to FreeImage format & save to file
+	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
+	FreeImage_Save(FIF_BMP, image, screenshotFile, 0);
+
+	// Free resources
+	FreeImage_Unload(image);
+	delete[] pixels;
+}
 
 float verticesLight[] = {
 	-0.01f, -0.01f, -0.01f,
@@ -938,13 +951,12 @@ int main()
 
 // 					iluInit();
  					ilInit();
-					ilutRenderer(ILUT_OPENGL);
 
 					std::string number = std::to_string(Y+P*10);
 					std::string picture = "data/image.png";
 					picture.insert(10, number);
-					takeScreenshot(picture.c_str());
-
+					//takeScreenshot(picture.c_str());
+					screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());
