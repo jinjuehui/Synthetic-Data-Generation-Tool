@@ -49,8 +49,8 @@ bool ROTATE_LIGHT = false;
 
 //parameters
 //Screen Parameters:
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 768;
+const unsigned int SCR_WIDTH = 240;
+const unsigned int SCR_HEIGHT =240;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
 //User Input Mouse and cursor
@@ -478,7 +478,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//if core_profile is chosen, the vertex array object need to be manually created
 	window[0] = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, u8"Rendering 正在进行渲染...", NULL, NULL);
 	//window[1] = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, u8"GroundTruth 正在进行渲染...", NULL, NULL);
-
+	
 	//setting up the first window
 	if (!window[0])
 	{
@@ -505,6 +505,7 @@ int main()
 		std::cout << "glew initialization succeed!" << std::endl;
 	}
 
+	//GLCall(glViewport(0,0,SCR_WIDTH,SCR_HEIGHT));
 // 	//setting up the second window
 // 	if (!window[1])
 // 	{
@@ -956,7 +957,7 @@ int main()
 					std::string picture = "E:/data/image.png";
 					picture.insert(13, number);
 					//takeScreenshot(picture.c_str());
-					screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+					//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());
