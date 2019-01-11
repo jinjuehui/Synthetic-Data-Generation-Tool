@@ -953,8 +953,8 @@ int main()
 // 					ilInit();
 
 					std::string number = std::to_string(Y+P*10);
-					std::string picture = "data/image.png";
-					picture.insert(10, number);
+					std::string picture = "E:/data/image.png";
+					picture.insert(13, number);
 					//takeScreenshot(picture.c_str());
 					screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
