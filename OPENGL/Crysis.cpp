@@ -39,18 +39,18 @@
 //Triggers and Keys
 #define LOAD_MODEL "mesh/nanosuit/chess/queen.obj"
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
-#define USE_BACKGROUND_IMAGE true
 #define ROTATE_CAMERA true
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
+bool USE_BACKGROUND_IMAGE = true;
 bool STATIC_CAMERA_VIEW = true;
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
 
 //parameters
 //Screen Parameters:
-const unsigned int SCR_WIDTH = 240;
-const unsigned int SCR_HEIGHT =240;
+const unsigned int SCR_WIDTH = 1000;
+const unsigned int SCR_HEIGHT =1000;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
 //User Input Mouse and cursor
@@ -647,6 +647,8 @@ int main()
 		
 		GLCall(glEnable(GL_DEPTH_TEST));
 		std::cout << "rendering..." << std::endl;
+		bool ground_truth = false;
+
 		while (!glfwWindowShouldClose(window[0]))  //start the game
 		{
 			//GLCall(glViewport(0,0,1024,768));
@@ -661,8 +663,10 @@ int main()
 			cube = glm::translate(cube, glm::vec3(3.0f,0.0f,0.0f));
 			cube = glm::scale(cube, glm::vec3(5.0f, 5.0f, 5.0f));//for nanosuits default 0.4
 
-
-
+			if (ground_truth)
+			{
+				USE_BACKGROUND_IMAGE = false;
+			}
 
 			for (int P = 0; P < 361; P++)
 			{
@@ -760,41 +764,44 @@ int main()
 						pointLight.ambient = glm::vec3{0.05f,0.05f,0.05f};
 						pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
 						pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f};
-
-						for (int i=0; i<(int)((sizeof(light_positions)/sizeof(glm::vec3)));i++)
+						
+						if (!ground_truth) 
 						{
-							if (ENABLE_RANDOM_LIGHT_SOURCE_POSITION)
+							for (int i=0; i<(int)((sizeof(light_positions)/sizeof(glm::vec3)));i++)
 							{
-								light_positions[i] = glm::ballRand(15.0f);
-							}
-							std::string number = std::to_string(i);
-							std::string uniform_position = "pointlights[].position";
-							std::string uniform_ambient = "pointlights[].ambient";
-							std::string uniform_diffuse = "pointlights[].diffuse";
-							std::string uniform_specular = "pointlights[].specular";
-							std::string uniform_constantoffset = "pointlights[].constantoffset";
-							std::string uniform_linearfactor = "pointlights[].linearfactor";
-							std::string uniform_quadraticfactor = "pointlights[].quadraticfactor";
-							uniform_position.insert(12, number);
-							uniform_ambient.insert(12, number);
-							uniform_diffuse.insert(12, number);
-							uniform_specular.insert(12, number);
-							uniform_constantoffset.insert(12, number);
-							uniform_linearfactor.insert(12, number);
-							uniform_quadraticfactor.insert(12, number);
+								if (ENABLE_RANDOM_LIGHT_SOURCE_POSITION)
+								{
+									light_positions[i] = glm::ballRand(15.0f);
+								}
+								std::string number = std::to_string(i);
+								std::string uniform_position = "pointlights[].position";
+								std::string uniform_ambient = "pointlights[].ambient";
+								std::string uniform_diffuse = "pointlights[].diffuse";
+								std::string uniform_specular = "pointlights[].specular";
+								std::string uniform_constantoffset = "pointlights[].constantoffset";
+								std::string uniform_linearfactor = "pointlights[].linearfactor";
+								std::string uniform_quadraticfactor = "pointlights[].quadraticfactor";
+								uniform_position.insert(12, number);
+								uniform_ambient.insert(12, number);
+								uniform_diffuse.insert(12, number);
+								uniform_specular.insert(12, number);
+								uniform_constantoffset.insert(12, number);
+								uniform_linearfactor.insert(12, number);
+								uniform_quadraticfactor.insert(12, number);
 
-							//std::cout << uniform_position << std::endl;
+								//std::cout << uniform_position << std::endl;
 
 
-							multiple_lightning_shader.setVector3f(uniform_position, light_positions[i]);
-							multiple_lightning_shader.setVector3f(uniform_ambient, pointLight.ambient);
-							multiple_lightning_shader.setVector3f(uniform_diffuse, pointLight.diffuse);
-							multiple_lightning_shader.setVector3f(uniform_specular, pointLight.specular);
-							multiple_lightning_shader.setFloat(uniform_constantoffset, pointLight.constantoffset);
-							multiple_lightning_shader.setFloat(uniform_linearfactor, pointLight.linearfactor);
-							multiple_lightning_shader.setFloat(uniform_quadraticfactor, pointLight.quadraticfactor);
+								multiple_lightning_shader.setVector3f(uniform_position, light_positions[i]);
+								multiple_lightning_shader.setVector3f(uniform_ambient, pointLight.ambient);
+								multiple_lightning_shader.setVector3f(uniform_diffuse, pointLight.diffuse);
+								multiple_lightning_shader.setVector3f(uniform_specular, pointLight.specular);
+								multiple_lightning_shader.setFloat(uniform_constantoffset, pointLight.constantoffset);
+								multiple_lightning_shader.setFloat(uniform_linearfactor, pointLight.linearfactor);
+								multiple_lightning_shader.setFloat(uniform_quadraticfactor, pointLight.quadraticfactor);
 
-						}
+							}//<--for different light position
+						}//<-- ground truth
 
 						spotLight.ambient = glm::vec3{0.0f,0.0f,0.0f};
 						spotLight.diffuse = glm::vec3{ 1.0f,1.0f,1.0f};
@@ -823,58 +830,61 @@ int main()
 						multiple_lightning_shader.setMatrix4fv("model", chess_piece);
 						TrainingObject.Draw(multiple_lightning_shader);//main object for training
 
-						cube = glm::mat4(1.0f);
-						cube = glm::translate(cube, glm::ballRand(5.0f));
-						cube = glm::scale(cube, glm::vec3(5.0f));
-						multiple_lightning_shader.use();
-						multiple_lightning_shader.setMatrix4fv("model", cube);
-						Object obstacles;
-						obstacles.ambient = glm::ballRand(1.0f);
-						obstacles.diffuse = glm::ballRand(1.0f);
-						multiple_lightning_shader.setVector3f("material.ambient", obstacles.ambient);
-						multiple_lightning_shader.setVector3f("material.diffuse", obstacles.diffuse);
-						ReferenceObject.Draw(multiple_lightning_shader);//obstacles
-
 
 						//draw reference cube, in order to check whether imported vertex data correctly generated by blender
-						glm::mat4 cube2 = glm::mat4(1.0f);
-						cube2 = glm::translate(cube2, glm::vec3{ 4.0f,0.0f,0.0f });
-						cube2 = glm::scale(cube2, glm::vec3(5.0f));
-						multiple_lightning_shader.use();
-						multiple_lightning_shader.setMatrix4fv("model", cube2);
-						multiple_lightning_shader.setVector3f("material.ambient", reference_object.ambient);
-						multiple_lightning_shader.setVector3f("material.diffuse", reference_object.diffuse);
-
-						//std::cout << "length of array[]: "<<sizeof(indicies_cube) << std::endl;
-						GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_cube));
-						GLCall(glBindVertexArray(VAO_cube));
-						GLCall(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
-						//GLCall(glDrawArrays(GL_TRIANGLES, 0, 36);
-
-						lightning_shader.use();
-						lightning_shader.setMatrix4fv("projection_light", projection);
-						lightning_shader.setMatrix4fv("view_light", camera);
-						lightning_shader.setVector3f("LightColor", lightning.light_color);
-						GLCall(glBindVertexArray(VAO_Light));
-						for (int i = 0; i < sizeof(light_positions) / sizeof(glm::vec3); i++)
+						if (!ground_truth)
 						{
-							lamp = glm::mat4(1.0f);
-							lamp = glm::translate(lamp, light_positions[i]);
-							lamp = glm::scale(lamp, glm::vec3{ 10.0f,10.0f,10.0f });
-							lightning_shader.setMatrix4fv("model_light", lamp);
-							GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
-						}
+							cube = glm::mat4(1.0f);
+							cube = glm::translate(cube, glm::ballRand(5.0f));
+							cube = glm::scale(cube, glm::vec3(5.0f));
+							multiple_lightning_shader.use();
+							multiple_lightning_shader.setMatrix4fv("model", cube);
+							Object obstacles;
+							obstacles.ambient = glm::ballRand(1.0f);
+							obstacles.diffuse = glm::ballRand(1.0f);
+							multiple_lightning_shader.setVector3f("material.ambient", obstacles.ambient);
+							multiple_lightning_shader.setVector3f("material.diffuse", obstacles.diffuse);
+							ReferenceObject.Draw(multiple_lightning_shader);//obstacles
 
-						glm::mat4 pose_camera_view = camera * chess_piece;
-						pose_camera_view = glm::transpose(pose_camera_view);
-						std::cout<<"pose camera view piece matrix:"<<std::endl;
-						std::cout << "	" << pose_camera_view[0][0] << "	" << pose_camera_view[0][1] << "	" << pose_camera_view[0][2] << "	" << pose_camera_view[0][3] << "	" << std::endl;
-						std::cout << "	" << pose_camera_view[1][0] << "	" << pose_camera_view[1][1] << "	" << pose_camera_view[1][2] << "	" << pose_camera_view[1][3] << "	" << std::endl;
-						std::cout << "	" << pose_camera_view[2][0] << "	" << pose_camera_view[2][1] << "	" << pose_camera_view[2][2] << "	" << pose_camera_view[2][3] << "	" << std::endl;
-						std::cout << "	" << pose_camera_view[3][0] << "		" << pose_camera_view[3][1] << "		" << pose_camera_view[3][2] << "		" << pose_camera_view[3][3] << "		" << std::endl;
+							glm::mat4 cube2 = glm::mat4(1.0f);
+							cube2 = glm::translate(cube2, glm::vec3{ 4.0f,0.0f,0.0f });
+							cube2 = glm::scale(cube2, glm::vec3(5.0f));
+							multiple_lightning_shader.use();
+							multiple_lightning_shader.setMatrix4fv("model", cube2);
+							multiple_lightning_shader.setVector3f("material.ambient", reference_object.ambient);
+							multiple_lightning_shader.setVector3f("material.diffuse", reference_object.diffuse);
+
+							//std::cout << "length of array[]: "<<sizeof(indicies_cube) << std::endl;
+							GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_cube));
+							GLCall(glBindVertexArray(VAO_cube));
+							GLCall(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+							//GLCall(glDrawArrays(GL_TRIANGLES, 0, 36);
+
+							lightning_shader.use();
+							lightning_shader.setMatrix4fv("projection_light", projection);
+							lightning_shader.setMatrix4fv("view_light", camera);
+							lightning_shader.setVector3f("LightColor", lightning.light_color);
+							GLCall(glBindVertexArray(VAO_Light));
+							for (int i = 0; i < sizeof(light_positions) / sizeof(glm::vec3); i++)
+							{
+								lamp = glm::mat4(1.0f);
+								lamp = glm::translate(lamp, light_positions[i]);
+								lamp = glm::scale(lamp, glm::vec3{ 10.0f,10.0f,10.0f });
+								lightning_shader.setMatrix4fv("model_light", lamp);
+								GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+							}
+						}//<--ground truth
+
 						
-					}
+					}//<--use multiple light source
 
+					glm::mat4 pose_camera_view = camera * chess_piece;
+					pose_camera_view = glm::transpose(pose_camera_view);
+						//std::cout<<"pose camera view piece matrix:"<<std::endl;
+						//std::cout << "	" << pose_camera_view[0][0] << "	" << pose_camera_view[0][1] << "	" << pose_camera_view[0][2] << "	" << pose_camera_view[0][3] << "	" << std::endl;
+						//std::cout << "	" << pose_camera_view[1][0] << "	" << pose_camera_view[1][1] << "	" << pose_camera_view[1][2] << "	" << pose_camera_view[1][3] << "	" << std::endl;
+						//std::cout << "	" << pose_camera_view[2][0] << "	" << pose_camera_view[2][1] << "	" << pose_camera_view[2][2] << "	" << pose_camera_view[2][3] << "	" << std::endl;
+						//std::cout << "	" << pose_camera_view[3][0] << "		" << pose_camera_view[3][1] << "		" << pose_camera_view[3][2] << "		" << pose_camera_view[3][3] << "		" << std::endl;
 
 
 					if (USE_SIMPLE_LIGHTNING_MODEL)
@@ -956,7 +966,7 @@ int main()
 						GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 
 
-					}
+					}//<--use simple light source
 
 // 					iluInit();
 // 					ilInit();
@@ -973,8 +983,14 @@ int main()
 				}//<---Y loop
 			
 			}//<--P loop
-			glfwTerminate();//destroy glcontext
-
+			
+			if (ground_truth)
+			{
+				glfwTerminate();//destroy glcontext
+			}
+			
+			ground_truth = true;
+			std::cout << "ground_truth: "<< ground_truth << std::endl;
 		}//<--while loop
 		exit(EXIT_SUCCESS);
 		return 0;
