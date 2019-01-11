@@ -192,7 +192,7 @@ struct CameraOrientation
 {
 	glm::vec3 camera_pose = glm::vec3{ 0.0f,10.0f,20.0f };
 	glm::vec3 camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose;//the target camera look at - camera position
-	glm::vec3 camera_up = glm::vec3{ 0.0f,0.1f,0.0f };
+	glm::vec3 camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
 
 };
 
@@ -723,11 +723,8 @@ int main()
 					}
 
 					//rotate_object(model, 2, 0.1f);
-					/*std::cout<<"second loop:"<<std::endl;
-					std::cout << " " << model[0][0] << " " << model[0][1] << " " << model[0][2] << " " << model[0][3] << " " << std::endl;
-					std::cout << " " << model[1][0] << " " << model[1][1] << " " << model[1][2] << " " << model[1][3] << " " << std::endl;
-					std::cout << " " << model[2][0] << " " << model[2][1] << " " << model[2][2] << " " << model[2][3] << " " << std::endl;
-					std::cout << " " << model[3][0] << " " << model[3][1] << " " << model[3][2] << " " << model[3][3] << " " << std::endl;*/
+					glm::mat4 camera_transpose = glm::transpose(camera);
+
 					//shader_program.use();
 					//shader_program.setMatrix4fv("model", model);
 					//shader_program.setMatrix4fv("projection", projection);
@@ -737,6 +734,9 @@ int main()
 					//shader_program.setVector3f("LightColor",lightning.light_color);
 					//nanosuits.Draw(shader_program);
 
+
+					//object pose in Camera coordinate system:
+					//pose = view * model
 					if (!USE_SIMPLE_LIGHTNING_MODEL)
 					{
 						multiple_lightning_shader.use();
@@ -865,6 +865,14 @@ int main()
 							GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 						}
 
+						glm::mat4 pose_camera_view = camera * chess_piece;
+						pose_camera_view = glm::transpose(pose_camera_view);
+						std::cout<<"pose camera view piece matrix:"<<std::endl;
+						std::cout << "	" << pose_camera_view[0][0] << "	" << pose_camera_view[0][1] << "	" << pose_camera_view[0][2] << "	" << pose_camera_view[0][3] << "	" << std::endl;
+						std::cout << "	" << pose_camera_view[1][0] << "	" << pose_camera_view[1][1] << "	" << pose_camera_view[1][2] << "	" << pose_camera_view[1][3] << "	" << std::endl;
+						std::cout << "	" << pose_camera_view[2][0] << "	" << pose_camera_view[2][1] << "	" << pose_camera_view[2][2] << "	" << pose_camera_view[2][3] << "	" << std::endl;
+						std::cout << "	" << pose_camera_view[3][0] << "		" << pose_camera_view[3][1] << "		" << pose_camera_view[3][2] << "		" << pose_camera_view[3][3] << "		" << std::endl;
+						
 					}
 
 
