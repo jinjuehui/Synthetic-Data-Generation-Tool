@@ -17,8 +17,8 @@
 #include <assimp/postprocess.h>
 
 //image output
-#include <IL/devil_internal_exports.h>
-#include <IL/ilut.h>
+//#include <IL/devil_internal_exports.h>
+//#include <IL/ilut.h>
 
 #include <FreeImage.h>
 
@@ -360,16 +360,16 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 
-void takeScreenshot(const char* screenshotFile)
-{
-	ILuint imageID = ilGenImage();
-	ilBindImage(imageID);
-	ilutGLScreen();
-	ilEnable(IL_FILE_OVERWRITE);
-	ilSaveImage(screenshotFile);
-	ilDeleteImage(imageID);
-	//printf("Screenshot saved to: %s\n", screenshotFile);
-}
+//void takeScreenshot(const char* screenshotFile)
+//{
+//	ILuint imageID = ilGenImage();
+//	ilBindImage(imageID);
+//	ilutGLScreen();
+//	ilEnable(IL_FILE_OVERWRITE);
+//	ilSaveImage(screenshotFile);
+//	ilDeleteImage(imageID);
+//	//printf("Screenshot saved to: %s\n", screenshotFile);
+//}
 
 void screenshot_freeimage(const char* screenshotFile, int width, int height ) {
 
@@ -950,7 +950,7 @@ int main()
 					}
 
 // 					iluInit();
- 					ilInit();
+// 					ilInit();
 
 					std::string number = std::to_string(Y+P*10);
 					std::string picture = "data/image.png";
