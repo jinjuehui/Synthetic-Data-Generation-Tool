@@ -74,7 +74,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\include;$(SolutionDir)Dependencies\DevIL\include;$(SolutionDir)Dependencies\freeimage\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\include;$(SolutionDir)Dependencies\DevIL\include;$(SolutionDir)Dependencies\freeimage\;$(SolutionDir)Dependencies\Json\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -97,7 +97,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\include;$(SolutionDir)Dependencies\DevIL\include;$(SolutionDir)Dependencies\freeimage\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\include;$(SolutionDir)Dependencies\DevIL\include;$(SolutionDir)Dependencies\freeimage\;$(SolutionDir)Dependencies\Json\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>

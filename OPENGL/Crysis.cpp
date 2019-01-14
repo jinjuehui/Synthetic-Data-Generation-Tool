@@ -34,6 +34,9 @@
 //C++ basics
 #include <iostream>
 
+//Json
+#include <nlohmann/json.hpp>
+
 
 
 //Triggers and Keys
@@ -49,8 +52,9 @@ bool ROTATE_LIGHT = false;
 
 //parameters
 //Screen Parameters:
+std::string const path = LOAD_MODEL;
 const unsigned int SCR_WIDTH = 1000;
-const unsigned int SCR_HEIGHT =1000;
+const unsigned int SCR_HEIGHT = 1000;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
 //User Input Mouse and cursor
@@ -62,6 +66,8 @@ glm::mat4 lamp, back_position;
 glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
 glm::vec3 light_position(1.0f,0.0f,2.0f);
 
+
+using json = nlohmann::json;
 
 struct light 
 {
@@ -387,6 +393,18 @@ void screenshot_freeimage(const char* screenshotFile, int width, int height ) {
 	delete[] pixels;
 }
 
+
+void convert_array(glm::mat4 mat, float** pose)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			pose[i][j] = glm::transpose(mat)[i][j];
+		}
+	}
+}
+
 float verticesLight[] = {
 	-0.01f, -0.01f, -0.01f,
 	 0.01f, -0.01f, -0.01f,
@@ -505,7 +523,7 @@ int main()
 		std::cout << "glew initialization succeed!" << std::endl;
 	}
 
-	//GLCall(glViewport(0,0,SCR_WIDTH,SCR_HEIGHT));
+	GLCall(glViewport(0,0,SCR_WIDTH,SCR_HEIGHT));
 // 	//setting up the second window
 // 	if (!window[1])
 // 	{
@@ -649,6 +667,12 @@ int main()
 		std::cout << "rendering..." << std::endl;
 		bool ground_truth = false;
 
+		json labels;
+
+		labels["object_id"] = path.substr(0, path.find_last_of('/'));
+
+
+
 		while (!glfwWindowShouldClose(window[0]))  //start the game
 		{
 			//GLCall(glViewport(0,0,1024,768));
@@ -741,6 +765,12 @@ int main()
 
 					//object pose in Camera coordinate system:
 					//pose = view * model
+					glm::mat4 pose = camera*chess_piece;
+					float pose_array[4][4];
+					//convert_array(pose, pose_array[][]);
+					labels["Orientation"] = pose_array;
+
+
 					if (!USE_SIMPLE_LIGHTNING_MODEL)
 					{
 						multiple_lightning_shader.use();
@@ -973,9 +1003,13 @@ int main()
 
 					std::string number = std::to_string(Y+P*10);
 					std::string picture = "E:/data/image.png";
+					if (ground_truth)
+					{
+						 picture = "E:/data/image_gt.png";
+					}
 					picture.insert(13, number);
-					//takeScreenshot(picture.c_str());
-					//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+					//takeScreenshot(picture.c_str());//not used
+					screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());
