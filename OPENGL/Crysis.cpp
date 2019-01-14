@@ -33,6 +33,7 @@
 
 //C++ basics
 #include <iostream>
+#include <fstream>
 
 //Json
 #include <nlohmann/json.hpp>
@@ -53,8 +54,8 @@ bool ROTATE_LIGHT = false;
 //parameters
 //Screen Parameters:
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 1000;
-const unsigned int SCR_HEIGHT = 1000;
+const unsigned int SCR_WIDTH = 225;
+const unsigned int SCR_HEIGHT = 225;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
 //User Input Mouse and cursor
@@ -394,7 +395,7 @@ void screenshot_freeimage(const char* screenshotFile, int width, int height ) {
 }
 
 
-void convert_array(glm::mat4 mat, float** pose)
+void convert_array(glm::mat4 mat, float pose[][4])
 {
 	for (int i = 0; i < 4; i++)
 	{
@@ -670,6 +671,10 @@ int main()
 		json labels;
 
 		labels["object_id"] = path.substr(0, path.find_last_of('/'));
+		
+		std::ofstream jsonfile;
+		jsonfile.open("data/label.json");
+
 
 
 
@@ -692,7 +697,7 @@ int main()
 				USE_BACKGROUND_IMAGE = false;
 			}
 
-			for (int P = 0; P < 361; P++)
+			for (int P = 300; P < 361; P++)
 			{
 				//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
 				projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -767,9 +772,13 @@ int main()
 					//pose = view * model
 					glm::mat4 pose = camera*chess_piece;
 					float pose_array[4][4];
-					//convert_array(pose, pose_array[][]);
+					convert_array(pose, pose_array);
 					labels["Orientation"] = pose_array;
 
+					jsonfile << labels;
+
+
+					std::cout << pose_array[0][0] << std::endl;
 
 					if (!USE_SIMPLE_LIGHTNING_MODEL)
 					{
@@ -1009,7 +1018,7 @@ int main()
 					}
 					picture.insert(13, number);
 					//takeScreenshot(picture.c_str());//not used
-					screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+					//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());
@@ -1017,7 +1026,8 @@ int main()
 				}//<---Y loop
 			
 			}//<--P loop
-			
+			jsonfile.close();
+
 			if (ground_truth)
 			{
 				glfwTerminate();//destroy glcontext
