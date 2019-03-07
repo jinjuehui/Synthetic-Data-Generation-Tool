@@ -54,8 +54,8 @@ bool ROTATE_LIGHT = false;
 //parameters
 //Screen Parameters:
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 220;
-const unsigned int SCR_HEIGHT = 220;
+const unsigned int SCR_WIDTH = 1000;
+const unsigned int SCR_HEIGHT = 1000;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
 //User Input Mouse and cursor
@@ -673,7 +673,7 @@ int main()
 		labels["object_id"] = path.substr(0, path.find_last_of('/'));
 		
 		std::ofstream jsonfile;
-		jsonfile.open("data/label.json");
+		jsonfile.open("E:/label/label.json");
 
 
 
@@ -697,7 +697,7 @@ int main()
 				USE_BACKGROUND_IMAGE = false;
 			}
 
-			for (int P = 360; P < 361; P++)
+			for (int P = 350; P < 361; P++)
 			{
 				//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
 				projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -1031,6 +1031,8 @@ int main()
 			if (ground_truth)
 			{
 				glfwTerminate();//destroy glcontext
+				exit(EXIT_SUCCESS);
+
 			}
 			
 			ground_truth = true;
