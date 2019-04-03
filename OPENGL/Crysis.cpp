@@ -16,10 +16,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-//image output
-//#include <IL/devil_internal_exports.h>
-//#include <IL/ilut.h>
-
+//write image output
 #include <FreeImage.h>
 
 //self defined headers
@@ -368,17 +365,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 }
 
-
-//void takeScreenshot(const char* screenshotFile)
-//{
-//	ILuint imageID = ilGenImage();
-//	ilBindImage(imageID);
-//	ilutGLScreen();
-//	ilEnable(IL_FILE_OVERWRITE);
-//	ilSaveImage(screenshotFile);
-//	ilDeleteImage(imageID);
-//	//printf("Screenshot saved to: %s\n", screenshotFile);
-//}
 
 void screenshot_freeimage(const char* screenshotFile, int width, int height ) {
 
@@ -991,9 +977,6 @@ int main()
 
 
 					}//<--use simple light source
-
-// 					iluInit();
-// 					ilInit();
 
 					std::string number = std::to_string(Y+P*10);
 					std::string picture = "E:/data/image.png";
