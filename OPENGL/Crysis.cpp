@@ -34,6 +34,7 @@
 //C++ basics
 #include <iostream>
 #include <fstream>
+#include <map>
 
 //Json
 #include <nlohmann/json.hpp>
@@ -41,8 +42,9 @@
 
 
 //Triggers and Keys
-#define LOAD_MODEL "mesh/nanosuit/chess/queen.obj"
+//#define LOAD_MODEL "mesh/nanosuit/chess/queen.obj"
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
+#define LOAD_MODEL "mesh/nanosuit/obj_05_001.obj"
 #define ROTATE_CAMERA true
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
@@ -553,61 +555,49 @@ int main()
 // 
 // 	glfwMakeContextCurrent(window[0]);
 
-
+		//draw lights
 		unsigned int VAO_Light, VBO_Light;
-		std::cout << "create Light buffers and layout!" << std::endl;
-		GLCall(glGenVertexArrays(1, &VAO_Light));
-		GLCall(glGenBuffers(1, &VBO_Light));
-		GLCall(glBindVertexArray(VAO_Light));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Light));
-		GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(verticesLight), verticesLight, GL_STATIC_DRAW));
-		//VertexBuffer light(verticesLight,sizeof(verticesLight)*sizeof(float));
-		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
-		GLCall(glEnableVertexAttribArray(0));
-		GLCall(glBindVertexArray(0));
+		//VertexBuffer::VertexBuffer(const void* data, int number_of_elements, size_t element_size, int layout, int size_of_vertex, int stride, int offset)
+		VertexBuffer Lightning(verticesLight,108,sizeof(float),0,3,3*sizeof(float),0);
 
-		unsigned int VAO_cube, VBO_cube,EBO_cube;
-		GLCall(glGenVertexArrays(1,&VAO_cube));
-		GLCall(glGenBuffers(1,&VBO_cube));
-		GLCall(glGenBuffers(1, &EBO_cube));
+		std::map<std::string, int> AttribPointer_cube;
+		AttribPointer_cube["layout_0"] = 0;
+		AttribPointer_cube["size_of_vertex_0"] = 3;
+		AttribPointer_cube["stride_0"] = 6*sizeof(float);
+		AttribPointer_cube["offset_0"] = 0;
+		AttribPointer_cube["layout_1"] = 1;
+		AttribPointer_cube["size_of_vertex_1"] = 3;
+		AttribPointer_cube["stride_1"] = 6*sizeof(float);
+		AttribPointer_cube["offset_1"] = 3*sizeof(float);
 
-		GLCall(glBindVertexArray(VAO_cube));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER,VBO_cube));
-		GLCall(glBufferData(GL_ARRAY_BUFFER,sizeof(cube_vertex),cube_vertex,GL_STATIC_DRAW));
-		
-		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO_cube));
-		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies_cube), indicies_cube, GL_STATIC_DRAW));
-
-		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0));
-		GLCall(glEnableVertexAttribArray(0));
-		GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))));
-		GLCall(glEnableVertexAttribArray(1));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER,0));
-		GLCall(glBindVertexArray(0));
-
+		VertexBuffer Cube(cube_vertex,
+						  indicies_cube,
+						  sizeof(cube_vertex)/sizeof(cube_vertex[0]),
+						  sizeof(float), 
+						  sizeof(indicies_cube)/sizeof(indicies_cube[0]),
+						  sizeof(int),
+						  AttribPointer_cube);
 
 		std::cout << "create Background buffers and layout!" << std::endl;
-		unsigned int VAO_Background, VBO_Background, EBO_Background;
-		GLCall(glGenVertexArrays(1, &VAO_Background));
-		GLCall(glGenBuffers(1, &VBO_Background));
-		GLCall(glGenBuffers(1, &EBO_Background));
+		std::map<std::string, int> AttribPointer_Background;
+		AttribPointer_Background["layout_0"] = 0;
+		AttribPointer_Background["size_of_vertex_0"] = 3;
+		AttribPointer_Background["stride_0"] = 5 * sizeof(float);
+		AttribPointer_Background["offset_0"] = 0;
 
-		GLCall(glBindVertexArray(VAO_Background));
-		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_Background));
-		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(back_indicies), back_indicies, GL_STATIC_DRAW));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_Background));
-		GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(background), background, GL_STATIC_DRAW));
-		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
-		GLCall(glEnableVertexAttribArray(0));
-		GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
-		GLCall(glEnableVertexAttribArray(1));
-		unsigned int BK1;
-		GLCall(glGenTextures(1, &BK1));
-		GLCall(glBindTexture(GL_TEXTURE_2D, BK1));
-		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		AttribPointer_Background["layout_1"] = 1;
+		AttribPointer_Background["size_of_vertex_1"] = 2;
+		AttribPointer_Background["stride_1"] = 5 * sizeof(float);
+		AttribPointer_Background["offset_1"] = 3 * sizeof(float);
+
+		VertexBuffer Background(background,
+								back_indicies,
+								sizeof(background) / sizeof(background[0]),
+								sizeof(float),
+								sizeof(back_indicies) / sizeof(back_indicies[0]),
+								sizeof(int),
+								AttribPointer_Background,
+								"TEXTURE");
 
 		//background image setting
 		if (USE_BACKGROUND_IMAGE)
@@ -618,9 +608,14 @@ int main()
 
 			if (data)
 			{
-				GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, background_width, background_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
-				GLCall(glGenerateMipmap(GL_TEXTURE_2D));
-
+				
+				Background.load_texture_image(GL_TEXTURE_2D,
+											  GL_RGB,
+											  background_width,
+											  background_height,
+											  0,
+										      GL_RGB,
+											  data);
 			}
 			else
 			{
@@ -708,7 +703,7 @@ int main()
 				std::cout << " " << back_position[2][0] << " " << back_position[2][1] << " " << back_position[2][2] << " " << back_position[2][3] << " " << std::endl;
 				std::cout << " " << back_position[3][0] << " " << back_position[3][1] << " " << back_position[3][2] << " " << back_position[3][3] << " " << std::endl;
 */
-				for (int Y = 0; Y < 361; Y++)
+				for (int Y = 0; Y < 361; Y+=5)
 				{
 					if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
 					{
@@ -736,17 +731,10 @@ int main()
 					//use background image
 					if (USE_BACKGROUND_IMAGE)
 					{
-						GLCall(glActiveTexture(GL_TEXTURE0));
-						GLCall(glBindTexture(GL_TEXTURE_2D,BK1));
-						GLCall(glBindVertexArray(VAO_Background));
+						Background.Bind("bind_Texure");
 						background_shader.use();
-						/*background_shader.setInt("texture1", 0);
-						background_shader.setMatrix4fv("model_back", back_position);
-						background_shader.setMatrix4fv("view", camera);*/
-
-						GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
-
-						GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+						Background.Draw("draw_elements");
+						GLCall(glClear(GL_DEPTH_BUFFER_BIT));//otherweise, it would be foreground
 
 					}
 
@@ -893,24 +881,20 @@ int main()
 							multiple_lightning_shader.setVector3f("material.ambient", reference_object.ambient);
 							multiple_lightning_shader.setVector3f("material.diffuse", reference_object.diffuse);
 
-							//std::cout << "length of array[]: "<<sizeof(indicies_cube) << std::endl;
-							GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_cube));
-							GLCall(glBindVertexArray(VAO_cube));
-							GLCall(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+							Cube.Draw("draw_elements");
+							
 							//GLCall(glDrawArrays(GL_TRIANGLES, 0, 36);
-
 							lightning_shader.use();
 							lightning_shader.setMatrix4fv("projection_light", projection);
 							lightning_shader.setMatrix4fv("view_light", camera);
 							lightning_shader.setVector3f("LightColor", lightning.light_color);
-							GLCall(glBindVertexArray(VAO_Light));
 							for (int i = 0; i < sizeof(light_positions) / sizeof(glm::vec3); i++)
 							{
 								lamp = glm::mat4(1.0f);
 								lamp = glm::translate(lamp, light_positions[i]);
 								lamp = glm::scale(lamp, glm::vec3{ 10.0f,10.0f,10.0f });
 								lightning_shader.setMatrix4fv("model_light", lamp);
-								GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+								Lightning.Draw("draw_arrays");
 							}
 						}//<--ground truth
 
@@ -988,9 +972,10 @@ int main()
 						Simple_shader.setVector3f("light.specular", lightning.light_color);
 
 						//std::cout << "length of array[]: "<<sizeof(indicies_cube) << std::endl;
-						GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_cube));
-						GLCall(glBindVertexArray(VAO_cube));
-						GLCall(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+						//GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO_cube));
+						//GLCall(glBindVertexArray(VAO_cube));
+						//GLCall(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+						Cube.Draw("draw_elements");
 
 						lightning_shader.use();
 						lightning_shader.setMatrix4fv("projection_light", projection);
@@ -1018,7 +1003,7 @@ int main()
 					}
 					picture.insert(13, number);
 					//takeScreenshot(picture.c_str());//not used
-					screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+					//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());

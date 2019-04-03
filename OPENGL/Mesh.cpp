@@ -25,7 +25,6 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies)
 		for (int i = 0; i < indicies.size(); i++)
 		{
 			std::cout << " " << indicies[i] << " ";
-
 		}
 		std::cout<<std::endl;
 	}
@@ -63,7 +62,7 @@ void Mesh::setupMesh()
 		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
 		////normal
 		GLCall(glEnableVertexAttribArray(1));
-		GLCall(glVertexAttribPointer(1, 3, GL_INT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float))));
+		GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float))));
 		////texture coordinate
 		GLCall(glEnableVertexAttribArray(2));
 		GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float))));
