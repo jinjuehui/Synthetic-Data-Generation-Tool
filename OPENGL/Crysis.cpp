@@ -32,6 +32,10 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <string>
+#include <iostream>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 //Json
 #include <nlohmann/json.hpp>
@@ -53,8 +57,8 @@ bool ROTATE_LIGHT = false;
 //parameters
 //Screen Parameters:
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 1000;
-const unsigned int SCR_HEIGHT = 1000;
+const unsigned int SCR_WIDTH = 500;
+const unsigned int SCR_HEIGHT = 500;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
 //User Input Mouse and cursor
@@ -65,7 +69,6 @@ float yaw(-90.0f), pitch(0.0f), fov(45.0f);
 glm::mat4 lamp, back_position;
 glm::vec3 back_ground_position(1.0f,1.0f,1.0f);
 glm::vec3 light_position(1.0f,0.0f,2.0f);
-
 
 using json = nlohmann::json;
 
@@ -153,7 +156,6 @@ struct CameraOrientation
 
 }Setup;
 
-
 //rotate camera the function should be used in two for loop, which loop through the Yaw and Pitch angle
 CameraOrientation rotateCamera(int P, int Y,float distance)
 {
@@ -187,7 +189,6 @@ CameraOrientation rotateCamera(int P, int Y,float distance)
 	return setup;
 }
 
-
 glm::mat4 rotateLight(glm::mat4 light_model, int P, int Y, float distance)
 {
 	float x_direction = distance * glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y));
@@ -198,6 +199,23 @@ glm::mat4 rotateLight(glm::mat4 light_model, int P, int Y, float distance)
 	
 	light_model = glm::translate(light_model, glm::vec3{x_direction,y_direction,z_direction});
 	return light_model;
+}
+
+
+
+std::map<std::string, int> read_images_in_folder(std::string path)
+{
+	std::map<std::string, int> files;
+	std::cout << "out side loop" << std::endl;
+	for (const auto & entry : fs::directory_iterator(path))
+	{
+		//std::cout << "reading images" << std::endl;
+		files[entry.path().string()];
+		//std::cout << entry.path() << std::endl;
+	}
+	std::cout << "finish reading" << std::endl;
+	return files;
+
 }
 
 void rotate_object(glm::mat4 &model, int axis, float velocity)
@@ -321,11 +339,12 @@ void screenshot_freeimage(const char* screenshotFile, int width, int height ) {
 	// Make the BYTE array, factor of 3 because it's RBG.
 	BYTE* pixels = new BYTE[3 * width * height];
 
-	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+	glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, pixels);
 
 	// Convert to FreeImage format & save to file
-	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
-	FreeImage_Save(FIF_BMP, image, screenshotFile, 0);
+	//FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
+	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3*width, 24, 0xFF0000, 0x00FF00, 0x0000FF, false);
+	FreeImage_Save(FIF_JPEG, image, screenshotFile, 0);
 
 	// Free resources
 	FreeImage_Unload(image);
@@ -504,34 +523,13 @@ int main()
 							AttribPointer_Background,
 							"TEXTURE");
 
-
-
-	//background image setting
-	if (USE_BACKGROUND_IMAGE)
-	{
-		int background_width, background_height, nrChannels;
-		stbi_set_flip_vertically_on_load(true);
-		unsigned char *data = stbi_load("Crynet_nanosuit.jpg", &background_width, &background_height, &nrChannels, 0);//Crynet_nanosuit.jpg
-
-		Background.load_texture_image(GL_TEXTURE_2D,
-										  GL_RGB,
-										  background_width,
-										  background_height,
-										  0,
-									      GL_RGB,
-										  data);
-
-		stbi_image_free(data);
-	}
-
-
-		Shader background_shader("background_vertex.shader", "background_fragment.shader");
-		background_shader.use();
-		background_shader.setInt("texture1", 0);
-
-
-
-
+	//read file list int the folder
+	std::cout << "creating image list..." << std::endl;
+	std::map<std::string,int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");
+	std::map<std::string, int>::iterator it = Filelist.begin();
+	++it;
+	std::cout << it->first << std::endl;
+	std::cout << "image list created!" << std::endl;
 	//Model nanosuits(LOAD_MODEL);//untitled.obj
 	Model TrainingObject(LOAD_MODEL);
 	Model ReferenceObject(LOAD_CUBE_REFERENCE);
@@ -631,11 +629,41 @@ int main()
 				//use background image
 				if (USE_BACKGROUND_IMAGE)
 				{
-					Background.Bind("bind_Texure");
-					background_shader.use();
-					Background.Draw("draw_elements");
-					GLCall(glClear(GL_DEPTH_BUFFER_BIT));//otherweise, it would be foreground
+					
+						if(it==Filelist.end())
+							it=Filelist.begin();
+						//background image setting
+						int background_width, background_height, nrChannels;
+						stbi_set_flip_vertically_on_load(true);
+						unsigned char *data = stbi_load(it->first.c_str(), &background_width, &background_height, &nrChannels, 0);//Crynet_nanosuit.jpg
+						std::cout << "background image size: " << (float)background_width / background_height << std::endl;
+						std::cout << it->first.c_str() << std::endl;
 
+						try
+						{
+							Background.load_texture_image(GL_TEXTURE_2D,
+								GL_RGB,
+								background_width,
+								background_height,
+								0,
+								GL_RGB,
+								data);
+						}
+						catch (std::exception&)
+						{
+							continue;
+						}
+						stbi_image_free(data);
+						it++;
+						Shader background_shader("background_vertex.shader", "background_fragment.shader");
+						background_shader.use();
+						background_shader.setInt("texture1", 0);
+						Background.Bind("bind_Texure");
+						background_shader.use();
+						Background.Draw("draw_elements");
+						GLCall(glClear(GL_DEPTH_BUFFER_BIT));//otherweise, it would be foreground
+					
+						Background.UnBind();
 				}
 
 				if (ROTATE_LIGHT)
@@ -892,14 +920,14 @@ int main()
 				}//<--use simple light source
 
 				std::string number = std::to_string(Y+P*10);
-				std::string picture = "E:/data/image.png";
+				std::string picture = "E:/data/image.jpg";
 				if (ground_truth)
 				{
-					 picture = "E:/data/image_gt.png";
+					 picture = "E:/data/image_gt.jpg";
 				}
 				picture.insert(13, number);
 				//takeScreenshot(picture.c_str());//not used
-				//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+				screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 				GLCall(glfwSwapBuffers(window[0]));
 				GLCall(glfwPollEvents());

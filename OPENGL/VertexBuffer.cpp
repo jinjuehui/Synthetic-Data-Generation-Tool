@@ -131,9 +131,25 @@ void VertexBuffer::load_texture_image(GLenum target,
 									  const GLvoid* data) const
 {
 	if (data) {
-		GLCall(glTexImage2D(target, 0, internalformat, width, height, border, format, GL_UNSIGNED_BYTE, data));
-		GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+		try
+		{
+
+			GLCall(glTexImage2D(target,
+							0,
+							internalformat,
+							width,
+							height,
+							border,
+							format,
+							GL_UNSIGNED_BYTE,
+							data));
+			GLCall(glGenerateMipmap(GL_TEXTURE_2D));
 	
+		}
+		catch (const std::exception&)
+		{
+
+		}
 	}
 	else
 		std::cout << "failed to load image" << std::endl;
