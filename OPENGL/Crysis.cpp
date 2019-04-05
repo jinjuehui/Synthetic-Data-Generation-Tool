@@ -150,7 +150,7 @@ unsigned int indicies_cube[] = {
 //camera setup with default parameters
 struct CameraOrientation
 {
-	glm::vec3 camera_pose = glm::vec3{ 0.0f,10.0f,20.0f };
+	glm::vec3 camera_pose = glm::vec3{ 0.0f,0.10f,20.0f };//{ 0.0f, 10.0f, 20.0f };
 	glm::vec3 camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose;//the target camera look at - camera position
 	glm::vec3 camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
 
@@ -525,10 +525,9 @@ int main()
 
 	//read file list int the folder
 	std::cout << "creating image list..." << std::endl;
-	std::map<std::string,int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");
+	std::map<std::string,int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\picturesnotworking");
 	std::map<std::string, int>::iterator it = Filelist.begin();
-	++it;
-	std::cout << it->first << std::endl;
+	//std::cout << it->first << std::endl;
 	std::cout << "image list created!" << std::endl;
 	//Model nanosuits(LOAD_MODEL);//untitled.obj
 	Model TrainingObject(LOAD_MODEL);
@@ -614,7 +613,7 @@ int main()
 				lastFrame = currentFrame;
 				if (STATIC_CAMERA_VIEW == true)
 				{
-					float distance = 20.0f;
+					float distance = 5.0f;
 
 					if(ROTATE_CAMERA)
 						Setup=rotateCamera(P, Y, distance);
@@ -636,24 +635,28 @@ int main()
 						int background_width, background_height, nrChannels;
 						stbi_set_flip_vertically_on_load(true);
 						unsigned char *data = stbi_load(it->first.c_str(), &background_width, &background_height, &nrChannels, 0);//Crynet_nanosuit.jpg
-						std::cout << "background image size: " << (float)background_width / background_height << std::endl;
+			
+																																  //std::cout << "background image size: " << (float)background_width / background_height << std::endl;
 						std::cout << it->first.c_str() << std::endl;
 
 						try
 						{
-							Background.load_texture_image(GL_TEXTURE_2D,
-								GL_RGB,
-								background_width,
-								background_height,
-								0,
-								GL_RGB,
-								data);
+							if (data) {
+								//std::cout << "loaded data: "<<*data << std::endl;
+								Background.load_texture_image(GL_TEXTURE_2D,
+									GL_RGB,
+									background_width,
+									background_height,
+									0,
+									GL_RGB,
+									data);
+								std::cout << "texture loaded" << std::endl;
+							}
 						}
 						catch (std::exception&)
 						{
 							continue;
 						}
-						stbi_image_free(data);
 						it++;
 						Shader background_shader("background_vertex.shader", "background_fragment.shader");
 						background_shader.use();
@@ -664,6 +667,7 @@ int main()
 						GLCall(glClear(GL_DEPTH_BUFFER_BIT));//otherweise, it would be foreground
 					
 						Background.UnBind();
+						stbi_image_free(data);
 				}
 
 				if (ROTATE_LIGHT)
@@ -926,8 +930,7 @@ int main()
 					 picture = "E:/data/image_gt.jpg";
 				}
 				picture.insert(13, number);
-				//takeScreenshot(picture.c_str());//not used
-				screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+				//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 				GLCall(glfwSwapBuffers(window[0]));
 				GLCall(glfwPollEvents());
