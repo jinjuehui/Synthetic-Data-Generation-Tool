@@ -78,8 +78,8 @@ VertexBuffer::VertexBuffer(const void* data,
 
 	GLCall(glGenTextures(1, &TEXTURE));
 	GLCall(glBindTexture(GL_TEXTURE_2D, TEXTURE));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
 	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
@@ -135,7 +135,8 @@ void VertexBuffer::load_texture_image(GLenum target,
 		{
 
 			GLCall(glTexImage2D(target,	0,internalformat,width,height,border,format,GL_UNSIGNED_BYTE,data));
-			GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+			//.................texture target,mipmap level,legacy,format,and datatype,data
+			//GLCall(glGenerateMipmap(GL_TEXTURE_2D));
 	
 		}
 		catch (const std::exception&)
