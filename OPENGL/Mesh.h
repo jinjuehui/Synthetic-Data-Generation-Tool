@@ -52,9 +52,9 @@
 	public:
 		Model(char *path,bool gamma = false);
 		void Draw(Shader shader);
+		std::vector<Mesh> meshes;
 	private:
 		std::vector<Texture> textures_loaded;
-		std::vector<Mesh> meshes;
 		std::string directory;
 		bool gammaCorrection;
 		bool norm_key = false;

@@ -89,7 +89,7 @@ struct light
 	float cutoff = glm::cos(glm::radians(12.5f));
 	float outercutoff = glm::cos(glm::radians(15.0f));
 } dirLight, pointLight, spotLight,lightning;
-struct Object
+struct Object  //object rendering params related to lightning and materials
 {
 	//default white plastic
 	glm::vec3 color{1.0f,1.0f,1.0f};
@@ -541,7 +541,7 @@ int main()
 
 	//read file list int the folder
 	std::cout << "creating image list..." << std::endl;
-	std::map<std::string,int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\SegmentationClass");
+	std::map<std::string,int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");
 	std::map<std::string, int>::iterator it = Filelist.begin();
 	std::advance(it, 2600);
 	
@@ -549,6 +549,7 @@ int main()
 	std::cout << "image list created!" << std::endl;
 	//Model nanosuits(LOAD_MODEL);//untitled.obj
 	Model TrainingObject(LOAD_MODEL);
+	std::cout << "number of model meshes: " << TrainingObject.meshes[0].Vertecies.size() << std::endl;
 	Model ReferenceObject(LOAD_CUBE_REFERENCE);
 	if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
 	{
@@ -710,7 +711,7 @@ int main()
 
 					//object pose in Camera coordinate system:
 					//pose = view * model
-					glm::mat4 pose = camera*chess_piece;
+					glm::mat4 pose = camera*chess_piece;//<-------------------------after add roll angle this should be modified
 					float pose_array[4][4];
 					convert_array(pose, pose_array);
 					labels["Orientation"] = pose_array;

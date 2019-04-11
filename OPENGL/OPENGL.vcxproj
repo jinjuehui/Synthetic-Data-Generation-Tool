@@ -128,6 +128,8 @@
     <None Include="background_fragment.shader" />
     <None Include="background_vertex.shader" />
     <None Include="Basic.shader" />
+    <None Include="Basic_Fragment.shader" />
+    <None Include="Basic_vertex.shader" />
     <None Include="FragmentShader.shader" />
     <None Include="Lightning_fragment.shader" />
     <None Include="Lightning_vertex.shader" />
@@ -138,7 +140,7 @@
     <None Include="VertexShader.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Crysis.cpp" />
+    <ClCompile Include="Calculate_Bounding_Box.cpp" />
     <ClCompile Include="image_loader.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Mesh.cpp" />

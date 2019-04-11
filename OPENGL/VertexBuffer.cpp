@@ -58,7 +58,7 @@ VertexBuffer::VertexBuffer(const void* data,
 						   int number_of_index,
 						   size_t index_size,
 						   std::map<std::string, int> AttribPointer,
-						   std::string key)
+						   std::string key)//<--any value to overload the function
 {
 	NOE = number_of_index;
 	GLCall(glGenVertexArrays(1, &VAO));
@@ -73,17 +73,24 @@ VertexBuffer::VertexBuffer(const void* data,
 	//TODO auto parsing the Attribpointer map
 	GLCall(glVertexAttribPointer(AttribPointer["layout_0"], AttribPointer["size_of_vertex_0"], GL_FLOAT, GL_FALSE, AttribPointer["stride_0"], (void*)AttribPointer["offset_0"]));
 	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glVertexAttribPointer(AttribPointer["layout_1"], AttribPointer["size_of_vertex_1"], GL_FLOAT, GL_FALSE, AttribPointer["stride_1"], (void*)AttribPointer["offset_1"]));
-	GLCall(glEnableVertexAttribArray(1));
+	if (AttribPointer.count("layout_1"))
+	{
+		std::cout << "layout 1 found!" << std::endl;
+		GLCall(glVertexAttribPointer(AttribPointer["layout_1"], AttribPointer["size_of_vertex_1"], GL_FLOAT, GL_FALSE, AttribPointer["stride_1"], (void*)AttribPointer["offset_1"]));
+		GLCall(glEnableVertexAttribArray(1));
+	}
 
-	GLCall(glGenTextures(1, &TEXTURE));
-	GLCall(glBindTexture(GL_TEXTURE_2D, TEXTURE));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-	GLCall(glBindVertexArray(0));
+	if (key == "generate texture")
+	{
+		GLCall(glGenTextures(1, &TEXTURE));
+		GLCall(glBindTexture(GL_TEXTURE_2D, TEXTURE));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+		GLCall(glBindVertexArray(0));
+	}
 }
 
 VertexBuffer::~VertexBuffer()

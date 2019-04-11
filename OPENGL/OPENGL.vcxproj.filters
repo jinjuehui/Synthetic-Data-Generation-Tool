@@ -57,6 +57,12 @@
     <None Include="multipleLightSource_fragment.shader">
       <Filter>Shader</Filter>
     </None>
+    <None Include="Basic_vertex.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Basic_Fragment.shader">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp">
@@ -77,7 +83,7 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Crysis.cpp">
+    <ClCompile Include="Calculate_Bounding_Box.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

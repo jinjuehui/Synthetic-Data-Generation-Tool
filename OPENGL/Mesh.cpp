@@ -158,13 +158,20 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 	std::cout << "Processing Node!" << std::endl;
 	for (unsigned int i=0; i<node->mNumMeshes;i++)
 	{
+		std::cout << "in loop process mesh" << std::endl;
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+		std::cout << "in loop process mesh" << std::endl;
+
 		meshes.push_back(processMesh(mesh, scene)); //transfer aiMesh* type to the Mesh type we defined ourselfs
+		std::cout << "in loop process mesh" << std::endl;
+
 	}
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
+		std::cout << "in loop process children node" << std::endl;
 		processNode(node->mChildren[i], scene);
 	}
+	std::cout << "node process finished" << std::endl;
 }
 
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
@@ -176,6 +183,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	//process in vertex
 	for (unsigned int i = 0; i<mesh->mNumVertices; i++)
 	{
+		//std::cout << "process vertex" <<i<< std::endl;
 		//process vertex
 		Vertex vertex;
 		vertex.Position.x = mesh->mVertices[i].x;
