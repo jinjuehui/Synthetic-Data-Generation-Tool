@@ -1,12 +1,6 @@
 #include "utils.h"
 
 
-
-
-
-
-
-
 CameraOrientation rotateCamera(int P, int Y, float distance)
 {
 	//std::cout << "Camera rotation enabled!" << std::endl;
@@ -74,7 +68,7 @@ GLFWwindow* initialize_window(int width, int height, const char* name)
 }
 
 
-bounding_box caculate_bounbox(float x_min,
+bounding_box caculate_boundingbox(float x_min,
 								float x_max,
 								float y_min,
 								float y_max,
@@ -88,5 +82,50 @@ bounding_box caculate_bounbox(float x_min,
 	bb.w = int(screen_w*(x_max - x_min));
 	bb.h = int(screen_h*(y_max - y_min));
 	return bb;
+
+}
+
+bounding_box_vertex generate_bounding_box_labels(Model train_object, 
+									int screen_w, 
+									int screen_h, 
+									glm::mat4 projection,
+									glm::mat4 camera,
+									glm::mat4 model)
+{
+
+	std::vector<float> U;
+	std::vector<float> V;
+
+	int i = 0;
+	while (i < train_object.meshes[0].Vertecies.size())
+	{
+		glm::vec4 vertex_position_on_image = projection * camera * model * glm::vec4(train_object.meshes[0].Vertecies[i].Position, 1.0f);
+		U.push_back(vertex_position_on_image[0] / vertex_position_on_image[3]);
+		//std::cout << "vertex position on image: " << vertex_position_on_image[0]/ vertex_position_on_image[3]
+		//			<< " " << vertex_position_on_image[1]/ vertex_position_on_image[3] << " " 
+		//			<< vertex_position_on_image[2]/ vertex_position_on_image[3] << " " << vertex_position_on_image[3]/ vertex_position_on_image[3] << std::endl;
+
+		V.push_back(vertex_position_on_image[1] / vertex_position_on_image[3]);
+		i++;
+	}
+	float bb_X_max = *std::max_element(U.begin(), U.end());
+	float bb_X_min = *std::min_element(U.begin(), U.end());
+	//std::cout << "delta x: " << bb_X_min<<" "<<bb_X_max-bb_X_min << std::endl;
+	float bb_Y_max = *std::max_element(V.begin(), V.end());
+	float bb_Y_min = *std::min_element(V.begin(), V.end());
+
+
+	bounding_box_vertex BoundingBox;
+
+	BoundingBox.x_max = bb_X_max;	// top right
+	BoundingBox.x_min = bb_X_min;  // bottom right
+	BoundingBox.y_max = bb_Y_max;  // bottom left
+	BoundingBox.y_min = bb_Y_min;
+
+
+	bounding_box bb = caculate_boundingbox(bb_X_min, bb_X_max, bb_Y_min, bb_Y_max, screen_w, screen_h);
+	//std::cout <<"bounding box: "<< bb.x << " " << bb.y << " " << bb.w << " " << bb.h << std::endl;
+
+	return BoundingBox;
 
 }

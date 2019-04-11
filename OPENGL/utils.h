@@ -2,8 +2,10 @@
 #include<GLFW/glfw3.h>
 #include<glm.hpp>
 #include<iostream>
+#include<algorithm>
 
 #include "Renderer.h"
+#include "Mesh.h"
 
 
 struct CameraOrientation//camera orientation , implement it to camera class in the future
@@ -51,7 +53,21 @@ struct bounding_box
 
 };
 
+struct bounding_box_vertex
+{
+	float x_min;
+	float x_max;
+	float y_min;
+	float y_max;
+};
+
 CameraOrientation rotateCamera(int P, int Y, float distance);
 GLFWwindow* initialize_window(int width, int height, const char* name);
-bounding_box caculate_bounbox(float x_min, float x_max, float y_min, float y_max,int screen_w,int screen_h);
-
+bounding_box caculate_boundingbox(float x_min, float x_max, float y_min, float y_max,int screen_w,int screen_h);
+bounding_box_vertex generate_bounding_box_labels(Model train_object,
+									int screen_w,
+									int screen_h,
+									glm::mat4 projection,
+									glm::mat4 camera,
+									glm::mat4 model
+									);

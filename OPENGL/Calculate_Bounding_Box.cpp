@@ -59,7 +59,7 @@ int main()
 		3,0,2
 	};
 
-	bounding_box bb;
+
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -87,9 +87,6 @@ int main()
 				{
 					GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 					GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-					//std::cout << "R: " << Y << std::endl;
-					std::vector<float> U;
-					std::vector<float> V;
 
 					camera = glm::rotate(camera, glm::radians((float)R), CameraSetup.camera_front);
 					
@@ -111,48 +108,21 @@ int main()
 					TrainingObject.Draw(Simple_shader);
 					GLCall(glClear(GL_DEPTH_BUFFER_BIT));
 
-
 					//drawing bounding box
-					int i = 0;
-					while (i<TrainingObject.meshes[0].Vertecies.size())
-					{
-						glm::vec4 vertex_position_on_image =  projection * camera * model * glm::vec4(TrainingObject.meshes[0].Vertecies[i].Position, 1.0f);
-						U.push_back(vertex_position_on_image[0]/vertex_position_on_image[3]);
-						//std::cout << "vertex position on image: " << vertex_position_on_image[0]/ vertex_position_on_image[3]
-						//			<< " " << vertex_position_on_image[1]/ vertex_position_on_image[3] << " " 
-						//			<< vertex_position_on_image[2]/ vertex_position_on_image[3] << " " << vertex_position_on_image[3]/ vertex_position_on_image[3] << std::endl;
+					bounding_box_vertex BoundingBox_vertex=generate_bounding_box_labels(TrainingObject, SCR_WIDTH, SCR_WIDTH, projection, camera, model);
 					
-						V.push_back(vertex_position_on_image[1]/vertex_position_on_image[3]);
-						i++;
-					}
-					float bb_X_max = *std::max_element(U.begin(), U.end());
-					float bb_X_min = *std::min_element(U.begin(), U.end());
-					//std::cout << "delta x: " << bb_X_min<<" "<<bb_X_max-bb_X_min << std::endl;
-					float bb_Y_max = *std::max_element(V.begin(), V.end());
-					float bb_Y_min = *std::min_element(V.begin(), V.end());
-
-
-
-
-
-					Basic_shader.use();
-
+					float BoundingBox[] = {
+						BoundingBox_vertex.x_max,	BoundingBox_vertex.y_max,	0.f,  // top right
+						BoundingBox_vertex.x_max,	BoundingBox_vertex.y_min,	0.f,  // bottom right
+						BoundingBox_vertex.x_min,	BoundingBox_vertex.y_min,	0.f,  // bottom left
+						BoundingBox_vertex.x_min,	BoundingBox_vertex.y_max,	0.f
+					};
 
 					std::map<std::string, int> AttribPointer_BB;
 					AttribPointer_BB["layout_0"] = 0;
 					AttribPointer_BB["size_of_vertex_0"] = 3;
 					AttribPointer_BB["stride_0"] = 3 * sizeof(float);
 					AttribPointer_BB["offset_0"] = 0;
-					float bb_factor = 1;
-					float bias = 0;
-
-					float BoundingBox[] = {
-						 bb_factor*bb_X_max,	bb_factor*bb_Y_max,	bias,  // top right
-						 bb_factor*bb_X_max,	bb_factor*bb_Y_min,	bias,  // bottom right
-						 bb_factor*bb_X_min,	bb_factor*bb_Y_min,	bias,  // bottom left
-						 bb_factor*bb_X_min,	bb_factor*bb_Y_max,	bias
-					};
-					
 
 					VertexBuffer BB(BoundingBox,
 						BB_indicies,
@@ -163,9 +133,7 @@ int main()
 						AttribPointer_BB,
 						"bb");
 					
-					bb = caculate_bounbox(bb_X_min,bb_X_max,bb_Y_min,bb_Y_max,SCR_WIDTH,SCR_HEIGHT);
-					std::cout <<"bounding box: "<< bb.x << " " << bb.y << " " << bb.w << " " << bb.h << std::endl;
-					
+					Basic_shader.use();
 					GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 					BB.Draw("draw_elements");
 
