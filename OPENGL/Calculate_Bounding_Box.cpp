@@ -1,9 +1,4 @@
-﻿//OpenGL extension
-#include <GL/glew.h>
-
-//OpenGL
-#include <GLFW/glfw3.h>
-#include <glm.hpp>
+﻿#include "utils.h"
 
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
@@ -26,121 +21,20 @@
 
 
 //camera setup with default parameters
-struct CameraOrientation
-{
-	glm::vec3 camera_pose = glm::vec3{ 0.0f,0.10f,20.0f };//{ 0.0f, 10.0f, 20.0f };
-	glm::vec3 camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose;//the target camera look at - camera position
-	glm::vec3 camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
+CameraOrientation CameraSetup;
+object_setting_for_fragment_shader train_object; 
+light lightning;
 
-}CameraSetup;
-
-struct Object  //object rendering params related to lightning and materials
-{
-	//default white plastic
-	glm::vec3 color{ 1.0f,1.0f,1.0f };
-	glm::vec3 position{ 0.0f,0.0f,0.0f };
-	glm::vec3 ambient{ 1.0f,1.0f,1.0f };
-	glm::vec3 diffuse{ 0.55f,0.55f,0.55f };
-	glm::vec3 specular{ 0.7f,0.7f,0.7f };
-	float shininess = 15.0f;
-}train_object;
-
-struct light
-{
-	glm::vec3 light_color = { 1.0f,1.0f,1.0f };
-	glm::vec3 light_direction = { -0.2,-1.0f,-0.3f };
-	glm::vec3 light_position = { 5.0f,0.0f,2.0f };
-
-	glm::vec3 ambient = { 0.2f,0.2f,0.2f };
-	glm::vec3 diffuse = { 0.1f,0.1f,0.1f };
-	glm::vec3 specular = light_color;
-
-	float constantoffset = 1.0f;
-	float linearfactor = 0.09f;
-	float quadraticfactor = 0.032f;
-
-	float cutoff = glm::cos(glm::radians(12.5f));
-	float outercutoff = glm::cos(glm::radians(15.0f));
-}lightning;
-
-glm::vec3 light_position(10.0f, 10.0f, 2.0f);
-
-
-//rotate camera the function should be used in two for loop, which loop through the Yaw and Pitch angle
-CameraOrientation rotateCamera(int P, int Y, float distance)
-{
-	//std::cout << "Camera rotation enabled!" << std::endl;
-
-	CameraOrientation setup;
-	//std::cout << "Y= " << Y << std::endl;
-	float x_direction = distance * glm::cos(glm::radians((float)P)) * cos(glm::radians((float)Y));
-	float y_direction = distance * glm::sin(glm::radians((float)P));
-	float z_direction = distance * glm::cos(glm::radians((float)P)) * sin(glm::radians((float)Y));
-
-	setup.camera_pose = glm::vec3(x_direction, y_direction, z_direction);
-	std::cout << "camera_pose: " <<setup.camera_pose[0]<< " " <<setup.camera_pose[1] << " " << setup.camera_pose[2] << " " << std::endl;
-	glm::vec3 camera_pose_xz = glm::vec3(setup.camera_pose.x, 0.0f, setup.camera_pose.z);
-	setup.camera_front =glm::normalize(-setup.camera_pose);
-	std::cout << "camera_front: " << setup.camera_front[0] << " " << setup.camera_front[1] << " " << setup.camera_front[2] << " " << std::endl;
-	setup.camera_up;
-
-	if (P == 0)
-		setup.camera_up = glm::vec3(0.0f,1.0f,0.0f);
-
-	if ((0 < P&&P <= 90) || (180 <= P && P <= 270) || P == 360)
-	{
-		setup.camera_up = glm::normalize(glm::cross(glm::cross(setup.camera_pose, camera_pose_xz), glm::normalize(setup.camera_front)));
-		std::cout << "camera up: " <<setup.camera_up[0]<< " " << setup.camera_up[1]<< " " <<setup.camera_up[1] << std::endl;
-	}
-
-	if ((90 < P&&P < 180) || (270 < P&&P < 360))
-	{
-		setup.camera_up = glm::normalize(glm::cross(glm::cross(setup.camera_pose, camera_pose_xz), glm::normalize(setup.camera_pose)));
-		std::cout << "camera up: " << setup.camera_up[0] << " " << setup.camera_up[1] << " " << setup.camera_up[1] << std::endl;
-	}
-
-	return setup;
-}
-
-GLFWwindow* initialize_window(int width, int height, const char* name)
-{
-	GLFWwindow* window;
-	if (!glfwInit())
-		exit(EXIT_FAILURE);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-
-	window = glfwCreateWindow(width,height,name,NULL,NULL);
-
-	if (!window)
-	{
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		std::cout << "Window creation succeed!" << std::endl;
-	}
-
-	glfwMakeContextCurrent(window);
-
-	if (glewInit() != GLEW_OK)
-		std::cout << "initialize glew failed" << std::endl;
-	else
-		std::cout << "glew initialization succeed!" << std::endl;
-
-	GLCall(glViewport(0, 0, width, height));
-	return window;
-}
+const unsigned int SCR_WIDTH = 1000;
+const unsigned int SCR_HEIGHT = 1000;
+int delta_P(5), delta_Y(5), delta_R(10);
 
 int main()
 {
 
-	const unsigned int SCR_WIDTH = 1000;
-	const unsigned int SCR_HEIGHT = 1000;
 	GLFWwindow* window = initialize_window(SCR_WIDTH, SCR_HEIGHT, "Bounding Box");
-
 	Shader Simple_shader("Simple_vertex.shader", "Simple_Fragment.shader");
+	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader");
 
 	glm::mat4 model(1.0);
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
@@ -149,7 +43,7 @@ int main()
 	projection = glm::perspective(glm::radians(60.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 100.0f);
 
 
-	Model TrainingObject("mesh/obj_05.stl");
+	Model TrainingObject("mesh/obj_05_simplified.stl");
 	std::cout << "finish loading model" << std::endl;
 
 	std::vector<glm::vec3> pointset_on_image;
@@ -164,18 +58,19 @@ int main()
 		0,1,2,
 		3,0,2
 	};
+
+	bounding_box bb;
 	
-	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader");
 	while (!glfwWindowShouldClose(window))
 	{
 
 
-		for (int P = 0; P <361; P++)
+		for (int P = 0; P <361; P+=delta_P)
 		{	
 			std::cout << "P: "<< P << std::endl;
-			for (int Y = 0; Y < 361; Y += 5)
+			for (int Y = 0; Y < 361; Y += delta_Y)
 			{
-				//std::cout << "P: " << Y << std::endl;
+				std::cout << "Y: " << Y << std::endl;
 
 				float distance = 0.2f;
 				CameraSetup = rotateCamera(P, Y, distance);
@@ -188,14 +83,13 @@ int main()
 				//std::cout << "projection: " << projection[3][0] << "	" << projection[3][1] << "	" << projection[3][2] << "	" <<projection[3][3] << std::endl;
 
 
-				for (int R = 0; R < 361; R += 60)
+				for (int R = 0; R < 361; R += delta_R)
 				{
 					GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 					GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 					//std::cout << "R: " << Y << std::endl;
 					std::vector<float> U;
 					std::vector<float> V;
-					std::vector<float> W;
 
 					camera = glm::rotate(camera, glm::radians((float)R), CameraSetup.camera_front);
 					
@@ -209,7 +103,7 @@ int main()
 					Simple_shader.setVector3f("material.specular", train_object.specular);
 					Simple_shader.setFloat("material.shininess", train_object.shininess);
 
-					Simple_shader.setVector3f("light.position", light_position);
+					Simple_shader.setVector3f("light.position", lightning.light_position);
 					Simple_shader.setVector3f("light.ambient", lightning.ambient);
 					Simple_shader.setVector3f("light.diffuse", lightning.diffuse);
 					Simple_shader.setVector3f("light.specular", lightning.light_color);
@@ -229,7 +123,6 @@ int main()
 						//			<< vertex_position_on_image[2]/ vertex_position_on_image[3] << " " << vertex_position_on_image[3]/ vertex_position_on_image[3] << std::endl;
 					
 						V.push_back(vertex_position_on_image[1]/vertex_position_on_image[3]);
-						//W.push_back(vertex_position_on_image[2]);
 						i++;
 					}
 					float bb_X_max = *std::max_element(U.begin(), U.end());
@@ -237,16 +130,12 @@ int main()
 					//std::cout << "delta x: " << bb_X_min<<" "<<bb_X_max-bb_X_min << std::endl;
 					float bb_Y_max = *std::max_element(V.begin(), V.end());
 					float bb_Y_min = *std::min_element(V.begin(), V.end());
-					//std::cout << "delta y: " << bb_Y_min << " "<<bb_Y_max-bb_Y_min << std::endl;
-					//float bb_Z_max = *std::max_element(W.begin(), W.end());
-					//std::cout << "Z max: " << bb_Z_max << std::endl;
 
 
-					//define a functino to do all the transformation
+
 
 
 					Basic_shader.use();
-					//Basic_shader.setMatrix4fv("projection",otoprojection);
 
 
 					std::map<std::string, int> AttribPointer_BB;
@@ -274,8 +163,12 @@ int main()
 						AttribPointer_BB,
 						"bb");
 					
+					bb = caculate_bounbox(bb_X_min,bb_X_max,bb_Y_min,bb_Y_max,SCR_WIDTH,SCR_HEIGHT);
+					std::cout <<"bounding box: "<< bb.x << " " << bb.y << " " << bb.w << " " << bb.h << std::endl;
+					
 					GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 					BB.Draw("draw_elements");
+
 
 					GLCall(glfwSwapBuffers(window));
 					GLCall(glfwPollEvents());
