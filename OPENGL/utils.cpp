@@ -94,17 +94,38 @@ bounding_box caculate_boundingbox(float x_min,
 }
 
 
+void generate_yaml_label(std::ofstream &jsonfile, std::string json_path,json labels, std::string object_path, bounding_box bb,int P,int Y,int R)
+{
+	int n = 100 * P + 10 * Y + R;
+	std::string PYR=std::to_string(n);
+	//std::cout << "PYR" << PYR << std::endl;
+		
+	labels["object_id"] = object_path.substr(0, object_path.find_last_of('/'));
+	labels[PYR]["bb"]["x"] = bb.x;
+	labels[PYR]["bb"]["y"] = bb.y;
+	labels[PYR]["bb"]["w"] = bb.w;
+	labels[PYR]["bb"]["h"] = bb.h;
+	jsonfile << labels;
+
+}
+
+
 //use to generate the bounding box labels 
 //input: a model object, screen width and screen height, the projection matrix, the view(camera) matrix, and model matrix
 //return: return a bouding box vertex structure to visualize on the screen.
 bounding_box_vertex generate_bounding_box_labels(Model train_object, 
 									int screen_w, 
-									int screen_h, 
+									int screen_h,
+									int P,
+									int Y,
+									int R,
 									glm::mat4 projection,
 									glm::mat4 camera,
-									glm::mat4 model)
+									glm::mat4 model,
+									std::ofstream &jsonfile,
+									std::string json_path)
 {
-
+	std::ofstream &jf=jsonfile;
 	std::vector<float> U;
 	std::vector<float> V;
 
@@ -136,6 +157,9 @@ bounding_box_vertex generate_bounding_box_labels(Model train_object,
 
 
 	bounding_box bb = caculate_boundingbox(bb_X_min, bb_X_max, bb_Y_min, bb_Y_max, screen_w, screen_h);
+
+	json bb_labels;
+	generate_yaml_label(jf,json_path,bb_labels,"mesh/obj_05.stl",bb,P,Y,R);
 	//std::cout <<"bounding box: "<< bb.x << " " << bb.y << " " << bb.w << " " << bb.h << std::endl;
 
 	return BoundingBox;

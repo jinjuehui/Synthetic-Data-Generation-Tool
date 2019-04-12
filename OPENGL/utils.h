@@ -4,20 +4,23 @@
 #include<iostream>
 #include<algorithm>
 #include<nlohmann/json.hpp>
-
-
+#include<sstream>
 #include "Renderer.h"
 #include "Mesh.h"
 
+using json = nlohmann::json;
 
-struct CameraOrientation//camera orientation , implement it to camera class in the future
+//camera orientation , implement it to camera class in the future
+struct CameraOrientation
 {
 	glm::vec3 camera_pose = glm::vec3{ 0.0f,0.10f,20.0f };//{ 0.0f, 10.0f, 20.0f };
 	glm::vec3 camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose;//the target camera look at - camera position
 	glm::vec3 camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
 };
 
-struct object_setting_for_fragment_shader//define object fragment shader setup
+
+//define object fragment shader setup
+struct object_setting_for_fragment_shader
 {
 	//default white plastic
 	glm::vec3 color{ 1.0f,1.0f,1.0f };
@@ -46,6 +49,7 @@ struct light
 	float outercutoff = glm::cos(glm::radians(15.0f));
 }; //lightning setup for fragment shader
 
+//bounding box in normal convention, the label is formed in this structure
 struct bounding_box 
 {
 	int x;
@@ -55,6 +59,7 @@ struct bounding_box
 
 };
 
+//bounding box vertex used to draw the bb on the screen to visualize the result of the calculation
 struct bounding_box_vertex
 {
 	float x_min;
@@ -63,13 +68,21 @@ struct bounding_box_vertex
 	float y_max;
 };
 
+
 CameraOrientation rotateCamera(int P, int Y, float distance);
 GLFWwindow* initialize_window(int width, int height, const char* name);
+void generate_yaml_label(std::ofstream &jsonfile,std::string json_path,json labels, std::string object_path, bounding_box bb, int P, int Y, int R);
 bounding_box caculate_boundingbox(float x_min, float x_max, float y_min, float y_max,int screen_w,int screen_h);
 bounding_box_vertex generate_bounding_box_labels(Model train_object,
 									int screen_w,
 									int screen_h,
+									int P,
+									int Y,
+									int R,
 									glm::mat4 projection,
 									glm::mat4 camera,
-									glm::mat4 model
+									glm::mat4 model,
+									std::ofstream &jsonfile,
+									std::string json_path
 									);
+

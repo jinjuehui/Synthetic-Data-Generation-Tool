@@ -430,7 +430,6 @@ unsigned int back_indicies[] =
 
 
 //TODO:
-//* Generating bounding box
 //*.Object Position randomization
 //*.bench marking
 //*.photo realistic rendering
@@ -439,11 +438,12 @@ unsigned int back_indicies[] =
 //*.add semantic segmentation
 //*.check rotation information
 //*.add xml generator
-//*.fix no rendering happens when P=0  (walk arounded with P set to 1)
 //*.Image Loading problem, some image cause glTexImage2D exception break(walk arounded with deleting image from folder, probably related with aspect ration of the picture)
 //*. implement the split window to show both the rendered data and the ground truth data
 
 //Done(need be checked):
+//*.fix no rendering happens when P=0  (walk arounded with P set to 1)
+//* Generating bounding box
 //*.Add in plane rotation
 //*. set pictures as the background of the window
 //*. optimize all of the VAO and VBOs

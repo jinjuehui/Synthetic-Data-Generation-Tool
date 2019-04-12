@@ -57,7 +57,9 @@ int main()
 		3,0,2
 	};
 
-
+	std::ofstream jsonfile;
+	std::string json_path = "E:/label/label.json";
+	jsonfile.open(json_path);
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -107,7 +109,7 @@ int main()
 					GLCall(glClear(GL_DEPTH_BUFFER_BIT));
 
 					//generating bounding box
-					bounding_box_vertex BoundingBox_vertex = generate_bounding_box_labels(TrainingObject, SCR_WIDTH, SCR_WIDTH, projection, camera, model);
+					bounding_box_vertex BoundingBox_vertex = generate_bounding_box_labels(TrainingObject, SCR_WIDTH, SCR_WIDTH,P,Y,R, projection, camera, model,jsonfile,json_path);
 					
 					float BoundingBox[] = {
 						BoundingBox_vertex.x_max,	BoundingBox_vertex.y_max,	0.f,  // top right
@@ -142,7 +144,7 @@ int main()
 			}
 		}
 
-
+		jsonfile.close();
 
 	}
 	glfwTerminate();
