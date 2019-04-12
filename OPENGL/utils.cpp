@@ -1,6 +1,7 @@
 #include "utils.h"
 
-
+//input: pitch and yaw angle, and the distance: TODO add roll angle in this function
+//return: the camera setup, used to initialize the gllookAt() function to initialize the camera object
 CameraOrientation rotateCamera(int P, int Y, float distance)
 {
 	//std::cout << "Camera rotation enabled!" << std::endl;
@@ -36,6 +37,9 @@ CameraOrientation rotateCamera(int P, int Y, float distance)
 	return setup;
 }
 
+
+//input: screen width, screen height, window name
+//return: a window object used for ex. while loop
 GLFWwindow* initialize_window(int width, int height, const char* name)
 {
 	GLFWwindow* window;
@@ -68,6 +72,10 @@ GLFWwindow* initialize_window(int width, int height, const char* name)
 }
 
 
+
+//use to calculate the bounding box in pixels
+//input: (x_min,y_min) lower left origin, (x_max,y_max) upper right corner, screen width, screen height
+//return: a bounding box structure contains, origin, width and height of the bounding box in pixels
 bounding_box caculate_boundingbox(float x_min,
 								float x_max,
 								float y_min,
@@ -85,6 +93,10 @@ bounding_box caculate_boundingbox(float x_min,
 
 }
 
+
+//use to generate the bounding box labels 
+//input: a model object, screen width and screen height, the projection matrix, the view(camera) matrix, and model matrix
+//return: return a bouding box vertex structure to visualize on the screen.
 bounding_box_vertex generate_bounding_box_labels(Model train_object, 
 									int screen_w, 
 									int screen_h, 

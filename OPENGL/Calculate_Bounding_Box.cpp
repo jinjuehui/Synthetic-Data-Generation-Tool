@@ -3,12 +3,10 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include <gtc/random.hpp>
-#include <algorithm>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <iostream>
 #include <string>
 
 #include "Renderer.h"
@@ -27,7 +25,7 @@ light lightning;
 
 const unsigned int SCR_WIDTH = 1000;
 const unsigned int SCR_HEIGHT = 1000;
-int delta_P(5), delta_Y(5), delta_R(10);
+int delta_P(5), delta_Y(5), delta_R(10);//<---if the step here changed, then the yaml file need to be generated one more time 
 
 int main()
 {
@@ -108,8 +106,8 @@ int main()
 					TrainingObject.Draw(Simple_shader);
 					GLCall(glClear(GL_DEPTH_BUFFER_BIT));
 
-					//drawing bounding box
-					bounding_box_vertex BoundingBox_vertex=generate_bounding_box_labels(TrainingObject, SCR_WIDTH, SCR_WIDTH, projection, camera, model);
+					//generating bounding box
+					bounding_box_vertex BoundingBox_vertex = generate_bounding_box_labels(TrainingObject, SCR_WIDTH, SCR_WIDTH, projection, camera, model);
 					
 					float BoundingBox[] = {
 						BoundingBox_vertex.x_max,	BoundingBox_vertex.y_max,	0.f,  // top right

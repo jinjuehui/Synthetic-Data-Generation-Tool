@@ -3,6 +3,8 @@
 #include<glm.hpp>
 #include<iostream>
 #include<algorithm>
+#include<nlohmann/json.hpp>
+
 
 #include "Renderer.h"
 #include "Mesh.h"
