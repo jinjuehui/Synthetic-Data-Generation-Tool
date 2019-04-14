@@ -46,13 +46,17 @@ int main()
 	std::cout << "finish loading model" << std::endl;
 
 	std::vector<glm::vec3> pointset_on_image;
-	glm::mat4 camera = glm::mat4(1.0f);
-	
-	std::cout << "finish loading model" << std::endl;
+	glm::mat4 camera = glm::mat4(1.0f);	
 
 	BoundingBox boundingbox(TrainingObject,SCR_WIDTH,SCR_HEIGHT);
 	
-	std::cout << "finish loading model" << std::endl;
+	std::cout << "3d bouding box size: " << std::endl;
+	std::cout << "x max:" << boundingbox.bb_v_3d.x_max << "x min: "
+		<< boundingbox.bb_v_3d.x_min << " y max: "
+		<< boundingbox.bb_v_3d.y_max << " y_min: "
+		<< boundingbox.bb_v_3d.y_min << " z_max: "
+		<< boundingbox.bb_v_3d.z_max << " z_min: "
+		<< boundingbox.bb_v_3d.z_min << std::endl;
 
 	float bounding_box_vertex_8point[] =
 	{
@@ -66,21 +70,30 @@ int main()
 		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max
 	};
 
+	float array[] = { 1,2,3,4,5,6,7,8,9,10 };
+	//std::cout << "size of 8 point" << sizeof(bounding_box_vertex_8point)/sizeof(*bounding_box_vertex_8point)/3 << std::endl;
+	std::vector<glm::vec3> bb_glm_vec3;
+
+	for (int i = 0; i < 8; i++)
+	{
+		bb_glm_vec3.push_back(glm::vec3(bounding_box_vertex_8point[3*i], bounding_box_vertex_8point[3*i+1], bounding_box_vertex_8point[3*i+2]));
+	}
+
 
 	unsigned int bounding_box_indecies[] =
 	{
-		1,2,3,
-		1,4,3,
-		5,6,7,
-		5,7,8,
-		1,2,6,
-		1,6,5,
-		4,3,7,
-		4,7,8,
-		1,5,8,
-		1,4,8,
-		2,6,7,
-		2,7,3
+		0,1,2,
+		0,2,3,
+		4,5,6,
+		3,6,7,
+		0,1,5,
+		0,5,4,
+		3,2,6,
+		3,6,7,
+		0,4,7,
+		0,3,7,
+		1,5,6,
+		1,6,2
 	};
 
 
@@ -162,8 +175,10 @@ int main()
 					GLCall(glClear(GL_DEPTH_BUFFER_BIT));
 
 					//generating bounding box
-					boundingbox.generate_bounding_box_labels_2d(TrainingObject, SCR_WIDTH, SCR_WIDTH,P,Y,R, projection, camera, model,jsonfile,json_path);
-					
+					//for 2d bounding box
+					//boundingbox.generate_bounding_box_labels_2d(TrainingObject, SCR_WIDTH, SCR_HEIGHT,P,Y,R, projection, camera, model,jsonfile,json_path);
+					//for 3d 8 point project on to the 2d image
+					boundingbox.generate_bounding_box_labels_3d(bb_glm_vec3, SCR_WIDTH, SCR_HEIGHT,P,Y,R,projection,camera,model,jsonfile,json_path);
 					//2d Bounding Box
 					float BoundingBox[] = {
 						boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
@@ -208,11 +223,11 @@ int main()
 		}
 
 		jsonfile.close();
+
+	}
 		glfwTerminate();
 		exit(EXIT_SUCCESS);
 		return 0;
-
-	}
 
 }
 

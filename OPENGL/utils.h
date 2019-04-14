@@ -82,7 +82,6 @@ public:
 		float z_max;
 	}bb_v_3d;
 
-	
 
 	BoundingBox(Model train_object, int screen_w, int screen_h);
 	void calculate_boundingbox(float x_min, float x_max, float y_min, float y_max, int screen_w, int screen_h);
@@ -100,7 +99,7 @@ public:
 										std::string json_path
 										);//very time consuming
 
-	void generate_bounding_box_labels_3d(float* bounding_box_3d_vertex,
+	void generate_bounding_box_labels_3d(std::vector<glm::vec3> bb_glm_vec3,
 										int screen_w,
 										int screen_h,
 										int P,
