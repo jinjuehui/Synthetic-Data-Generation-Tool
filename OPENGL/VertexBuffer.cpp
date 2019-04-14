@@ -123,7 +123,7 @@ void VertexBuffer::Draw(std::string key) const
 {
 	if (key=="draw_elements")
 	{
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+		//GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
 		GLCall(glBindVertexArray(VAO));
 		GLCall(glDrawElements(GL_TRIANGLES, NOE, GL_UNSIGNED_INT, 0));
 	}

@@ -50,39 +50,74 @@ struct light
 }; //lightning setup for fragment shader
 
 //bounding box in normal convention, the label is formed in this structure
-struct bounding_box 
-{
-	int x;
-	int y;
-	int w;
-	int h;
 
-};
+class BoundingBox {
+public:
 
-//bounding box vertex used to draw the bb on the screen to visualize the result of the calculation
-struct bounding_box_vertex
-{
-	float x_min;
-	float x_max;
-	float y_min;
-	float y_max;
+	struct bounding_box //in pixel
+	{
+		int x;
+		int y;
+		int w;
+		int h;
+	
+	}bb;
+	
+	//bounding box vertex used to draw the bb on the screen to visualize the result of the calculation
+	struct bounding_box_2d_param
+	{
+		float x_min;
+		float x_max;
+		float y_min;
+		float y_max;
+	}bb_v;
+	
+	struct bounding_box_3d_param
+	{
+		float x_min;
+		float x_max;
+		float y_min;
+		float y_max;
+		float z_min;
+		float z_max;
+	}bb_v_3d;
+
+	
+
+	BoundingBox(Model train_object, int screen_w, int screen_h);
+	void calculate_boundingbox(float x_min, float x_max, float y_min, float y_max, int screen_w, int screen_h);
+	void generate_bounding_box_3d(Model train_object);
+	void generate_bounding_box_labels_2d(Model train_object,
+										int screen_w,
+										int screen_h,
+										int P,
+										int Y,
+										int R,
+										glm::mat4 projection,
+										glm::mat4 camera,
+										glm::mat4 model,
+										std::ofstream &jsonfile,
+										std::string json_path
+										);//very time consuming
+
+	void generate_bounding_box_labels_3d(float* bounding_box_3d_vertex,
+										int screen_w,
+										int screen_h,
+										int P,
+										int Y,
+										int R,
+										glm::mat4 projection,
+										glm::mat4 camera,
+										glm::mat4 model,
+										std::ofstream &jsonfile,
+										std::string json_path
+										);
+	
 };
 
 
 CameraOrientation rotateCamera(int P, int Y, float distance);
 GLFWwindow* initialize_window(int width, int height, const char* name);
-void generate_yaml_label(std::ofstream &jsonfile,std::string json_path,json labels, std::string object_path, bounding_box bb, int P, int Y, int R);
-bounding_box caculate_boundingbox(float x_min, float x_max, float y_min, float y_max,int screen_w,int screen_h);
-bounding_box_vertex generate_bounding_box_labels(Model train_object,
-									int screen_w,
-									int screen_h,
-									int P,
-									int Y,
-									int R,
-									glm::mat4 projection,
-									glm::mat4 camera,
-									glm::mat4 model,
-									std::ofstream &jsonfile,
-									std::string json_path
-									);
+void generate_yaml_label(std::ofstream &jsonfile,std::string json_path,json labels, std::string object_path, BoundingBox::bounding_box bb, int P, int Y, int R);
+
 

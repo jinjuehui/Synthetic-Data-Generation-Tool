@@ -33,6 +33,7 @@ int main()
 	GLFWwindow* window = initialize_window(SCR_WIDTH, SCR_HEIGHT, "Bounding Box");
 	Shader Simple_shader("Simple_vertex.shader", "Simple_Fragment.shader");
 	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader");
+	Shader boundingbox_8p_shader("boundingbox_8p_vertex.shader", "boundingbox_8p_fragment.shader");
 
 	glm::mat4 model(1.0);
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
@@ -46,16 +47,68 @@ int main()
 
 	std::vector<glm::vec3> pointset_on_image;
 	glm::mat4 camera = glm::mat4(1.0f);
+	
+	std::cout << "finish loading model" << std::endl;
 
-	int P=0, Y=0, R=0;
+	BoundingBox boundingbox(TrainingObject,SCR_WIDTH,SCR_HEIGHT);
+	
+	std::cout << "finish loading model" << std::endl;
 
-	GLCall(glEnable(GL_DEPTH_TEST));
+	float bounding_box_vertex_8point[] =
+	{
+		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
+		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_min,
+		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_min,
+		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max,
+		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
+		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_min,
+		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_min,
+		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max
+	};
+
+
+	unsigned int bounding_box_indecies[] =
+	{
+		1,2,3,
+		1,4,3,
+		5,6,7,
+		5,7,8,
+		1,2,6,
+		1,6,5,
+		4,3,7,
+		4,7,8,
+		1,5,8,
+		1,4,8,
+		2,6,7,
+		2,7,3
+	};
+
 
 	unsigned int BB_indicies[] =
 	{
 		0,1,2,
 		3,0,2
 	};
+
+	std::map<std::string, int> AttribPointer_BB_3d;
+	AttribPointer_BB_3d["layout_0"] = 0;
+	AttribPointer_BB_3d["size_of_vertex_0"] = 3;
+	AttribPointer_BB_3d["stride_0"] = 3 * sizeof(float);
+	AttribPointer_BB_3d["offset_0"] = 0;
+
+	VertexBuffer BB_3d(bounding_box_vertex_8point,
+		bounding_box_indecies,
+		sizeof(bounding_box_vertex_8point) / sizeof(bounding_box_vertex_8point[0]),
+		sizeof(float),
+		sizeof(bounding_box_indecies) / sizeof(bounding_box_indecies[0]),
+		sizeof(int),
+		AttribPointer_BB_3d,
+		"bb");
+
+
+	int P=0, Y=0, R=0;
+
+	GLCall(glEnable(GL_DEPTH_TEST));
 
 	std::ofstream jsonfile;
 	std::string json_path = "E:/label/label.json";
@@ -109,14 +162,25 @@ int main()
 					GLCall(glClear(GL_DEPTH_BUFFER_BIT));
 
 					//generating bounding box
-					bounding_box_vertex BoundingBox_vertex = generate_bounding_box_labels(TrainingObject, SCR_WIDTH, SCR_WIDTH,P,Y,R, projection, camera, model,jsonfile,json_path);
+					boundingbox.generate_bounding_box_labels_2d(TrainingObject, SCR_WIDTH, SCR_WIDTH,P,Y,R, projection, camera, model,jsonfile,json_path);
 					
+					//2d Bounding Box
 					float BoundingBox[] = {
-						BoundingBox_vertex.x_max,	BoundingBox_vertex.y_max,	0.f,  // top right
-						BoundingBox_vertex.x_max,	BoundingBox_vertex.y_min,	0.f,  // bottom right
-						BoundingBox_vertex.x_min,	BoundingBox_vertex.y_min,	0.f,  // bottom left
-						BoundingBox_vertex.x_min,	BoundingBox_vertex.y_max,	0.f
+						boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
+						boundingbox.bb_v.x_max,	boundingbox.bb_v.y_min,	0.f,  // bottom right
+						boundingbox.bb_v.x_min,	boundingbox.bb_v.y_min,	0.f,  // bottom left
+						boundingbox.bb_v.x_min,	boundingbox.bb_v.y_max,	0.f
 					};
+
+					//3d Bounding Box
+					boundingbox_8p_shader.use();
+					boundingbox_8p_shader.setMatrix4fv("model", model);
+					boundingbox_8p_shader.setMatrix4fv("view",camera);
+					boundingbox_8p_shader.setMatrix4fv("projection",projection);
+
+					GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+					BB_3d.Draw("draw_elements");
+
 
 					std::map<std::string, int> AttribPointer_BB;
 					AttribPointer_BB["layout_0"] = 0;
@@ -134,7 +198,6 @@ int main()
 						"bb");
 					
 					Basic_shader.use();
-					GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 					BB.Draw("draw_elements");
 
 
@@ -145,11 +208,11 @@ int main()
 		}
 
 		jsonfile.close();
+		glfwTerminate();
+		exit(EXIT_SUCCESS);
+		return 0;
 
 	}
-	glfwTerminate();
-	exit(EXIT_SUCCESS);
-	return 0;
 
 }
 

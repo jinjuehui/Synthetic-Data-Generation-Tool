@@ -63,6 +63,12 @@
     <None Include="Basic_Fragment.shader">
       <Filter>Shader</Filter>
     </None>
+    <None Include="boundingbox_8p_vertex.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="boundingbox_8p_fragment.shader">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp">

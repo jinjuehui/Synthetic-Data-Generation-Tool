@@ -89,6 +89,7 @@ Shader::Shader(const char* VertexPath, const char* FragmentPath)
 Shader::~Shader()
 {
 	GLCall(glUseProgram(0));
+	//GLCall(glDeleteShader(shader_ID));
 }
 
 void Shader::use()
