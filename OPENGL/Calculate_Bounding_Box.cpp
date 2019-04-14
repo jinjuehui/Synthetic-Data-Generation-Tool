@@ -37,7 +37,7 @@ int main()
 
 	glm::mat4 model(1.0);
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-	model = glm::scale(model,glm::vec3(1.0f));
+	model = glm::scale(model,glm::vec3(1.f));
 	glm::mat4 projection = glm::mat4(1.0f);
 	projection = glm::perspective(glm::radians(60.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 100.0f);
 
@@ -124,7 +124,7 @@ int main()
 	GLCall(glEnable(GL_DEPTH_TEST));
 
 	std::ofstream jsonfile;
-	std::string json_path = "E:/label/label.json";
+	std::string json_path = "label.json";
 	jsonfile.open(json_path);
 	
 	while (!glfwWindowShouldClose(window))
@@ -136,7 +136,7 @@ int main()
 			std::cout << "P: "<< P << std::endl;
 			for (int Y = 0; Y < 361; Y += delta_Y)
 			{
-				std::cout << "Y: " << Y << std::endl;
+				//std::cout << "Y: " << Y << std::endl;
 
 				float distance = 0.2f;
 				CameraSetup = rotateCamera(P, Y, distance);
@@ -215,7 +215,7 @@ int main()
 					Basic_shader.use();
 					BB.Draw("draw_elements");
 
-
+					//save sample images here
 					GLCall(glfwSwapBuffers(window));
 					GLCall(glfwPollEvents());
 				}
@@ -223,11 +223,11 @@ int main()
 		}
 
 		jsonfile.close();
-
-	}
 		glfwTerminate();
 		exit(EXIT_SUCCESS);
 		return 0;
+
+	}
 
 }
 
