@@ -1,15 +1,4 @@
-//OpenGL extension
-#include <GL/glew.h>
-
-//OpenGL
-#include <GLFW/glfw3.h>
-
-//OpenGL Math
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
-#include <gtc/random.hpp>
-
+#include "utils.h"
 
 //OpenGL mesh loader
 #include <assimp/Importer.hpp>
@@ -20,26 +9,18 @@
 #include <FreeImage.h>
 
 //self defined headers
-#include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "stb_image.h"
-#include "Mesh.h"
 
 
 //C++ basics
-#include <iostream>
 #include <fstream>
 #include <map>
 #include <string>
-#include <iostream>
 #include <filesystem>
 namespace fs = std::filesystem;
-
-//Json
-#include <nlohmann/json.hpp>
-
 
 
 //Triggers and Keys
@@ -72,33 +53,8 @@ glm::vec3 light_position(1.0f,0.0f,2.0f);
 
 using json = nlohmann::json;
 
-struct light 
-{
-	glm::vec3 light_color = {1.0f,1.0f,1.0f};
-	glm::vec3 light_direction = { -0.2,-1.0f,-0.3f };
-	glm::vec3 light_position = {5.0f,0.0f,2.0f};
-
-	glm::vec3 ambient = { 0.2f,0.2f,0.2f };
-	glm::vec3 diffuse = {0.1f,0.1f,0.1f};
-	glm::vec3 specular = light_color;
-
-	float constantoffset = 1.0f;
-	float linearfactor = 0.09f;
-	float quadraticfactor = 0.032f;
-
-	float cutoff = glm::cos(glm::radians(12.5f));
-	float outercutoff = glm::cos(glm::radians(15.0f));
-} dirLight, pointLight, spotLight,lightning;
-struct Object  //object rendering params related to lightning and materials
-{
-	//default white plastic
-	glm::vec3 color{1.0f,1.0f,1.0f};
-	glm::vec3 position{0.0f,0.0f,0.0f};
-	glm::vec3 ambient{1.0f,1.0f,1.0f};
-	glm::vec3 diffuse{0.55f,0.55f,0.55f};
-	glm::vec3 specular{0.7f,0.7f,0.7f};
-	float shininess = 15.0f;
-}train_object,reference_object;
+light dirLight, pointLight, spotLight,lightning;
+object_setting_for_fragment_shader train_object,reference_object;
 glm::vec3 light_positions[] =
 {	glm::ballRand(10.0),
 	glm::ballRand(15.0),
@@ -148,48 +104,7 @@ unsigned int indicies_cube[] = {
 };
 
 //camera setup with default parameters
-struct CameraOrientation
-{
-	glm::vec3 camera_pose = glm::vec3{ 0.0f,0.10f,20.0f };//{ 0.0f, 10.0f, 20.0f };
-	glm::vec3 camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose;//the target camera look at - camera position
-	glm::vec3 camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
-
-}Setup;
-
-//rotate camera the function should be used in two for loop, which loop through the Yaw and Pitch angle
-CameraOrientation rotateCamera(int P, int Y,float distance)
-{
-	//std::cout << "Camera rotation enabled!" << std::endl;
-
-	CameraOrientation setup;
-	//std::cout << "Y= " << Y << std::endl;
-	float x_direction = distance * glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y));
-	float y_direction = distance * glm::sin(glm::radians((float)P));
-	float z_direction = -distance * glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y));
-
-	setup.camera_pose = glm::vec3(x_direction, y_direction, z_direction);
-	glm::vec3 camera_pose_xz = glm::vec3(setup.camera_pose.x, 0.0f, setup.camera_pose.z);
-	setup.camera_front = -setup.camera_pose;
-	setup.camera_up;
-
-
-	if ((0 < P&&P <= 90) || (180 <= P && P <= 270) || P == 360)
-	{
-		setup.camera_up = glm::normalize(glm::cross(glm::cross(setup.camera_pose, camera_pose_xz), setup.camera_front));
-		//std::cout << "0<P<=90" << std::endl;
-	}
-
-	if ((90 < P&&P < 180) || (270 < P&&P < 360)||P==0)
-	{
-		setup.camera_up = glm::normalize(glm::cross(glm::cross(setup.camera_pose, camera_pose_xz), setup.camera_pose));
-		//std::cout << "90<P<=180" << std::endl;
-	}
-
-
-
-
-	return setup;
-}
+CameraOrientation Setup;
 
 glm::mat4 rotateLight(glm::mat4 light_model, int P, int Y, float distance)
 {
@@ -430,23 +345,24 @@ unsigned int back_indicies[] =
 
 
 //TODO:
-//*.Object Position randomization
-//*.bench marking
-//*.photo realistic rendering
-//*.output data in PascalVOC structure
-//*.add instance segmentation
-//*.add semantic segmentation
-//*.check rotation information
-//*.add xml generator
-//*.Image Loading problem, some image cause glTexImage2D exception break(walk arounded with deleting image from folder, probably related with aspect ration of the picture)
-//*. implement the split window to show both the rendered data and the ground truth data
+//* Object Position randomization
+//* bench marking
+//* photo realistic rendering
+//* output data in PascalVOC structure
+//* add instance segmentation
+//* add semantic segmentation
+//* check rotation information
+//* add xml generator
+//* Image Loading problem, some image cause glTexImage2D exception break(walk arounded with deleting image from folder, probably related with aspect ration of the picture)
+//* implement the split window to show both the rendered data and the ground truth data
 
 //Done(need be checked):
-//*.fix no rendering happens when P=0  (walk arounded with P set to 1)
+//* fix no rendering happens when P=0  (walk arounded with P set to 1)
 //* Generating bounding box
-//*.Add in plane rotation
-//*. set pictures as the background of the window
-//*. optimize all of the VAO and VBOs
+//* generating 3d bounding box
+//* Add in plane rotation
+//* set pictures as the background of the window
+//* optimize all of the VAO and VBOs
 
 
 //void window_size_callback(GLFWwindow* window, int width, int height)
@@ -537,19 +453,17 @@ int main()
 							sizeof(back_indicies) / sizeof(back_indicies[0]),
 							sizeof(int),
 							AttribPointer_Background,
-							"TEXTURE");
+							"generate texture");
 
 	//read file list int the folder
 	std::cout << "creating image list..." << std::endl;
 	std::map<std::string,int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");
 	std::map<std::string, int>::iterator it = Filelist.begin();
-	std::advance(it, 2600);
+	std::advance(it, 1);
 	
-	//std::cout << it->first << std::endl;
 	std::cout << "image list created!" << std::endl;
-	//Model nanosuits(LOAD_MODEL);//untitled.obj
 	Model TrainingObject(LOAD_MODEL);
-	std::cout << "number of model meshes: " << TrainingObject.meshes[0].Vertecies.size() << std::endl;
+	//std::cout << "number of model meshes: " << TrainingObject.meshes[0].Vertecies.size() << std::endl;
 	Model ReferenceObject(LOAD_CUBE_REFERENCE);
 	if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
 	{
@@ -559,17 +473,60 @@ int main()
 		std::cout << "mouse to zoom.." << std::endl;
 	}
 
-	//old shader for nanosuits
-		//Shader shader_program("VertexShader.shader", "FragmentShader.shader");
 
 	Shader Simple_shader("Simple_vertex.shader","Simple_Fragment.shader");
-
 	Shader lightning_shader("Lightning_vertex.shader", "Lightning_fragment.shader");
-
 	Shader multiple_lightning_shader("multipleLightSource_vertex.shader","multipleLightSource_fragment.shader");
+	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader");
+	Shader Boundingbox_8p_shader("boundingbox_8p_vertex.shader","boundingbox_8p_fragment.shader");
 
+	BoundingBox boundingbox(TrainingObject, SCR_WIDTH, SCR_HEIGHT);
 
+	/////////////////////////////////////////////////move into bounding box class/////////////////////////////////////
+	float bounding_box_vertex_8point[]=//for visualization
+	{
+		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
+		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_min,
+		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_min,
+		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max,
+		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
+		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_min,
+		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_min,
+		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max
+	};
 
+	unsigned int bounding_box_indecies[] =
+	{
+		0,1,2,
+		0,2,3,
+		4,5,6,
+		3,6,7,
+		0,1,5,
+		0,5,4,
+		3,2,6,
+		3,6,7,
+		0,4,7,
+		0,3,7,
+		1,5,6,
+		1,6,2
+	};
+
+	std::vector<glm::vec3> bb_glm_vec3;//for calculation the 2d bb
+	for (int i = 0; i < 8; i++)
+	{
+		bb_glm_vec3.push_back(glm::vec3(bounding_box_vertex_8point[3 * i], bounding_box_vertex_8point[3 * i + 1], bounding_box_vertex_8point[3 * i + 2]));
+	}//move into boundingbox class
+
+	unsigned int BB_indicies[] =
+	{
+		0,1,2,
+		3,0,2
+	};
+
+	//for visualization
+	
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	lamp = glm::translate(lamp, light_position);
 	lamp = glm::scale(lamp, glm::vec3(10.0f,10.0f,10.0f));
 	//back_position = glm::translate(back_position, back_ground_position);
@@ -586,7 +543,7 @@ int main()
 	std::ofstream jsonfile;
 	jsonfile.open("E:/label/label.json");
 
-
+	int delta_P(5), delta_Y(5), delta_R(10);
 
 
 	while (!glfwWindowShouldClose(window[0]))  //start the game
@@ -608,7 +565,7 @@ int main()
 			USE_BACKGROUND_IMAGE = false;
 		}
 
-		for (int P = 1; P <361; P++)
+		for (int P = 0; P <361; P+=delta_P)
 		{
 			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
 			projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -618,8 +575,8 @@ int main()
 				std::cout <<" "<<back_position[1][0] <<" "<< back_position[1][1] << " " << back_position[1][2] <<" "<< back_position[1][3] << " " << std::endl;
 				std::cout << " " << back_position[2][0] << " " << back_position[2][1] << " " << back_position[2][2] << " " << back_position[2][3] << " " << std::endl;
 				std::cout << " " << back_position[3][0] << " " << back_position[3][1] << " " << back_position[3][2] << " " << back_position[3][3] << " " << std::endl;
-*/
-			for (int Y = 0; Y < 361; Y+=5)
+			*/
+			for (int Y = 0; Y < 361; Y+=delta_Y)
 			{
 				std::cout << "in loop: " << Y << std::endl;
 				if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
@@ -641,7 +598,7 @@ int main()
 				}
 				camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
 				//create inplane rotation
-				for (int R = 0; R < 361; R+=10)
+				for (int R = 0; R < 361; R+=delta_R)
 				{
 					camera = glm::rotate(camera, glm::radians((float)R), Setup.camera_front);
 					GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
@@ -683,7 +640,6 @@ int main()
 							background_shader.use();
 							background_shader.setInt("texture1", 0);
 							Background.Bind("bind_Texure");
-							background_shader.use();
 							Background.Draw("draw_elements");
 							GLCall(glClear(GL_DEPTH_BUFFER_BIT));//otherweise, it would be foreground
 						
@@ -819,7 +775,7 @@ int main()
 							cube = glm::scale(cube, glm::vec3(0.3f));
 							multiple_lightning_shader.use();
 							multiple_lightning_shader.setMatrix4fv("model", cube);
-							Object obstacles;
+							object_setting_for_fragment_shader obstacles;
 							obstacles.ambient = glm::ballRand(1.0f);
 							obstacles.diffuse = glm::ballRand(1.0f);
 							multiple_lightning_shader.setVector3f("material.ambient", obstacles.ambient);

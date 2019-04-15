@@ -1,12 +1,17 @@
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
 #include<glm.hpp>
+#include<gtc/matrix_transform.hpp>
+#include<gtc/type_ptr.hpp>
+#include<gtc/random.hpp>
 #include<iostream>
 #include<algorithm>
 #include<nlohmann/json.hpp>
 #include<sstream>
-#include "Renderer.h"
-#include "Mesh.h"
+
+#include"VertexBuffer.h"
+#include"Renderer.h"
+#include"Mesh.h"
 
 using json = nlohmann::json;
 
@@ -16,7 +21,9 @@ struct CameraOrientation
 	glm::vec3 camera_pose = glm::vec3{ 0.0f,0.10f,20.0f };//{ 0.0f, 10.0f, 20.0f };
 	glm::vec3 camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose;//the target camera look at - camera position
 	glm::vec3 camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
+	
 };
+
 
 
 //define object fragment shader setup
@@ -64,7 +71,7 @@ public:
 	}bb;
 	
 	//bounding box vertex used to draw the bb on the screen to visualize the result of the calculation
-	struct bounding_box_2d_param
+	struct bounding_box_2d_param//might not needed sice in bounding_box_3d_param all these params are included
 	{
 		float x_min;
 		float x_max;
@@ -72,7 +79,7 @@ public:
 		float y_max;
 	}bb_v;
 	
-	struct bounding_box_3d_param
+	struct bounding_box_3d_param//calculate once when the object is created
 	{
 		float x_min;
 		float x_max;
@@ -82,8 +89,48 @@ public:
 		float z_max;
 	}bb_v_3d;
 
+	std::vector<glm::vec3> bb_glm_vec3;//for calculate the boundingbox3d
 
-	BoundingBox(Model train_object, int screen_w, int screen_h);
+	//for visualization the vertex member:
+	//3d:
+
+	//float bounding_box_vertex_8point[24];
+	unsigned int bounding_box_vertex_8point_indecies[36] =
+	{
+		0,1,2,
+		0,2,3,
+		4,5,6,
+		3,6,7,
+		0,1,5,
+		0,5,4,
+		3,2,6,
+		3,6,7,
+		0,4,7,
+		0,3,7,
+		1,5,6,
+		1,6,2
+	};
+
+	//2d:
+	//float bounding_box_vertex_4point[12];
+	unsigned int bounding_box_vertex_4point_indecies[6] =
+	{
+		0,1,2,
+		3,0,2
+	};
+
+	std::map<std::string, int> AttribPointer_BB_3d;
+
+	//VertexBuffer* BB_2d;
+	//VertexBuffer* BB_3d;
+
+
+
+	BoundingBox(Model train_object);//the constrcutor fill the bb_v_3d
+	~BoundingBox();
+	//void construct_BB_2d(float* bounding_box_vertex_4point);//not working
+	//void construct_BB_3d(float* bounding_box_vertex_8point);//not working
+	void fill_bb_glm_vec3(float* bounding_box_vertex_8point);
 	void calculate_boundingbox(float x_min, float x_max, float y_min, float y_max, int screen_w, int screen_h);
 	void generate_bounding_box_3d(Model train_object);
 	void generate_bounding_box_labels_2d(Model train_object,
@@ -99,8 +146,7 @@ public:
 										std::string json_path
 										);//very time consuming
 
-	void generate_bounding_box_labels_3d(std::vector<glm::vec3> bb_glm_vec3,
-										int screen_w,
+	void generate_bounding_box_labels_3d(int screen_w,
 										int screen_h,
 										int P,
 										int Y,
@@ -111,7 +157,8 @@ public:
 										std::ofstream &jsonfile,
 										std::string json_path
 										);
-	
+	//void draw_2d(Shader shader, glm::mat4 model, glm::mat4 camera, glm::mat4 projection);//not working
+	//void draw_3d(Shader shader, glm::mat4 model,glm::mat4 camera,glm::mat4 projection);//not working
 };
 
 

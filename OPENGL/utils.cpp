@@ -91,11 +91,58 @@ void generate_yaml_label(std::ofstream &jsonfile, std::string json_path,json lab
 //use to calculate the bounding box in pixels
 //input: (x_min,y_min) lower left origin, (x_max,y_max) upper right corner, screen width, screen height
 //return: a bounding box structure contains, origin, width and height of the bounding box in pixels
-BoundingBox::BoundingBox(Model train_object, int screen_w, int screen_h)
+BoundingBox::BoundingBox(Model train_object)
 {
+	
 	generate_bounding_box_3d(train_object);
+	
 }
 
+BoundingBox::~BoundingBox()
+{
+	//delete BB_3d;
+	//delete BB_2d;
+}
+
+//void BoundingBox::construct_BB_2d(float* bounding_box_vertex_4point)
+//{
+//	std::map<std::string, int> AttribPointer_BB;
+//	AttribPointer_BB["layout_0"] = 0;
+//	AttribPointer_BB["size_of_vertex_0"] = 3;
+//	AttribPointer_BB["stride_0"] = 3 * sizeof(float);
+//	AttribPointer_BB["offset_0"] = 0;
+//	BB_2d = new VertexBuffer(bounding_box_vertex_4point,
+//		bounding_box_vertex_4point_indecies,
+//		sizeof(bounding_box_vertex_4point) / sizeof(bounding_box_vertex_4point),
+//		sizeof(float),
+//		sizeof(bounding_box_vertex_4point_indecies) / sizeof(bounding_box_vertex_4point_indecies[0]),
+//		sizeof(int),
+//		AttribPointer_BB,
+//		"bb");
+//
+//}
+
+//void BoundingBox::construct_BB_3d(float* bounding_box_vertex_8point)
+//{
+//
+//	std::map<std::string, int> AttribPointer_BB;
+//	AttribPointer_BB["layout_0"] = 0;
+//	AttribPointer_BB["size_of_vertex_0"] = 3;
+//	AttribPointer_BB["stride_0"] = 3 * sizeof(float);
+//	AttribPointer_BB["offset_0"] = 0;
+//	std::cout << "in construct bb 3d" << bounding_box_vertex_8point<< std::endl;
+//	BB_3d = new VertexBuffer(bounding_box_vertex_8point,
+//		bounding_box_vertex_8point_indecies,
+//		sizeof(bounding_box_vertex_8point) / sizeof(bounding_box_vertex_8point),
+//		sizeof(float),
+//		sizeof(bounding_box_vertex_8point_indecies) / sizeof(bounding_box_vertex_8point_indecies[0]),
+//		sizeof(int),
+//		AttribPointer_BB,
+//		"bb");
+//
+//	
+//	std::cout << "construction finished" << std::endl;
+//}
 
 void BoundingBox::calculate_boundingbox(float x_min,
 								float x_max,
@@ -185,10 +232,11 @@ void BoundingBox::generate_bounding_box_3d(Model train_object)//run only once, o
 	bb_v_3d.y_min = *std::min_element(V.begin(), V.end());
 	bb_v_3d.z_max = *std::max_element(W.begin(), W.end());
 	bb_v_3d.z_min = *std::min_element(W.begin(), W.end());
+	//std::cout << " bounding box 3d: "<< bb_v_3d.x_max << std::endl;
 
 }
 
-void BoundingBox::generate_bounding_box_labels_3d(std::vector<glm::vec3> bb_glm_vec3,
+void BoundingBox::generate_bounding_box_labels_3d(
 	int screen_w,
 	int screen_h,
 	int P,
@@ -222,7 +270,37 @@ void BoundingBox::generate_bounding_box_labels_3d(std::vector<glm::vec3> bb_glm_
 	calculate_boundingbox(bb_v.x_max, bb_v.x_min, bb_v.y_max, bb_v.y_min, screen_w, screen_h);
 	//std::cout << "delta x: " << bb_v.x_min<<" "<<bb_v.x_max-bb_v.x_min << std::endl;
 
-	
 	json bb_labels;
 	generate_yaml_label(jf, json_path, bb_labels, "mesh/obj_05.stl", bb, P, Y, R);
 }
+
+
+void BoundingBox::fill_bb_glm_vec3(float* bounding_box_vertex_8point)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		bb_glm_vec3.push_back(glm::vec3(bounding_box_vertex_8point[3 * i], bounding_box_vertex_8point[3 * i + 1], bounding_box_vertex_8point[3 * i + 2]));
+	}
+}
+
+//void BoundingBox::draw_3d(Shader shader,glm::mat4 model,glm::mat4 camera,glm::mat4 projection)
+//{
+//
+//	shader.use();
+//	shader.setMatrix4fv("model", model);
+//	shader.setMatrix4fv("view", camera);
+//	shader.setMatrix4fv("projection", projection);
+//	GLCall(glPolygonMode(GL_FRONT_AND_BACK,GL_LINE));
+//	//BB_3d->Draw("draw_elements");
+//}
+//
+//void BoundingBox::draw_2d(Shader shader, glm::mat4 model, glm::mat4 camera, glm::mat4 projection)
+//{
+//	//std::cout << "bounding box 2d vertex: " << bounding_box_vertex_4point[1] << std::endl;
+//	shader.use();
+//	shader.setMatrix4fv("model", model);
+//	shader.setMatrix4fv("view", camera);
+//	shader.setMatrix4fv("projection", projection);
+//	GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+//	//BB_2d->Draw("draw_elements");
+//}
