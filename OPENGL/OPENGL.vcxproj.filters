@@ -92,7 +92,7 @@
     <ClCompile Include="utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Calculate_Bounding_Box.cpp">
+    <ClCompile Include="Crysis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

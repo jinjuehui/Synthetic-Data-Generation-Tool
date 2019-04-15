@@ -142,7 +142,7 @@
     <None Include="VertexShader.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Calculate_Bounding_Box.cpp" />
+    <ClCompile Include="Crysis.cpp" />
     <ClCompile Include="image_loader.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Mesh.cpp" />

@@ -479,11 +479,9 @@ int main()
 	Shader multiple_lightning_shader("multipleLightSource_vertex.shader","multipleLightSource_fragment.shader");
 	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader");
 	Shader Boundingbox_8p_shader("boundingbox_8p_vertex.shader","boundingbox_8p_fragment.shader");
-
-	BoundingBox boundingbox(TrainingObject, SCR_WIDTH, SCR_HEIGHT);
-
-	/////////////////////////////////////////////////move into bounding box class/////////////////////////////////////
-	float bounding_box_vertex_8point[]=//for visualization
+	///////////////////////////////////////////using bounding box/////////////////////////////////////////////////////
+	BoundingBox boundingbox(TrainingObject);
+	float bounding_box_vertex_8point[24] =
 	{
 		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
 		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_min,
@@ -495,37 +493,20 @@ int main()
 		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max
 	};
 
-	unsigned int bounding_box_indecies[] =
-	{
-		0,1,2,
-		0,2,3,
-		4,5,6,
-		3,6,7,
-		0,1,5,
-		0,5,4,
-		3,2,6,
-		3,6,7,
-		0,4,7,
-		0,3,7,
-		1,5,6,
-		1,6,2
-	};
+	std::map<std::string, int> AttribPointer_BB;//problem by extracting to calss: pass array result in uncorrect bing VAO
+	AttribPointer_BB["layout_0"] = 0;
+	AttribPointer_BB["size_of_vertex_0"] = 3;
+	AttribPointer_BB["stride_0"] = 3 * sizeof(float);
+	AttribPointer_BB["offset_0"] = 0;
+	VertexBuffer BB_3d(bounding_box_vertex_8point,
+		boundingbox.bounding_box_vertex_8point_indecies,
+		sizeof(bounding_box_vertex_8point) / sizeof(bounding_box_vertex_8point[0]),
+		sizeof(float),
+		sizeof(boundingbox.bounding_box_vertex_8point_indecies) / sizeof(boundingbox.bounding_box_vertex_8point_indecies[0]),
+		sizeof(int),
+		AttribPointer_BB,
+		"bb");
 
-	std::vector<glm::vec3> bb_glm_vec3;//for calculation the 2d bb
-	for (int i = 0; i < 8; i++)
-	{
-		bb_glm_vec3.push_back(glm::vec3(bounding_box_vertex_8point[3 * i], bounding_box_vertex_8point[3 * i + 1], bounding_box_vertex_8point[3 * i + 2]));
-	}//move into boundingbox class
-
-	unsigned int BB_indicies[] =
-	{
-		0,1,2,
-		3,0,2
-	};
-
-	//for visualization
-	
-	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	lamp = glm::translate(lamp, light_position);
 	lamp = glm::scale(lamp, glm::vec3(10.0f,10.0f,10.0f));
@@ -535,13 +516,13 @@ int main()
 	GLCall(glEnable(GL_DEPTH_TEST));
 	std::cout << "rendering..." << std::endl;
 	bool ground_truth = false;
-
+	std::string json_path = "label_syn.json";
 	json labels;
 
 	labels["object_id"] = path.substr(0, path.find_last_of('/'));
 	
 	std::ofstream jsonfile;
-	jsonfile.open("E:/label/label.json");
+	jsonfile.open(json_path);
 
 	int delta_P(5), delta_Y(5), delta_R(10);
 
@@ -550,12 +531,12 @@ int main()
 	{
 		//GLCall(glViewport(0,0,1024,768));
 
-		glm::mat4 chess_piece = glm::mat4(1.0f);
+		glm::mat4 object_model = glm::mat4(1.0f);
 		glm::mat4 cube = glm::mat4(1.0f);
 		glm::mat4 camera = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
-		chess_piece  = glm::translate(chess_piece, train_object.position);
-		chess_piece  = glm::scale(chess_piece, glm::vec3(1.0f, 1.0f, 1.0f));//for nanosuits default 0.4
+		object_model  = glm::translate(object_model, train_object.position);
+		object_model  = glm::scale(object_model, glm::vec3(1.0f, 1.0f, 1.0f));//for nanosuits default 0.4
 
 		cube = glm::translate(cube, glm::vec3(3.0f,0.0f,0.0f));
 		cube = glm::scale(cube, glm::vec3(0.3f, 0.3f, 0.3f));//for nanosuits default 0.4
@@ -590,7 +571,7 @@ int main()
 				lastFrame = currentFrame;
 				if (STATIC_CAMERA_VIEW == true)
 				{
-					float distance = 0.8f;
+					float distance = 0.5f;
 
 					if(ROTATE_CAMERA)
 						Setup=rotateCamera(P, Y, distance);
@@ -603,7 +584,7 @@ int main()
 					camera = glm::rotate(camera, glm::radians((float)R), Setup.camera_front);
 					GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 					GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
+					GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));//added for object (bounding box use line)
 					//use background image
 					if (USE_BACKGROUND_IMAGE)
 					{
@@ -667,7 +648,7 @@ int main()
 
 					//object pose in Camera coordinate system:
 					//pose = view * model
-					glm::mat4 pose = camera*chess_piece;//<-------------------------after add roll angle this should be modified
+					glm::mat4 pose = camera*object_model;//<-------------------------after add roll angle this should be modified
 					float pose_array[4][4];
 					convert_array(pose, pose_array);
 					labels["Orientation"] = pose_array;
@@ -763,8 +744,48 @@ int main()
 						
 
 						multiple_lightning_shader.use();
-						multiple_lightning_shader.setMatrix4fv("model", chess_piece);
+						multiple_lightning_shader.setMatrix4fv("model", object_model);
 						TrainingObject.Draw(multiple_lightning_shader);//main object for training
+
+						//////////////////////using bounding box//////////////////////////////////////////////////////
+
+						boundingbox.fill_bb_glm_vec3(bounding_box_vertex_8point);
+						boundingbox.generate_bounding_box_labels_3d(SCR_WIDTH, SCR_HEIGHT, P, Y, R, projection, camera, object_model, jsonfile, json_path);
+						std::cout << "labels generated" << std::endl;
+						//3d Bounding Box
+						Boundingbox_8p_shader.use();
+						Boundingbox_8p_shader.setMatrix4fv("model", object_model);
+						Boundingbox_8p_shader.setMatrix4fv("view", camera);
+						Boundingbox_8p_shader.setMatrix4fv("projection", projection);
+						GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+						BB_3d.Draw("draw_elements");
+
+						float bounding_box_vertex_4point[] = {
+							boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
+							boundingbox.bb_v.x_max,	boundingbox.bb_v.y_min,	0.f,  // bottom right
+							boundingbox.bb_v.x_min,	boundingbox.bb_v.y_min,	0.f,  // bottom left
+							boundingbox.bb_v.x_min,	boundingbox.bb_v.y_max,	0.f
+						};
+
+						//2dBounding Box
+						VertexBuffer BB_2d(bounding_box_vertex_4point,
+							boundingbox.bounding_box_vertex_4point_indecies,
+							sizeof(bounding_box_vertex_4point) / sizeof(bounding_box_vertex_4point[0]),
+							sizeof(float),
+							sizeof(boundingbox.bounding_box_vertex_4point_indecies) / sizeof(boundingbox.bounding_box_vertex_4point_indecies[0]),
+							sizeof(int),
+							AttribPointer_BB,
+							"bb");
+
+						Basic_shader.use();
+						Basic_shader.setMatrix4fv("model", object_model);
+						Basic_shader.setMatrix4fv("view", camera);
+						Basic_shader.setMatrix4fv("projection", projection);
+						GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+						BB_2d.Draw("draw_elements");
+
+						////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 						//draw reference cube, in order to check whether imported vertex data correctly generated by blender
@@ -810,7 +831,7 @@ int main()
 						
 					}//<--use multiple light source
 
-					glm::mat4 pose_camera_view = camera * chess_piece;
+					glm::mat4 pose_camera_view = camera * object_model;
 					pose_camera_view = glm::transpose(pose_camera_view);
 						//std::cout<<"pose camera view piece matrix:"<<std::endl;
 						//std::cout << "	" << pose_camera_view[0][0] << "	" << pose_camera_view[0][1] << "	" << pose_camera_view[0][2] << "	" << pose_camera_view[0][3] << "	" << std::endl;
@@ -822,7 +843,7 @@ int main()
 					if (USE_SIMPLE_LIGHTNING_MODEL)
 					{
 						Simple_shader.use();
-						Simple_shader.setMatrix4fv("model", chess_piece);
+						Simple_shader.setMatrix4fv("model", object_model);
 						Simple_shader.setMatrix4fv("projection", projection);
 						Simple_shader.setMatrix4fv("view", camera);
 						Simple_shader.setVector3f("viewPos", Setup.camera_pose);
