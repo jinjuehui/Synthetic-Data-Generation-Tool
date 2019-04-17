@@ -56,10 +56,10 @@ using json = nlohmann::json;
 light dirLight, pointLight, spotLight,lightning;
 object_setting_for_fragment_shader train_object,reference_object;
 glm::vec3 light_positions[] =
-{	glm::ballRand(10.0),
-	glm::ballRand(15.0),
-	glm::ballRand(20.0),
-	glm::ballRand(50.0)
+{	glm::ballRand(1.0),
+	glm::ballRand(1.0),
+	glm::ballRand(1.0),
+	glm::ballRand(1.0)
 };
 
 float cube_vertex[] = {
@@ -441,7 +441,7 @@ int main()
 
 	//read file list int the folder
 	std::cout << "creating image list..." << std::endl;
-	std::map<std::string,int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");
+	std::map<std::string,int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
 	std::map<std::string, int>::iterator it = Filelist.begin();
 	std::advance(it, 1);
 	
@@ -463,6 +463,7 @@ int main()
 	Shader multiple_lightning_shader("multipleLightSource_vertex.shader","multipleLightSource_fragment.shader");
 	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader");
 	Shader Boundingbox_8p_shader("boundingbox_8p_vertex.shader","boundingbox_8p_fragment.shader");
+	Shader Segmentation("semantic_vertex.shader","semantic_fragment.shader");
 	///////////////////////////////////////////using bounding box/////////////////////////////////////////////////////
 	BoundingBox boundingbox(TrainingObject);
 	float bounding_box_vertex_8point[24] =
@@ -530,7 +531,7 @@ int main()
 			USE_BACKGROUND_IMAGE = false;
 		}
 
-		for (int P = 0; P <361; P+=delta_P)
+		for (int P = 20; P <361; P+=delta_P)
 		{
 			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
 			projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -541,7 +542,7 @@ int main()
 				std::cout << " " << back_position[2][0] << " " << back_position[2][1] << " " << back_position[2][2] << " " << back_position[2][3] << " " << std::endl;
 				std::cout << " " << back_position[3][0] << " " << back_position[3][1] << " " << back_position[3][2] << " " << back_position[3][3] << " " << std::endl;
 			*/
-			for (int Y = 0; Y < 361; Y+=delta_Y)
+			for (int Y = 40; Y < 361; Y+=delta_Y)
 			{
 				std::cout << "in loop: " << Y << std::endl;
 				if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
@@ -729,7 +730,16 @@ int main()
 
 						multiple_lightning_shader.use();
 						multiple_lightning_shader.setMatrix4fv("model", object_model);
-						TrainingObject.Draw(multiple_lightning_shader);//main object for training
+
+						//////////////////////////setting shader for semantic segmentation////////////////////////////
+						//Segmentation.use();
+						//glm::vec3 train_object_color(1.0f, 0.0f, 0.0f);
+						//Segmentation.setMatrix4fv("view", camera);
+						//Segmentation.setMatrix4fv("projection", projection);
+						//Segmentation.setMatrix4fv("model", object_model);
+						//Segmentation.setVector3f("fragcolor", train_object_color);
+
+						TrainingObject.Draw(Segmentation);//main object for training
 
 						//////////////////////using bounding box//////////////////////////////////////////////////////
 
@@ -742,7 +752,7 @@ int main()
 						Boundingbox_8p_shader.setMatrix4fv("view", camera);
 						Boundingbox_8p_shader.setMatrix4fv("projection", projection);
 						GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-						BB_3d.Draw("draw_elements");
+						//BB_3d.Draw("draw_elements");
 
 						float bounding_box_vertex_4point[] = {
 							boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
@@ -766,7 +776,8 @@ int main()
 						Basic_shader.setMatrix4fv("view", camera);
 						Basic_shader.setMatrix4fv("projection", projection);
 						GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-						BB_2d.Draw("draw_elements");
+						//BB_2d.Draw("draw_elements");
+						GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 
 						////////////////////////////////////////////////////////////////////////////////////////
 
@@ -785,8 +796,16 @@ int main()
 							obstacles.diffuse = glm::ballRand(1.0f);
 							multiple_lightning_shader.setVector3f("material.ambient", obstacles.ambient);
 							multiple_lightning_shader.setVector3f("material.diffuse", obstacles.diffuse);
-							ReferenceObject.Draw(multiple_lightning_shader);//obstacles
 
+							///////////////////////////////////////semantic segmentation///////////////////
+							//Segmentation.use();
+							//Segmentation.setMatrix4fv("view", camera);
+							//Segmentation.setMatrix4fv("projection", projection);
+							//Segmentation.setMatrix4fv("model", cube);
+							//Segmentation.setVector3f("fragcolor", obstacles.diffuse);
+
+							ReferenceObject.Draw(Segmentation);//obstacles
+							///////////////////////////////////////////////////////////////////////////////////
 							glm::mat4 cube2 = glm::mat4(1.0f);
 							cube2 = glm::translate(cube2, glm::vec3{ 4.0f,0.0f,0.0f });
 							cube2 = glm::scale(cube2, glm::vec3(0.3f));
@@ -795,8 +814,18 @@ int main()
 							multiple_lightning_shader.setVector3f("material.ambient", reference_object.ambient);
 							multiple_lightning_shader.setVector3f("material.diffuse", reference_object.diffuse);
 
+							/////////////////////////////semantic segmentation/////////////////////////////////
+							//Segmentation.use();
+							//glm::vec3 obstacle_color(0.0f,0.5f,0.5f);
+							//Segmentation.setMatrix4fv("view", camera);
+							//Segmentation.setMatrix4fv("projection", projection);
+							//Segmentation.setMatrix4fv("model", cube2);
+							//Segmentation.setVector3f("fragcolor", obstacle_color);
+
 							Cube.Draw("draw_elements");
-							
+
+							///////////////////////////////////////////////////////////////////////////////////
+
 							//GLCall(glDrawArrays(GL_TRIANGLES, 0, 36);
 							lightning_shader.use();
 							lightning_shader.setMatrix4fv("projection_light", projection);
@@ -905,14 +934,21 @@ int main()
 
 					}//<--use simple light source
 
-					std::string number = std::to_string(Y+P*10);
-					std::string picture = "E:/data/image.jpg";
+					std::string number = std::to_string(Y+P*10+R*100);
+					std::string picture = "D:/data/single_object/image.jpg";
+					std::string picture_multiobject = "D:/data/multi_object/image.jpg";
+					std::string picture_sm_seg = "D:/data/semantic_segmentation/image.jpg";
 					if (ground_truth)
 					{
-						 picture = "E:/data/image_gt.jpg";
+						 picture = "D:/data/single_object/image_gt.jpg";
+						 picture_multiobject = "D:/data/multi_object/image_gt.jpg";
+						 picture_sm_seg = "D:/data/semantic_segmentation/image_gt.jpg";
+
 					}
-					picture.insert(13, number);
-					//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+					picture.insert(27, number);
+					picture_multiobject.insert(26,number);
+					picture_sm_seg.insert(35,number);
+					screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());

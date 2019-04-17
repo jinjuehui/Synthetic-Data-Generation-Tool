@@ -89,7 +89,7 @@ int main()
 		<< boundingbox.bb_v_3d.z_max << " z_min: "
 		<< boundingbox.bb_v_3d.z_min << std::endl;*/
 
-	int P=0, Y=0, R=0;
+	int P=50, Y=20, R=80;
 
 	GLCall(glEnable(GL_DEPTH_TEST));
 	/////////////////////////////////////////////////implement json class///////////////////////////////////////////////
@@ -98,15 +98,17 @@ int main()
 	jsonfile.open(json_path);
 	////////////////////////////////////////////////implement json class///////////////////////////////////////////////
 	
+	bool screen_shot_once(false);
+
 	while (!glfwWindowShouldClose(window))
 	{
 
 
-		for (int P = 0; P <361; P+=delta_P)
-		{	
+		//for (int P = 0; P <361; P+=delta_P)
+		//{	
 			std::cout << "P: "<< P << std::endl;
-			for (int Y = 0; Y < 361; Y += delta_Y)
-			{
+			//for (int Y = 0; Y < 361; Y += delta_Y)
+			//{
 				//std::cout << "Y: " << Y << std::endl;
 
 				float distance = 0.2f;
@@ -120,8 +122,8 @@ int main()
 				//std::cout << "projection: " << projection[3][0] << "	" << projection[3][1] << "	" << projection[3][2] << "	" <<projection[3][3] << std::endl;
 
 
-				for (int R = 0; R < 361; R += delta_R)
-				{
+				//for (int R = 0; R < 361; R += delta_R)
+				//{
 					////////////////////////move into renderer class////////////////////////////////////////////////////////
 					GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 					GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
@@ -184,19 +186,26 @@ int main()
 					Basic_shader.setMatrix4fv("projection", projection);
 					GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 					BB_2d.Draw("draw_elements");
-	
+					
+					if (screen_shot_once)
+					{
+						std::string picture = "image_bb_2d_only_example.jpg";
+						screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+						screen_shot_once = false;
+					}
+
 					GLCall(glfwSwapBuffers(window));
 					GLCall(glfwPollEvents());
-				}
-			}
-		}
+				//}
+			//}
+		//}
 
 		jsonfile.close();
+
+	}
 		glfwTerminate();
 		exit(EXIT_SUCCESS);
 		return 0;
-
-	}
 
 }
 
