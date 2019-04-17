@@ -71,7 +71,6 @@ GLFWwindow* initialize_window(int width, int height, const char* name)
 	return window;
 }
 
-
 void screenshot_freeimage(const char* screenshotFile, int width, int height) {
 
 	// Make the BYTE array, factor of 3 because it's RBG.
@@ -88,7 +87,6 @@ void screenshot_freeimage(const char* screenshotFile, int width, int height) {
 	FreeImage_Unload(image);
 	delete[] pixels;
 }
-
 
 
 void generate_yaml_label(std::ofstream &jsonfile, std::string json_path,json labels, std::string object_path, BoundingBox::bounding_box bb,int P,int Y,int R)

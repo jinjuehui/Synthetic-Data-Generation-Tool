@@ -8,12 +8,12 @@
 #include<algorithm>
 #include<nlohmann/json.hpp>
 #include<sstream>
-#include <FreeImage.h>
 
 #include"VertexBuffer.h"
 #include"Renderer.h"
 #include"Mesh.h"
-#include "stb_image.h"
+#include <FreeImage.h>
+
 
 
 using json = nlohmann::json;
@@ -168,6 +168,5 @@ public:
 CameraOrientation rotateCamera(int P, int Y, float distance);
 GLFWwindow* initialize_window(int width, int height, const char* name);
 void generate_yaml_label(std::ofstream &jsonfile,std::string json_path,json labels, std::string object_path, BoundingBox::bounding_box bb, int P, int Y, int R);
-void screenshot_freeimage(const char* screenshotFile, int width, int height) {
-
+void screenshot_freeimage(const char* screenshotFile, int width, int height);
 
