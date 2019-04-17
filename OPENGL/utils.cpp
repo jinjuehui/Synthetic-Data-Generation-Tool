@@ -72,6 +72,25 @@ GLFWwindow* initialize_window(int width, int height, const char* name)
 }
 
 
+void screenshot_freeimage(const char* screenshotFile, int width, int height) {
+
+	// Make the BYTE array, factor of 3 because it's RBG.
+	BYTE* pixels = new BYTE[3 * width * height];
+
+	glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, pixels);
+
+	// Convert to FreeImage format & save to file
+	//FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
+	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, 0xFF0000, 0x00FF00, 0x0000FF, false);
+	FreeImage_Save(FIF_JPEG, image, screenshotFile, 0);
+
+	// Free resources
+	FreeImage_Unload(image);
+	delete[] pixels;
+}
+
+
+
 void generate_yaml_label(std::ofstream &jsonfile, std::string json_path,json labels, std::string object_path, BoundingBox::bounding_box bb,int P,int Y,int R)
 {
 	int n = 100 * P + 10 * Y + R;

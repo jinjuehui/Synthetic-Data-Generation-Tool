@@ -46,8 +46,8 @@ VertexBuffer::VertexBuffer(const void* data,
 	GLCall(glEnableVertexAttribArray(0));
 	GLCall(glVertexAttribPointer(AttribPointer["layout_1"], AttribPointer["size_of_vertex_1"], GL_FLOAT, GL_FALSE, AttribPointer["stride_1"], (void*)AttribPointer["offset_1"]));
 	GLCall(glEnableVertexAttribArray(1));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-	GLCall(glBindVertexArray(0));
+	//GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	//GLCall(glBindVertexArray(0));
 
 }
 
