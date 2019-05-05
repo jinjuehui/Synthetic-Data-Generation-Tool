@@ -30,7 +30,7 @@ namespace fs = std::filesystem;
 #define ROTATE_CAMERA true
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
-bool USE_BACKGROUND_IMAGE = true;
+bool USE_BACKGROUND_IMAGE = false;
 bool STATIC_CAMERA_VIEW = true;
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
@@ -948,7 +948,7 @@ int main()
 					picture.insert(27, number);
 					picture_multiobject.insert(26,number);
 					picture_sm_seg.insert(35,number);
-					screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+					//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());
