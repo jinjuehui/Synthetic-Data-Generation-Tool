@@ -1,5 +1,69 @@
 #include "utils.h"
 
+
+glm::vec3 set_random_position(int range)
+{
+	/*
+		use std library to generate random numbers
+		Input range: by given range the generated number will be located in range [0,range]
+		return: a 3d-vector, wich convert the integer number to floats.
+		set seed use set srand(i) i=1,2,3,4,5.. this will be needed out side the function
+	*/
+
+	int array[3];
+	for (int j = 0; j < 3; j++)
+	{
+		array[j] = rand() % range;
+	}
+	return glm::vec3{ array[0] / 100.f,array[1] / 100.f,array[2] / 100.f };
+}
+
+glm::vec3 set_random_with_distribution(std::default_random_engine &generator, float xy, float z, float sigma)
+{
+	/*
+		use <random> library to generate random numbers, in this case a better random generator with 
+		certain distribution can be used
+		Input generator: a random number generator, need tobe initialized outside this funciton, in order to set the random seed, generator.seed()
+			  sigma: this variance of the distribution, default normal distribution is unbiased
+		return: a 3d-vector, wich convert the integer number to floats.
+		set seed use set srand(i) i=1,2,3,4,5.. this will be needed out side the function
+	*/
+
+	std::normal_distribution<double> distribution_xy(xy, sigma);
+	std::normal_distribution<double> distribution_z(z, sigma);
+
+	std::vector<float> position;
+	position.push_back(distribution_xy(generator));
+	position.push_back(distribution_xy(generator));
+	position.push_back(distribution_z(generator));
+
+	return glm::vec3(position[0], position[1], position[2]);
+}
+
+glm::vec3 random_vec3(std::default_random_engine &generator, float xy_min, float xy_max, float z_min, float z_max)
+{
+
+	std::uniform_real_distribution<float> distribution_xy(xy_min, xy_max);
+	std::uniform_real_distribution<float> distribution_z(z_min, z_max);
+	std::vector<float> position;
+	position.push_back(distribution_xy(generator));
+	position.push_back(distribution_xy(generator));
+	position.push_back(distribution_z(generator));
+
+	std::cout << "position: "<< position[0] <<" "<< position[1]<<" "<< position[2] << std::endl;
+
+	return glm::vec3(position[0],position[1],position[2]);
+}
+
+float random_float(std::default_random_engine &generator, float v_min, float v_max)
+{
+	std::uniform_real_distribution<float> distribution(v_min, v_max);
+	return distribution(generator);
+}
+
+
+
+
 //input: pitch and yaw angle, and the distance: TODO add roll angle in this function
 //return: the camera setup, used to initialize the gllookAt() function to initialize the camera object
 CameraOrientation rotateCamera(int P, int Y, float distance)
@@ -37,6 +101,57 @@ CameraOrientation rotateCamera(int P, int Y, float distance)
 	return setup;
 }
 
+void rotate_object(glm::mat4 &model, int axis, float velocity)
+{
+	//model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 0.0f, 0.0f));
+	//std::cout << "Object Rotation Enabled!" << std::endl;
+	switch (axis)
+	{
+	case 1:
+		model = glm::rotate(model, glm::radians(velocity), glm::vec3(1.0f, 0.0f, 0.0f));
+		break;
+	case 2:
+		model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 1.0f, 0.0f));
+		break;
+	case 3:
+		model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 0.0f, 1.0f));
+		break;
+	}
+}
+
+glm::mat4 rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_engine &generator)
+{
+	//model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 0.0f, 0.0f));
+	//std::cout << "Object Rotation Enabled!" << std::endl;
+	std::uniform_real_distribution<float> distribution(0,6.28);
+	std::vector<float> random_angle;
+	random_angle.push_back(distribution(generator));
+	random_angle.push_back(distribution(generator));
+	random_angle.push_back(distribution(generator));
+
+	glm::mat4 rotation_matrix = glm::rotate(model, random_angle[0], glm::vec3(1.0f, 0.0f, 0.0f))*
+								glm::rotate(model, random_angle[1], glm::vec3(0.0f, 1.0f, 0.0f))*
+								glm::rotate(model, random_angle[2], glm::vec3(0.0f, 0.0f, 1.0f));
+
+	model = model*rotation_matrix;
+
+	return rotation_matrix;
+}
+
+void inverse_object_3axis_rotation(glm::mat4 &model, glm::mat4 rotation_matrix)
+{
+	rotation_matrix = glm::inverse(rotation_matrix);
+	model = model * rotation_matrix;
+}
+
+void rotate_light(glm::mat4 &light_model, int P, int Y, float distance)
+{
+	float x_direction = distance * glm::cos(glm::radians((float)P))*cos(glm::radians((float)Y));
+	float y_direction = distance * glm::sin(glm::radians((float)P));
+	float z_direction = -distance * glm::cos(glm::radians((float)P))*sin(glm::radians((float)Y));
+
+	light_model = glm::translate(light_model, glm::vec3{ x_direction,y_direction,z_direction });
+}
 
 //input: screen width, screen height, window name
 //return: a window object used for ex. while loop
@@ -321,3 +436,4 @@ void BoundingBox::fill_bb_glm_vec3(float* bounding_box_vertex_8point)
 //	GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 //	//BB_2d->Draw("draw_elements");
 //}
+

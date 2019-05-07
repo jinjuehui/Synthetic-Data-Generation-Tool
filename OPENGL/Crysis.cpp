@@ -30,7 +30,7 @@ namespace fs = std::filesystem;
 #define ROTATE_CAMERA true
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
-bool USE_BACKGROUND_IMAGE = false;
+bool USE_BACKGROUND_IMAGE = true;
 bool STATIC_CAMERA_VIEW = true;
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
@@ -952,6 +952,8 @@ int main()
 
 					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());
+
+					std::cin.get();
 				}//<---end loop for roll
 
 
