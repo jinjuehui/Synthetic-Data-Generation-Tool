@@ -14,6 +14,7 @@
 #include"Mesh.h"
 #include <FreeImage.h>
 #include <random>
+#include <iomanip>
 
 
 
@@ -130,6 +131,7 @@ public:
 
 
 
+
 	BoundingBox(Model train_object);//the constrcutor fill the bb_v_3d
 	~BoundingBox();
 	//void construct_BB_2d(float* bounding_box_vertex_4point);//not working
@@ -165,6 +167,7 @@ public:
 	//void draw_3d(Shader shader, glm::mat4 model,glm::mat4 camera,glm::mat4 projection);//not working
 };
 
+std::string to_format(const int number);
 glm::vec3 set_random_position(int range);
 glm::vec3 set_random_with_distribution(std::default_random_engine &generator, float xy, float z, float sigma);
 glm::vec3 random_vec3(std::default_random_engine &generator, float xy_min, float xy_max, float z_min, float z_max);

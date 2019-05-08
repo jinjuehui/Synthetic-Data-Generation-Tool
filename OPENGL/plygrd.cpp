@@ -4,6 +4,7 @@
 #include <random>
 #include <gtc/random.hpp>
 #include <string>
+#include "utils.h"
 
 glm::vec3 light_position[] =
 {
@@ -66,12 +67,15 @@ int main()
 	std::default_random_engine generator;
 	//std::normal_distribution<double> distribution(5.0, 2.0);
 
-	for(int j = 0; j < 4; j++)
+	while(true)
 	{
 		generator.seed(1);
 		for (int i = 0; i < 4; ++i) {
-			double number = generate_random_number(generator, 0.0,0.5);
+			double number = random_float(generator, 0.0,0.5);
+			glm::vec3 v = random_vec3(generator, 1.0, 2.0, 1.0, 2.0);
 			std::cout << "generated random number: " << number << std::endl;
+			std::cout << "random_vec3 check: " << v.x << std::endl;
+
 			std::cin.get();
 		}
 		std::cout << "==========outer for loop =================== " << std::endl;

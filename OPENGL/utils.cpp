@@ -1,5 +1,10 @@
 #include "utils.h"
 
+std::string to_format(const int number) {
+	std::stringstream ss;
+	ss << std::setw(4) << std::setfill('0') << number;
+	return ss.str();
+}
 
 glm::vec3 set_random_position(int range)
 {
@@ -50,7 +55,7 @@ glm::vec3 random_vec3(std::default_random_engine &generator, float xy_min, float
 	position.push_back(distribution_xy(generator));
 	position.push_back(distribution_z(generator));
 
-	std::cout << "position: "<< position[0] <<" "<< position[1]<<" "<< position[2] << std::endl;
+	//std::cout << "position: "<< position[0] <<" "<< position[1]<<" "<< position[2] << std::endl;
 
 	return glm::vec3(position[0],position[1],position[2]);
 }
