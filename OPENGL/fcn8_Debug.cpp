@@ -619,8 +619,8 @@ int main()
 			multiple_lightning_shader.setFloat("material.shininess", train_object.shininess);
 
 
-			glm::vec3 ObjectPosition = random_vec3(random_number_generator, -0.1, 0.1, 0.0, 0.0);
-			//glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, 0, 0.0, 0.02);
+			//glm::vec3 ObjectPosition = random_vec3(random_number_generator, -0.1, 0.1, 0.0, 0.0);
+			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, 0, 0.03, 0.02);
 			//glm::vec3 ObjectPosition = glm::vec3(0.08f, 0.0f, 0.0f);
 			//std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
