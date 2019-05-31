@@ -134,17 +134,21 @@
     <None Include="Basic.shader" />
     <None Include="Basic_Fragment.shader" />
     <None Include="Basic_vertex.shader" />
+    <None Include="boundingbox_8p_fragment.shader" />
+    <None Include="boundingbox_8p_vertex.shader" />
     <None Include="FragmentShader.shader" />
     <None Include="Lightning_fragment.shader" />
     <None Include="Lightning_vertex.shader" />
     <None Include="multipleLightSource_fragment.shader" />
     <None Include="multipleLightSource_vertex.shader" />
+    <None Include="semantic_fragment.shader" />
+    <None Include="semantic_vertex.shader" />
     <None Include="Simple_Fragment.shader" />
     <None Include="Simple_vertex.shader" />
     <None Include="VertexShader.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Calculate_Bounding_Box.cpp" />
+    <ClCompile Include="Datagenerator_FCN8.cpp" />
     <ClCompile Include="image_loader.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Mesh.cpp" />

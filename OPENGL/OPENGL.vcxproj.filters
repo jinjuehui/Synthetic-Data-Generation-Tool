@@ -63,6 +63,18 @@
     <None Include="Basic_Fragment.shader">
       <Filter>Shader</Filter>
     </None>
+    <None Include="boundingbox_8p_vertex.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="boundingbox_8p_fragment.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="semantic_vertex.shader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="semantic_fragment.shader">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp">
@@ -83,10 +95,10 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Calculate_Bounding_Box.cpp">
+    <ClCompile Include="utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="utils.cpp">
+    <ClCompile Include="Datagenerator_FCN8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

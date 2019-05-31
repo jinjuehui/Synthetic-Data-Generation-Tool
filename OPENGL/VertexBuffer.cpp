@@ -95,8 +95,13 @@ VertexBuffer::VertexBuffer(const void* data,
 
 VertexBuffer::~VertexBuffer()
 {
-	//GLCall(glDeleteBuffers(1,&VAO));
-	GLCall(glBindVertexArray(0));
+	//std::cout << "destructor called!" << std::endl;
+	if(&VAO)
+	GLCall(glDeleteBuffers(1,&VAO));
+	if(&VBO)
+	GLCall(glDeleteBuffers(1, &VBO));
+	if(&EBO)
+	GLCall(glDeleteBuffers(1, &EBO));
 }
 
 void VertexBuffer::Bind(std::string key) const
@@ -118,7 +123,7 @@ void VertexBuffer::Draw(std::string key) const
 {
 	if (key=="draw_elements")
 	{
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+		//GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
 		GLCall(glBindVertexArray(VAO));
 		GLCall(glDrawElements(GL_TRIANGLES, NOE, GL_UNSIGNED_INT, 0));
 	}
