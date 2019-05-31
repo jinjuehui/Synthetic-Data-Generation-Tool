@@ -37,7 +37,7 @@ bool ROTATE_LIGHT = false;
 //parameters
 //Screen Parameters:
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 224;
+const unsigned int SCR_WIDTH = 1000;
 const unsigned int SCR_HEIGHT = SCR_WIDTH;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
@@ -53,49 +53,8 @@ glm::vec3 light_position(1.0f, 0.0f, 2.0f);
 using json = nlohmann::json;
 
 light dirLight, pointLight, spotLight, lightning;
-object_setting_for_fragment_shader train_object, reference_object;
+object_setting_for_fragment_shader train_object;
 
-
-float cube_vertex[] = {
-	0.1f,	-0.1f,	-0.1f,	0.0f,	-1.0f,	-0.0f,
-	0.1f,	-0.1f,	0.1f,	0.0f,	-1.0f,	-0.0f,
-	-0.1f,	-0.1f,	0.1f,	0.0f,	-1.0f,	-0.0f,
-	-0.1f,	-0.1f,	-0.1f,  0.0f,	-1.0f,	-0.0f,
-	0.1f,	0.1f,	-0.1f,  0.0f,    1.0f,	0.0f,
-	-0.1f,	0.1f,	-0.1f,	0.0f,	1.0f,	0.0f,
-	-0.1f,	0.1f,	0.1f,	0.0f,	1.0f,	0.0f,
-	0.1f,	0.1f,	0.1f,	0.0f,	1.0f,	0.0f,
-	0.1f,	-0.1f,	-0.1f,	1.0f,	0.0f,	0.0f,
-	0.1f,	0.1f,	-0.1f,	1.0f,	0.0f,	0.0f,
-	0.1f,	0.1f,	0.1f,	1.0f,	0.0f,	0.0f,
-	0.1f,	-0.1f,	0.1f,	1.0f,	0.0f,	0.0f,
-	0.1f,	-0.1f,	0.1f,	-0.0f,	-0.0f,	1.0f,
-	0.1f,	0.1f,	0.1f,	-0.0f,	-0.0f,	1.0f,
-	-0.1f,	0.1f,	0.1f,	-0.0f,	-0.0f,	1.0f,
-	-0.1f,	-0.1f,	0.1f,	-0.0f,	-0.0f,	1.0f,
-	-0.1f,	-0.1f,	0.1f,	-1.0f,	-0.0f,	-0.0f,
-	-0.1f,	0.1f,	0.1f,	-1.0f,	-0.0f,	-0.0f,
-	-0.1f,	0.1f,	-0.1f,	-1.0f,	-0.0f,	-0.0f,
-	-0.1f,	-0.1f,	-0.1f,	-1.0f,	-0.0f,	-0.0f,
-	0.1f,	0.1f,	-0.1f,	0.0f,	0.0f,	-1.0f,
-	0.1f,	-0.1f,	-0.1f,	0.0f,	0.0f,	-1.0f,
-	-0.1f,	-0.1f,	-0.1f,	0.0f,	0.0f,	-1.0f,
-	-0.1f,	0.1f,	-0.1f,	0.0f,	0.0f,	-1.0f
-};
-unsigned int indicies_cube[] = {
-	 0,  1,  2,
-	 0,  2,  3,
-	 4,  5,  6,
-	 4,  6,  7,
-	 8,  9,  10,
-	 8,  10,  11,
-	 12,  13,  14,
-	 12,  14,  15,
-	 16,  17,  18,
-	 16,  18,  19,
-	 20,  21,  22,
-	 20,  22,  23
-};
 
 //camera setup with default parameters
 CameraOrientation Setup;
@@ -288,32 +247,6 @@ unsigned int back_indicies[] =
 };
 
 
-//TODO:
-//* Object Position randomization
-//* bench marking
-//* photo realistic rendering
-//* output data in PascalVOC structure
-//* add instance segmentation
-//* add semantic segmentation
-//* check rotation information
-//* Image Loading problem, some image cause glTexImage2D exception break(walk arounded with deleting image from folder, probably related with aspect ration of the picture)
-//* implement the split window to show both the rendered data and the ground truth data, multi processing might needed here
-
-//Done(need be checked):
-//* fix no rendering happens when P=0  (walk arounded with P set to 1)
-//* Generating bounding box
-//* generating 3d bounding box
-//* Add in plane rotation
-//* set pictures as the background of the window
-//* optimize all of the VAO and VBOs
-
-
-//void window_size_callback(GLFWwindow* window, int width, int height)
-//{
-//	glfwGetWindowSize(window, &width, &height);
-//}
-
-
 
 int main()
 {
@@ -349,13 +282,6 @@ int main()
 
 	//create light and cube vertex setting in OpenGL
 	VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
-	VertexBuffer Cube(cube_vertex,
-		indicies_cube,
-		sizeof(cube_vertex) / sizeof(cube_vertex[0]),
-		sizeof(float),
-		sizeof(indicies_cube) / sizeof(indicies_cube[0]),
-		sizeof(int),
-		AttribPointer_cube);
 
 	std::cout << "create Background buffers and layout!" << std::endl;
 	VertexBuffer Background(background,
@@ -371,7 +297,7 @@ int main()
 	std::cout << "creating image list..." << std::endl;
 	std::map<std::string, int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
 	std::map<std::string, int>::iterator it = Filelist.begin();
-	std::advance(it, 2000);  //2000
+	std::advance(it, 1);
 
 	std::cout << "image list created!" << std::endl;
 	Model TrainingObject(LOAD_MODEL);
@@ -393,33 +319,7 @@ int main()
 	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader"); //draw 2d bb
 	Shader Boundingbox_8p_shader("boundingbox_8p_vertex.shader", "boundingbox_8p_fragment.shader"); //draw 3d bb
 	Shader Segmentation("semantic_vertex.shader", "semantic_fragment.shader");
-	// setup bounding box object
-	BoundingBox boundingbox(TrainingObject);
-	float bounding_box_vertex_8point[24] =
-	{
-		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
-		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_min,
-		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_min,
-		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max,
-		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
-		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_min,
-		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_min,
-		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max
-	};
 
-	std::map<std::string, int> AttribPointer_BB;//problem by extracting to calss: pass array result in uncorrect bing VAO
-	AttribPointer_BB["layout_0"] = 0;
-	AttribPointer_BB["size_of_vertex_0"] = 3;
-	AttribPointer_BB["stride_0"] = 3 * sizeof(float);
-	AttribPointer_BB["offset_0"] = 0;
-	VertexBuffer BB_3d(bounding_box_vertex_8point,
-		boundingbox.bounding_box_vertex_8point_indecies,
-		sizeof(bounding_box_vertex_8point) / sizeof(bounding_box_vertex_8point[0]),
-		sizeof(float),
-		sizeof(boundingbox.bounding_box_vertex_8point_indecies) / sizeof(boundingbox.bounding_box_vertex_8point_indecies[0]),
-		sizeof(int),
-		AttribPointer_BB,
-		"bb");
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	lamp = glm::translate(lamp, light_position);
@@ -444,17 +344,12 @@ int main()
 
 	while (!glfwWindowShouldClose(window[0]))  //start the game
 	{
-		//GLCall(glViewport(0,0,1024,768));
 
 		glm::mat4 object_model = glm::mat4(1.0f);  //trainning object matrix 
-		glm::mat4 cube = glm::mat4(1.0f);
 		glm::mat4 camera = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
 
 		object_model = glm::scale(object_model, glm::vec3(1.0f, 1.0f, 1.0f));
-
-		cube = glm::translate(cube, glm::vec3(3.0f, 0.0f, 0.0f));
-		cube = glm::scale(cube, glm::vec3(0.3f, 0.3f, 0.3f));
 
 		if (ground_truth)
 		{
@@ -462,14 +357,14 @@ int main()
 		}
 
 		//important to set random seed on this position, if this is done in the for loop, the randomization will behave locally
-		random_number_generator.seed(1);
+		random_number_generator.seed(3);
 
-		for (int i = 2000; i < 10000; i++)
+		for (int i = 0; i < 20; i++)
 		{
 			std::cout << "iterations: " << i << std::endl;
 			// initialze light position vector, changing value here won't change the rendering result
 			std::vector<glm::vec3> light_positions;
-			int light_num = int(random_float(random_number_generator, 1, 5));
+			int light_num = int(random_float(random_number_generator, 1, 5));																	//randomize lightning number here
 			std::cout << light_num << std::endl;
 
 			for (int n = 0; n < light_num; n++)
@@ -477,9 +372,9 @@ int main()
 				light_positions.push_back(random_vec3(random_number_generator, -1.0, 1.0, -1.0, 1.0));
 			}
 
-			std::cout << "light position check: " << random_float(random_number_generator, -1.0f, 1.0f) << std::endl;
+			std::cout << "light position check: " << light_positions[0].x << " " << light_positions[0].y << " " << light_positions[0].z << std::endl;
 			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
-			projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+			projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 100.0f);
 
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
@@ -496,6 +391,7 @@ int main()
 			pointLight.ambient = random_v3_norm(random_number_generator, 0.05, 0.05, 0.05, 0.4);																			//randomize lightning color
 			pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
 			pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f };
+
 
 			if (USE_BACKGROUND_IMAGE)
 			{
@@ -554,7 +450,6 @@ int main()
 			multiple_lightning_shader.setMatrix4fv("view", camera);
 			multiple_lightning_shader.setVector3f("viewPos", Setup.camera_pose);
 			multiple_lightning_shader.setMatrix4fv("projection", projection);
-			multiple_lightning_shader.setMatrix4fv("model", cube);
 
 			dirLight.ambient = glm::vec3{ 0.15f,0.15f,0.15f };
 			dirLight.diffuse = glm::vec3{ 0.4f,0.4f,0.4f };
@@ -567,16 +462,12 @@ int main()
 
 			//std::cout << "number of the light sources: " << (int)((sizeof(light_positions) / sizeof(glm::vec3))) << std::endl;
 
-			//pointLight.ambient = glm::vec3{ 0.05f,0.05f,0.05f };
-			//pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
-			//pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f };
-
 
 			for (int n = 0; n < light_positions.size(); n++)
 			{
 				if (ENABLE_RANDOM_LIGHT_SOURCE_POSITION)
 				{
-					light_positions[n] = random_vec3(random_number_generator, -15.f, 15.f, -15.f, 15.f);															//randomize light position
+					light_positions[n] = random_vec3(random_number_generator, -10.f, 10.f, -10.f, 10.f);															//randomize light position
 				}
 				std::string number = std::to_string(n);
 				std::string uniform_position = "pointlights[].position";
@@ -629,43 +520,23 @@ int main()
 			multiple_lightning_shader.setVector3f("material.specular", train_object.specular);
 			multiple_lightning_shader.setFloat("material.shininess", train_object.shininess);
 
+			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, 0, 0.01, 0.03);				//objectposition
 
-			//glm::vec3 ObjectPosition = random_vec3(random_number_generator, -0.1, 0.1, 0.0, 0.0);
-			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, 0, 0.03, 0.02);
-			//glm::vec3 ObjectPosition = glm::vec3(0.08f, 0.0f, 0.0f);
-			//std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
-
-			/*std::cout<<"object position matrix:"<<std::endl;
-			std::cout << "	" << object_model[0][0] << "	" << object_model[0][1] << "	" << object_model[0][2] << "	" << object_model[0][3] << "	" << std::endl;
-			std::cout << "	" << object_model[1][0] << "	" << object_model[1][1] << "	" << object_model[1][2] << "	" << object_model[1][3] << "	" << std::endl;
-			std::cout << "	" << object_model[2][0] << "	" << object_model[2][1] << "	" << object_model[2][2] << "	" << object_model[2][3] << "	" << std::endl;
-			std::cout << "	" << object_model[3][0] << "	" << object_model[3][1] << "	" << object_model[3][2] << "	" << object_model[3][3] << "	" << std::endl;
-
-*/
 
 			glm::mat4 rotation_matrix = rotate_object_3axis_randomly(object_model, random_number_generator);
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
 
 
 			//////////////////////////setting shader for semantic segmentation////////////////////////////
-			if (ground_truth)
-			{
-				Segmentation.use();
-				glm::vec3 train_object_color(1.0f, 1.0f, 1.0f);
-				Segmentation.setMatrix4fv("view", camera);
-				Segmentation.setMatrix4fv("projection", projection);
-				Segmentation.setMatrix4fv("model", object_model);
-				Segmentation.setVector3f("fragcolor", train_object_color);
-				TrainingObject.Draw(Segmentation);
-			}
-			else
-			{
-				TrainingObject.Draw(multiple_lightning_shader);
-			}
-			
-			
-			//TrainingObject.Draw(multiple_lightning_shader);//main object for training
+			//Segmentation.use();
+			//glm::vec3 train_object_color(1.0f, 0.0f, 0.0f);
+			//Segmentation.setMatrix4fv("view", camera);
+			//Segmentation.setMatrix4fv("projection", projection);
+			//Segmentation.setMatrix4fv("model", object_model);
+			//Segmentation.setVector3f("fragcolor", train_object_color);
+
+			TrainingObject.Draw(multiple_lightning_shader);//main object for training
 			//object_model = glm::rotate(object_model, -float(glm::radians(1.0)), glm::vec3(1.0, 0.0, 0.0));
 			inverse_object_3axis_rotation(object_model, rotation_matrix);
 			object_model = glm::translate(object_model, -ObjectPosition); //after drawing the object traslate it back to origin
@@ -678,93 +549,10 @@ int main()
 
 			std::cout <<"object: "<< object_model[0][0] << std::endl;*/
 
-			//////////////////////using bounding box//////////////////////////////////////////////////////
 
-			boundingbox.fill_bb_glm_vec3(bounding_box_vertex_8point);
-			//boundingbox.generate_bounding_box_labels_3d(SCR_WIDTH, SCR_HEIGHT, P, Y, R, projection, camera, object_model, jsonfile, json_path);
-			//std::cout << "labels generated" << std::endl;
-			//3d Bounding Box
-			Boundingbox_8p_shader.use();
-			Boundingbox_8p_shader.setMatrix4fv("model", object_model);
-			Boundingbox_8p_shader.setMatrix4fv("view", camera);
-			Boundingbox_8p_shader.setMatrix4fv("projection", projection);
-			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-			//BB_3d.Draw("draw_elements");
-
-			float bounding_box_vertex_4point[] = {
-				boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
-				boundingbox.bb_v.x_max,	boundingbox.bb_v.y_min,	0.f,  // bottom right
-				boundingbox.bb_v.x_min,	boundingbox.bb_v.y_min,	0.f,  // bottom left
-				boundingbox.bb_v.x_min,	boundingbox.bb_v.y_max,	0.f
-			};
-
-			//2dBounding Box
-			VertexBuffer BB_2d(bounding_box_vertex_4point,
-				boundingbox.bounding_box_vertex_4point_indecies,
-				sizeof(bounding_box_vertex_4point) / sizeof(bounding_box_vertex_4point[0]),
-				sizeof(float),
-				sizeof(boundingbox.bounding_box_vertex_4point_indecies) / sizeof(boundingbox.bounding_box_vertex_4point_indecies[0]),
-				sizeof(int),
-				AttribPointer_BB,
-				"bb");
-
-			Basic_shader.use();
-			Basic_shader.setMatrix4fv("model", object_model);
-			Basic_shader.setMatrix4fv("view", camera);
-			Basic_shader.setMatrix4fv("projection", projection);
-			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-			//BB_2d.Draw("draw_elements");
-			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
-
-			////////////////////////////////////////////////////////////////////////////////////////
-
-
-			cube = glm::mat4(1.0f);
-			glm::vec3 cube_position = set_random_with_distribution(random_number_generator, 0.0, 0.03, 0.02);
-			object_setting_for_fragment_shader obstacles;
-			float scale = random_float(random_number_generator, 0.2, 0.5);
-			glm::mat4 cube_rotation_matrix = rotate_object_3axis_randomly(cube, random_number_generator);
-			cube = glm::translate(cube, cube_position);
-			cube = glm::scale(cube, glm::vec3(scale));
-
-			if (!ground_truth)
-			{
-				multiple_lightning_shader.use();
-				multiple_lightning_shader.setMatrix4fv("model", cube);
-				obstacles.ambient = set_random_with_distribution(random_number_generator, 0.5, 0.5, 0.2);
-				obstacles.diffuse = set_random_with_distribution(random_number_generator, 0.5, 0.5, 0.2);
-
-				multiple_lightning_shader.setVector3f("material.ambient", obstacles.ambient);
-				multiple_lightning_shader.setVector3f("material.diffuse", obstacles.diffuse);
-				ReferenceObject.Draw(multiple_lightning_shader);
-			}
-			else
-			{
-				glm::vec3 ambient = set_random_with_distribution(random_number_generator, 0.5, 0.5, 0.2);
-				glm::vec3 diffuse = set_random_with_distribution(random_number_generator, 0.5, 0.5, 0.2);
-
-				Segmentation.use();
-				glm::vec3 train_object_color(0.0f, 0.0f, 0.0f);
-
-				Segmentation.setMatrix4fv("view", camera);
-				Segmentation.setMatrix4fv("projection", projection);
-				Segmentation.setMatrix4fv("model", cube);
-				Segmentation.setVector3f("fragcolor", train_object_color);
-				ReferenceObject.Draw(Segmentation);//obstacles
-
-			}
-
-			///////////////////////////////////////semantic segmentation///////////////////
-			//Segmentation.use();
-			//Segmentation.setMatrix4fv("view", camera);
-			//Segmentation.setMatrix4fv("projection", projection);
-			//Segmentation.setMatrix4fv("model", cube);
-			//Segmentation.setVector3f("fragcolor", obstacles.diffuse);
-			inverse_object_3axis_rotation(cube, cube_rotation_matrix);
-			cube = glm::translate(cube, -cube_position);
-			/////////////////////////////////////////////////////////////////////////////////
 
 			//GLCall(glDrawArrays(GL_TRIANGLES, 0, 36);
+			// draw light directly in the field
 			lightning_shader.use();
 			lightning_shader.setMatrix4fv("projection_light", projection);
 			lightning_shader.setMatrix4fv("view_light", camera);
@@ -775,7 +563,7 @@ int main()
 				lamp = glm::translate(lamp, light_positions[n]);
 				lamp = glm::scale(lamp, glm::vec3{ 10.0f,10.0f,10.0f });
 				lightning_shader.setMatrix4fv("model_light", lamp);
-				//Lightning.Draw("draw_arrays");
+				Lightning.Draw("draw_arrays"); 
 
 			}
 
@@ -800,7 +588,7 @@ int main()
 			GLCall(glfwSwapBuffers(window[0]));
 			GLCall(glfwPollEvents());
 
-			//std::cin.get();
+			std::cin.get();
 
 		}
 

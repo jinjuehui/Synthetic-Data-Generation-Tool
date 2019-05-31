@@ -45,6 +45,23 @@ glm::vec3 set_random_with_distribution(std::default_random_engine &generator, fl
 	return glm::vec3(position[0], position[1], position[2]);
 }
 
+glm::vec3 random_v3_norm(std::default_random_engine &generator, float a, float b, float c, float d)
+{
+
+	std::normal_distribution<float> distribution_a(a, d);
+	std::normal_distribution<float> distribution_b(b, d);
+	std::normal_distribution<float> distribution_c(c, d);
+
+	std::vector<float> position;
+	position.push_back(distribution_a(generator));
+	position.push_back(distribution_b(generator));
+	position.push_back(distribution_c(generator));
+
+	//std::cout << "position: "<< position[0] <<" "<< position[1]<<" "<< position[2] << std::endl;
+
+	return glm::vec3(position[0], position[1], position[2]);
+}
+
 glm::vec3 random_vec3(std::default_random_engine &generator, float xy_min, float xy_max, float z_min, float z_max)
 {
 

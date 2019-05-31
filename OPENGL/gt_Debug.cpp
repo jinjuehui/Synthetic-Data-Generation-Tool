@@ -25,7 +25,7 @@ namespace fs = std::filesystem;
 //Triggers and Keys
 //#define LOAD_MODEL "mesh/nanosuit/chess/queen.obj"
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
-#define LOAD_MODEL "mesh/obj_05_re.stl"//"mesh/obj_05.stl"																								#change model type
+#define LOAD_MODEL "mesh/obj_05.stl"
 #define ROTATE_CAMERA false
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
@@ -37,8 +37,8 @@ bool ROTATE_LIGHT = false;
 //parameters
 //Screen Parameters:
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 224;
-const unsigned int SCR_HEIGHT = SCR_WIDTH;
+const unsigned int SCR_WIDTH = 1024;
+const unsigned int SCR_HEIGHT = 1024;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
 //User Input Mouse and cursor
@@ -99,21 +99,6 @@ unsigned int indicies_cube[] = {
 
 //camera setup with default parameters
 CameraOrientation Setup;
-
-std::map<std::string, int> read_images_in_folder(std::string path)
-{
-	std::map<std::string, int> files;
-	//std::cout << "out side loop" << std::endl;
-	for (const auto & entry : fs::directory_iterator(path))
-	{
-		//std::cout << "reading images" << std::endl;
-		files[entry.path().string()];
-		//std::cout << entry.path() << std::endl;
-	}
-	//std::cout << "finish reading" << std::endl;
-	return files;
-
-}
 
 
 //call back function for mouse scrolling to zoom the view
@@ -347,7 +332,7 @@ int main()
 	AttribPointer_Background["offset_1"] = 3 * sizeof(float);
 	//===============move into vertex classes to parse layout automatically=====================
 
-	//create light and cube vertex setting in OpenGL
+	//draw lights
 	VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
 	VertexBuffer Cube(cube_vertex,
 		indicies_cube,
@@ -367,17 +352,10 @@ int main()
 		AttribPointer_Background,
 		"generate texture");
 
-	//read file list int the folder
-	std::cout << "creating image list..." << std::endl;
-	std::map<std::string, int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
-	std::map<std::string, int>::iterator it = Filelist.begin();
-	std::advance(it, 2000);  //2000
 
-	std::cout << "image list created!" << std::endl;
 	Model TrainingObject(LOAD_MODEL);
 	//std::cout << "number of model meshes: " << TrainingObject.meshes[0].Vertecies.size() << std::endl;
-	Model ReferenceObject(LOAD_CUBE_REFERENCE);  //Obstacles
-
+	Model ReferenceObject(LOAD_CUBE_REFERENCE);
 	if (ENABLE_USER_INPUT_TO_CONTROL_CAMERA)
 	{
 		glfwSetInputMode(window[0], GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -386,14 +364,12 @@ int main()
 		std::cout << "mouse to zoom.." << std::endl;
 	}
 
-
-	// initializing shaer
 	Shader lightning_shader("Lightning_vertex.shader", "Lightning_fragment.shader");
 	Shader multiple_lightning_shader("multipleLightSource_vertex.shader", "multipleLightSource_fragment.shader");
 	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader"); //draw 2d bb
 	Shader Boundingbox_8p_shader("boundingbox_8p_vertex.shader", "boundingbox_8p_fragment.shader"); //draw 3d bb
 	Shader Segmentation("semantic_vertex.shader", "semantic_fragment.shader");
-	// setup bounding box object
+	///////////////////////////////////////////using bounding box/////////////////////////////////////////////////////
 	BoundingBox boundingbox(TrainingObject);
 	float bounding_box_vertex_8point[24] =
 	{
@@ -462,20 +438,18 @@ int main()
 		}
 
 		//important to set random seed on this position, if this is done in the for loop, the randomization will behave locally
-		random_number_generator.seed(1);
+		random_number_generator.seed(3);
 
-		for (int i = 2000; i < 10000; i++)
+		for (int i = 0; i < 2; i++)
 		{
 			std::cout << "iterations: " << i << std::endl;
-			// initialze light position vector, changing value here won't change the rendering result
-			std::vector<glm::vec3> light_positions;
-			int light_num = int(random_float(random_number_generator, 1, 5));
-			std::cout << light_num << std::endl;
-
-			for (int n = 0; n < light_num; n++)
+			glm::vec3 light_positions[] =
 			{
-				light_positions.push_back(random_vec3(random_number_generator, -1.0, 1.0, -1.0, 1.0));
-			}
+				random_vec3(random_number_generator,-1.0,1.0,-1.0,1.0),
+				random_vec3(random_number_generator,-1.0,1.0,-1.0,1.0),
+				random_vec3(random_number_generator,-1.0,1.0,-1.0,1.0),
+				random_vec3(random_number_generator,-1.0,1.0,-1.0,1.0),
+			};
 
 			std::cout << "light position check: " << random_float(random_number_generator, -1.0f, 1.0f) << std::endl;
 			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
@@ -493,56 +467,9 @@ int main()
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));//added for object (bounding box use line)
 			//use background image
 
-			pointLight.ambient = random_v3_norm(random_number_generator, 0.05, 0.05, 0.05, 0.4);																			//randomize lightning color
-			pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
-			pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f };
-
-			if (USE_BACKGROUND_IMAGE)
-			{
-
-				if (it == Filelist.end())
-					it = Filelist.begin();
-				//background image setting
-				int background_width, background_height, nrChannels;
-				stbi_set_flip_vertically_on_load(true);
-				unsigned char *data = stbi_load(it->first.c_str(), &background_width, &background_height, &nrChannels, 0);//Crynet_nanosuit.jpg
-																																				  //std::cout << "background image size: " << (float)background_width / background_height << std::endl;
-				std::cout << it->first.c_str() << std::endl;
-
-
-				if (data) {
-					//std::cout << "loaded data: "<<*data << std::endl;
-					Background.load_texture_image(GL_TEXTURE_2D,
-						GL_RGB,
-						background_width,
-						background_height,
-						0,
-						GL_RGB,
-						data);
-					std::cout << "texture loaded" << std::endl;
-				}
-
-				it++;
-				Shader background_shader("background_vertex.shader", "background_fragment.shader");
-				background_shader.use();
-				background_shader.setInt("texture1", 0);
-				background_shader.setVector3f("light", pointLight.ambient);
-				Background.Bind("bind_Texure");
-				Background.Draw("draw_elements");
-				GLCall(glClear(GL_DEPTH_BUFFER_BIT));//otherweise, it would be foreground
-
-				Background.UnBind();
-				stbi_image_free(data);
-			}
-
 			glm::mat4 camera_transpose = glm::transpose(camera);
 
 			//object pose in Camera coordinate system:
-			//pose = view * model
-			glm::mat4 pose = camera * object_model;//<-------------------------after add roll angle this should be modified
-			float pose_array[4][4];
-			convert_array(pose, pose_array);
-			labels["Orientation"] = pose_array;
 
 			jsonfile << labels;
 
@@ -567,18 +494,18 @@ int main()
 
 			//std::cout << "number of the light sources: " << (int)((sizeof(light_positions) / sizeof(glm::vec3))) << std::endl;
 
-			//pointLight.ambient = glm::vec3{ 0.05f,0.05f,0.05f };
-			//pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
-			//pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f };
+			pointLight.ambient = glm::vec3{ 0.05f,0.05f,0.05f };
+			pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
+			pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f };
 
 
-			for (int n = 0; n < light_positions.size(); n++)
+			for (int i = 0; i < (int)((sizeof(light_positions) / sizeof(glm::vec3))); i++)
 			{
 				if (ENABLE_RANDOM_LIGHT_SOURCE_POSITION)
 				{
-					light_positions[n] = random_vec3(random_number_generator, -15.f, 15.f, -15.f, 15.f);															//randomize light position
+					light_positions[i] = random_vec3(random_number_generator, -5.f, 5.f, -5.f, 5.f);
 				}
-				std::string number = std::to_string(n);
+				std::string number = std::to_string(i);
 				std::string uniform_position = "pointlights[].position";
 				std::string uniform_ambient = "pointlights[].ambient";
 				std::string uniform_diffuse = "pointlights[].diffuse";
@@ -597,7 +524,7 @@ int main()
 				//std::cout << uniform_position << std::endl;
 
 
-				multiple_lightning_shader.setVector3f(uniform_position, light_positions[n]);
+				multiple_lightning_shader.setVector3f(uniform_position, light_positions[i]);
 				multiple_lightning_shader.setVector3f(uniform_ambient, pointLight.ambient);
 				multiple_lightning_shader.setVector3f(uniform_diffuse, pointLight.diffuse);
 				multiple_lightning_shader.setVector3f(uniform_specular, pointLight.specular);
@@ -636,36 +563,20 @@ int main()
 			//std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
 
-			/*std::cout<<"object position matrix:"<<std::endl;
-			std::cout << "	" << object_model[0][0] << "	" << object_model[0][1] << "	" << object_model[0][2] << "	" << object_model[0][3] << "	" << std::endl;
-			std::cout << "	" << object_model[1][0] << "	" << object_model[1][1] << "	" << object_model[1][2] << "	" << object_model[1][3] << "	" << std::endl;
-			std::cout << "	" << object_model[2][0] << "	" << object_model[2][1] << "	" << object_model[2][2] << "	" << object_model[2][3] << "	" << std::endl;
-			std::cout << "	" << object_model[3][0] << "	" << object_model[3][1] << "	" << object_model[3][2] << "	" << object_model[3][3] << "	" << std::endl;
-
-*/
 
 			glm::mat4 rotation_matrix = rotate_object_3axis_randomly(object_model, random_number_generator);
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
 
 
 			//////////////////////////setting shader for semantic segmentation////////////////////////////
-			if (ground_truth)
-			{
-				Segmentation.use();
-				glm::vec3 train_object_color(1.0f, 1.0f, 1.0f);
-				Segmentation.setMatrix4fv("view", camera);
-				Segmentation.setMatrix4fv("projection", projection);
-				Segmentation.setMatrix4fv("model", object_model);
-				Segmentation.setVector3f("fragcolor", train_object_color);
-				TrainingObject.Draw(Segmentation);
-			}
-			else
-			{
-				TrainingObject.Draw(multiple_lightning_shader);
-			}
-			
-			
-			//TrainingObject.Draw(multiple_lightning_shader);//main object for training
+			//Segmentation.use();
+			//glm::vec3 train_object_color(1.0f, 0.0f, 0.0f);
+			//Segmentation.setMatrix4fv("view", camera);
+			//Segmentation.setMatrix4fv("projection", projection);
+			//Segmentation.setMatrix4fv("model", object_model);
+			//Segmentation.setVector3f("fragcolor", train_object_color);
+
+			TrainingObject.Draw(Segmentation);//main object for training
 			//object_model = glm::rotate(object_model, -float(glm::radians(1.0)), glm::vec3(1.0, 0.0, 0.0));
 			inverse_object_3axis_rotation(object_model, rotation_matrix);
 			object_model = glm::translate(object_model, -ObjectPosition); //after drawing the object traslate it back to origin
@@ -726,33 +637,7 @@ int main()
 			glm::mat4 cube_rotation_matrix = rotate_object_3axis_randomly(cube, random_number_generator);
 			cube = glm::translate(cube, cube_position);
 			cube = glm::scale(cube, glm::vec3(scale));
-
-			if (!ground_truth)
-			{
-				multiple_lightning_shader.use();
-				multiple_lightning_shader.setMatrix4fv("model", cube);
-				obstacles.ambient = set_random_with_distribution(random_number_generator, 0.5, 0.5, 0.2);
-				obstacles.diffuse = set_random_with_distribution(random_number_generator, 0.5, 0.5, 0.2);
-
-				multiple_lightning_shader.setVector3f("material.ambient", obstacles.ambient);
-				multiple_lightning_shader.setVector3f("material.diffuse", obstacles.diffuse);
-				ReferenceObject.Draw(multiple_lightning_shader);
-			}
-			else
-			{
-				glm::vec3 ambient = set_random_with_distribution(random_number_generator, 0.5, 0.5, 0.2);
-				glm::vec3 diffuse = set_random_with_distribution(random_number_generator, 0.5, 0.5, 0.2);
-
-				Segmentation.use();
-				glm::vec3 train_object_color(0.0f, 0.0f, 0.0f);
-
-				Segmentation.setMatrix4fv("view", camera);
-				Segmentation.setMatrix4fv("projection", projection);
-				Segmentation.setMatrix4fv("model", cube);
-				Segmentation.setVector3f("fragcolor", train_object_color);
-				ReferenceObject.Draw(Segmentation);//obstacles
-
-			}
+		
 
 			///////////////////////////////////////semantic segmentation///////////////////
 			//Segmentation.use();
@@ -769,10 +654,10 @@ int main()
 			lightning_shader.setMatrix4fv("projection_light", projection);
 			lightning_shader.setMatrix4fv("view_light", camera);
 			lightning_shader.setVector3f("LightColor", lightning.light_color);
-			for (int n = 0; n < light_positions.size(); n++)
+			for (int i = 0; i < sizeof(light_positions) / sizeof(glm::vec3); i++)
 			{
 				lamp = glm::mat4(1.0f);
-				lamp = glm::translate(lamp, light_positions[n]);
+				lamp = glm::translate(lamp, light_positions[i]);
 				lamp = glm::scale(lamp, glm::vec3{ 10.0f,10.0f,10.0f });
 				lightning_shader.setMatrix4fv("model_light", lamp);
 				//Lightning.Draw("draw_arrays");
@@ -784,6 +669,7 @@ int main()
 			std::string picture = "D:/data/single_object2/tr/.jpg";
 			std::string picture_multiobject = "D:/data/multi_object/image_tr.jpg";
 			std::string picture_sm_seg = "D:/data/semantic_segmentation/image_tr.jpg";
+			std::string desktop = "E:/Benutzer/Desktop/.jpg";
 			if (ground_truth)
 			{
 				picture = "D:/data/single_object2/gt/.jpg";
@@ -794,7 +680,8 @@ int main()
 			picture.insert(26, number);
 			picture_multiobject.insert(26, number);
 			picture_sm_seg.insert(35, number);
-			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+			desktop.insert(20, number);
+			//screenshot_freeimage(desktop.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 
 			GLCall(glfwSwapBuffers(window[0]));
