@@ -89,8 +89,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/GLFW/include;$(SolutionDir)Dependencies/GLEW/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/GLFW/include;$(SolutionDir)Dependencies/GLEW/include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\freeimage;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\glm;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\ASSIMP\include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\DevIL\include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\Json\include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\linmath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\GLFW\lib-vc2015;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\GLEW\lib\Release\Win32;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\DevIL\lib\x86\Release;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\freeimage;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\ASSIMP\lib\Debug;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\glm;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\linmath;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;glew32s.lib;User32.lib;Gdi32.lib;Shell32.lib;DevIL.lib;ILU.lib;ILUT.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

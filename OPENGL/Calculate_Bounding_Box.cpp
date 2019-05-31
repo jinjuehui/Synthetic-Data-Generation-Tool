@@ -58,7 +58,7 @@ int main()
 	};
 
 	std::ofstream jsonfile;
-	std::string json_path = "E:/label/label.json";
+	std::string json_path = "label.json";
 	jsonfile.open(json_path);
 	
 	while (!glfwWindowShouldClose(window))
@@ -145,11 +145,11 @@ int main()
 		}
 
 		jsonfile.close();
+		glfwTerminate();
+		exit(EXIT_SUCCESS);
+		return 0;
 
 	}
-	glfwTerminate();
-	exit(EXIT_SUCCESS);
-	return 0;
 
 }
 

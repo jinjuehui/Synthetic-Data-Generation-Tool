@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2046
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OPENGL", "OPENGL\OPENGL.vcxproj", "{95C14032-75F1-4ADB-9B96-B483AC9C8E19}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataGeneration", "OPENGL\OPENGL.vcxproj", "{95C14032-75F1-4ADB-9B96-B483AC9C8E19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +24,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EB34BF71-1A38-4BBB-BE40-BC5CCA7C0A71}
 	EndGlobalSection
 EndGlobal
