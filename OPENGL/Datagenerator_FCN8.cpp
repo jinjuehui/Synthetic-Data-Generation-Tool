@@ -25,7 +25,7 @@ namespace fs = std::filesystem;
 //Triggers and Keys
 //#define LOAD_MODEL "mesh/nanosuit/chess/queen.obj"
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
-#define LOAD_MODEL "mesh/obj_05_re.stl"//"mesh/obj_05.stl"																								#change model type
+#define LOAD_MODEL "mesh/obj_05.stl"//"mesh/obj_05_re.stl"//"mesh/obj_05.stl"																								#change model type
 #define ROTATE_CAMERA false
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
@@ -433,7 +433,7 @@ int main()
 	std::string json_path = "label_syn.json";
 	json labels;
 
-	labels["object_id"] = path.substr(0, path.find_last_of('/'));
+	labels["object_id"] = path.substr(path.find_last_of('/')+1);
 
 	std::ofstream jsonfile;
 	jsonfile.open(json_path);
@@ -544,7 +544,7 @@ int main()
 			convert_array(pose, pose_array);
 			labels["Orientation"] = pose_array;
 
-			jsonfile << labels;
+			//jsonfile << labels;
 
 			//std::cout << pose_array[0][0] << std::endl;
 
@@ -646,7 +646,10 @@ int main()
 
 			glm::mat4 rotation_matrix = rotate_object_3axis_randomly(object_model, random_number_generator);
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
-
+			std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
+			std::cout << "center point: " << projected_point[0] <<" "<<projected_point[1]<<" "<< projected_point[2] << std::endl;
+			labels["center_point"] = projected_point;
+			jsonfile << labels;
 
 			//////////////////////////setting shader for semantic segmentation////////////////////////////
 			if (ground_truth)
@@ -794,7 +797,8 @@ int main()
 			picture.insert(26, number);
 			picture_multiobject.insert(26, number);
 			picture_sm_seg.insert(35, number);
-			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+			labels["img_name"] = picture.c_str();
+			//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 
 			GLCall(glfwSwapBuffers(window[0]));

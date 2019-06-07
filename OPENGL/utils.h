@@ -177,6 +177,7 @@ glm::mat4 rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_eng
 void inverse_object_3axis_rotation(glm::mat4 &model, glm::mat4 rotation_matrix);
 float random_float(std::default_random_engine &generator, float v_min, float v_max);
 glm::vec3 random_v3_norm(std::default_random_engine &generator, float a, float b, float c, float d);
+std::vector<float> projection_single_point_on_creen(glm::vec3 point, glm::mat4 model, glm::mat4 camera, glm::mat4 projection);
 CameraOrientation rotateCamera(int P, int Y, float distance);
 GLFWwindow* initialize_window(int width, int height, const char* name);
 void generate_yaml_label(std::ofstream &jsonfile,std::string json_path,json labels, std::string object_path, BoundingBox::bounding_box bb, int P, int Y, int R);
