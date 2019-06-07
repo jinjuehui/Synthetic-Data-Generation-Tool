@@ -369,7 +369,7 @@ int main()
 
 	//read file list int the folder
 	std::cout << "creating image list..." << std::endl;
-	std::map<std::string, int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
+	std::map<std::string, int> Filelist = read_images_in_folder("E:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
 	std::map<std::string, int>::iterator it = Filelist.begin();
 	std::advance(it, 2000);  //2000
 
@@ -462,9 +462,9 @@ int main()
 		}
 
 		//important to set random seed on this position, if this is done in the for loop, the randomization will behave locally
-		random_number_generator.seed(1);
+		random_number_generator.seed(2);   //2000 pic, seed3, 10000 pic seed1, 10000 seed2
 
-		for (int i = 2000; i < 10000; i++)
+		for (int i = 10000; i < 20000; i++)
 		{
 			std::cout << "iterations: " << i << std::endl;
 			// initialze light position vector, changing value here won't change the rendering result
@@ -493,7 +493,7 @@ int main()
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));//added for object (bounding box use line)
 			//use background image
 
-			pointLight.ambient = random_v3_norm(random_number_generator, 0.05, 0.05, 0.05, 0.4);																			//randomize lightning color
+			pointLight.ambient = random_v3_norm(random_number_generator, 0.05, 0.05, 0.05, 0.05);																			//randomize lightning color
 			pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
 			pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f };
 
@@ -506,7 +506,7 @@ int main()
 				int background_width, background_height, nrChannels;
 				stbi_set_flip_vertically_on_load(true);
 				unsigned char *data = stbi_load(it->first.c_str(), &background_width, &background_height, &nrChannels, 0);//Crynet_nanosuit.jpg
-																																				  //std::cout << "background image size: " << (float)background_width / background_height << std::endl;
+				 //std::cout << "background image size: " << (float)background_width / background_height << std::endl;
 				std::cout << it->first.c_str() << std::endl;
 
 
@@ -631,7 +631,7 @@ int main()
 
 
 			//glm::vec3 ObjectPosition = random_vec3(random_number_generator, -0.1, 0.1, 0.0, 0.0);
-			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, 0, 0.03, 0.02);
+			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, 0, 0.09, 0.01);                //object position 0.03, 0.02
 			//glm::vec3 ObjectPosition = glm::vec3(0.08f, 0.0f, 0.0f);
 			//std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
@@ -720,7 +720,7 @@ int main()
 
 
 			cube = glm::mat4(1.0f);
-			glm::vec3 cube_position = set_random_with_distribution(random_number_generator, 0.0, 0.03, 0.02);
+			glm::vec3 cube_position = set_random_with_distribution(random_number_generator, 0.0, 0.2, 0.05);							//0.03, 0.02			//cube position
 			object_setting_for_fragment_shader obstacles;
 			float scale = random_float(random_number_generator, 0.2, 0.5);
 			glm::mat4 cube_rotation_matrix = rotate_object_3axis_randomly(cube, random_number_generator);
@@ -781,14 +781,14 @@ int main()
 
 
 			std::string number = to_format(i);
-			std::string picture = "D:/data/single_object2/tr/.jpg";
-			std::string picture_multiobject = "D:/data/multi_object/image_tr.jpg";
-			std::string picture_sm_seg = "D:/data/semantic_segmentation/image_tr.jpg";
+			std::string picture = "E:/data/single_object2/tr/.jpg";
+			std::string picture_multiobject = "E:/data/multi_object/image_tr.jpg";
+			std::string picture_sm_seg = "E:/data/semantic_segmentation/image_tr.jpg";
 			if (ground_truth)
 			{
-				picture = "D:/data/single_object2/gt/.jpg";
-				picture_multiobject = "D:/data/multi_object/image_gt.jpg";
-				picture_sm_seg = "D:/data/semantic_segmentation/image_gt.jpg";
+				picture = "E:/data/single_object2/gt/.jpg";
+				picture_multiobject = "E:/data/multi_object/image_gt.jpg";
+				picture_sm_seg = "E:/data/semantic_segmentation/image_gt.jpg";
 
 			}
 			picture.insert(26, number);
