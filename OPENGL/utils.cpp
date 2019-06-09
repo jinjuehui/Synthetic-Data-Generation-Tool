@@ -242,6 +242,18 @@ void generate_yaml_label(std::ofstream &jsonfile, std::string json_path,json lab
 
 }
 
+std::vector<float> projection_single_point_on_creen(glm::vec3 point, glm::mat4 model, glm::mat4 camera, glm::mat4 projection)
+{
+	std::vector<float> coordinate;
+	glm::vec4 projected_point;
+	projected_point = projection * camera* model * glm::vec4(point,1.0f);
+	coordinate.push_back((projected_point[0] / projected_point[3]+1)/2);
+	coordinate.push_back((projected_point[1] / projected_point[3]+1)/2);
+	coordinate.push_back(projected_point[2] / projected_point[3]);
+
+	return coordinate;
+}
+
 //use to calculate the bounding box in pixels
 //input: (x_min,y_min) lower left origin, (x_max,y_max) upper right corner, screen width, screen height
 //return: a bounding box structure contains, origin, width and height of the bounding box in pixels
