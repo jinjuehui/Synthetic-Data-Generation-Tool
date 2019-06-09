@@ -2,7 +2,7 @@
 
 std::string to_format(const int number) {
 	std::stringstream ss;
-	ss << std::setw(4) << std::setfill('0') << number;
+	ss << std::setw(5) << std::setfill('0') << number;																	//change file name digit here
 	return ss.str();
 }
 
@@ -248,7 +248,7 @@ std::vector<float> projection_single_point_on_creen(glm::vec3 point, glm::mat4 m
 	glm::vec4 projected_point;
 	projected_point = projection * camera* model * glm::vec4(point,1.0f);
 	coordinate.push_back((projected_point[0] / projected_point[3]+1)/2);
-	coordinate.push_back((projected_point[1] / projected_point[3]+1)/2);
+	coordinate.push_back((1-projected_point[1] / projected_point[3])/2);
 	coordinate.push_back(projected_point[2] / projected_point[3]);
 
 	return coordinate;

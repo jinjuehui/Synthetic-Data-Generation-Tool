@@ -95,13 +95,15 @@ VertexBuffer::VertexBuffer(const void* data,
 
 VertexBuffer::~VertexBuffer()
 {
-	//std::cout << "destructor called!" << std::endl;
+	std::cout << "destructor called!" << std::endl;
 	if(&VAO)
 	GLCall(glDeleteBuffers(1,&VAO));
 	if(&VBO)
 	GLCall(glDeleteBuffers(1, &VBO));
 	if(&EBO)
 	GLCall(glDeleteBuffers(1, &EBO));
+	if (&TEXTURE)
+	GLCall(glDeleteTextures(1, &TEXTURE));
 }
 
 void VertexBuffer::Bind(std::string key) const

@@ -347,25 +347,7 @@ int main()
 	AttribPointer_Background["offset_1"] = 3 * sizeof(float);
 	//===============move into vertex classes to parse layout automatically=====================
 
-	//create light and cube vertex setting in OpenGL
-	VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
-	VertexBuffer Cube(cube_vertex,
-		indicies_cube,
-		sizeof(cube_vertex) / sizeof(cube_vertex[0]),
-		sizeof(float),
-		sizeof(indicies_cube) / sizeof(indicies_cube[0]),
-		sizeof(int),
-		AttribPointer_cube);
 
-	std::cout << "create Background buffers and layout!" << std::endl;
-	VertexBuffer Background(background,
-		back_indicies,
-		sizeof(background) / sizeof(background[0]),
-		sizeof(float),
-		sizeof(back_indicies) / sizeof(back_indicies[0]),
-		sizeof(int),
-		AttribPointer_Background,
-		"generate texture");
 
 	//read file list int the folder
 	std::cout << "creating image list..." << std::endl;
@@ -462,10 +444,21 @@ int main()
 		}
 
 		//important to set random seed on this position, if this is done in the for loop, the randomization will behave locally
-		random_number_generator.seed(2);   //2000 pic, seed3, 10000 pic seed1, 10000 seed2
+		random_number_generator.seed(4);   //2000 pic, seed3, 10000 pic seed1, 10000 seed2, 60000, seed4
 
-		for (int i = 10000; i < 20000; i++)
+		for (int i = 20000; i < 40000; i++)
 		{
+			//create light and cube vertex setting in OpenGL
+			VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
+			VertexBuffer Cube(cube_vertex,
+				indicies_cube,
+				sizeof(cube_vertex) / sizeof(cube_vertex[0]),
+				sizeof(float),
+				sizeof(indicies_cube) / sizeof(indicies_cube[0]),
+				sizeof(int),
+				AttribPointer_cube);
+			std::cout << "create Background buffers and layout!" << std::endl;
+
 			std::cout << "iterations: " << i << std::endl;
 			// initialze light position vector, changing value here won't change the rendering result
 			std::vector<glm::vec3> light_positions;
@@ -493,12 +486,21 @@ int main()
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));//added for object (bounding box use line)
 			//use background image
 
-			pointLight.ambient = random_v3_norm(random_number_generator, 0.05, 0.05, 0.05, 0.05);																			//randomize lightning color
+			pointLight.ambient = random_v3_norm(random_number_generator, 0.08, 0.08, 0.08, 0.02);																			//randomize lightning color
 			pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
 			pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f };
 
 			if (USE_BACKGROUND_IMAGE)
 			{
+
+				VertexBuffer Background(background,
+					back_indicies,
+					sizeof(background) / sizeof(background[0]),
+					sizeof(float),
+					sizeof(back_indicies) / sizeof(back_indicies[0]),
+					sizeof(int),
+					AttribPointer_Background,
+					"generate texture");
 
 				if (it == Filelist.end())
 					it = Filelist.begin();
@@ -521,7 +523,6 @@ int main()
 						data);
 					std::cout << "texture loaded" << std::endl;
 				}
-
 				it++;
 				Shader background_shader("background_vertex.shader", "background_fragment.shader");
 				background_shader.use();
@@ -533,6 +534,7 @@ int main()
 
 				Background.UnBind();
 				stbi_image_free(data);
+				
 			}
 
 			glm::mat4 camera_transpose = glm::transpose(camera);
