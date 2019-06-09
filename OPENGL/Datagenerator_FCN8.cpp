@@ -351,7 +351,7 @@ int main()
 
 	//read file list int the folder
 	std::cout << "creating image list..." << std::endl;
-	std::map<std::string, int> Filelist = read_images_in_folder("E:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
+	std::map<std::string, int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
 	std::map<std::string, int>::iterator it = Filelist.begin();
 	std::advance(it, 2000);  //2000
 
@@ -412,14 +412,7 @@ int main()
 	GLCall(glEnable(GL_DEPTH_TEST));
 	std::cout << "rendering..." << std::endl;
 	bool ground_truth = false;
-	std::string json_path = "label_syn.json";
-	json labels;
-
-	labels["object_id"] = path.substr(path.find_last_of('/')+1);
-
-	std::ofstream jsonfile;
-	jsonfile.open(json_path);
-
+	
 	int delta_P(5), delta_Y(5), delta_R(10);
 
 	std::default_random_engine random_number_generator;
@@ -448,6 +441,27 @@ int main()
 
 		for (int i = 20000; i < 40000; i++)
 		{
+
+			//initialize data name for generated picture
+			std::string number = to_format(i);
+			std::string picture = "E:/data/single_object2/tr/.jpg";
+			std::string picture_multiobject = "E:/data/multi_object/image_tr.jpg";
+			std::string picture_sm_seg = "E:/data/semantic_segmentation/image_tr.jpg";
+
+			//initialize json:
+			std::string json_path = "D:/data/single_object2/label/.json";
+			json_path.insert(29, number);
+			json labels;
+			std::ofstream jsonfile;
+			if (!ground_truth)
+			{
+				std::cout << "generate label" << std::endl;
+				jsonfile.open(json_path);
+				labels["name"] = number;
+				labels["object_id"] = path.substr(path.find_last_of('/') + 1);
+			}
+			
+
 			//create light and cube vertex setting in OpenGL
 			VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
 			VertexBuffer Cube(cube_vertex,
@@ -544,7 +558,8 @@ int main()
 			glm::mat4 pose = camera * object_model;//<-------------------------after add roll angle this should be modified
 			float pose_array[4][4];
 			convert_array(pose, pose_array);
-			labels["Orientation"] = pose_array;
+			if(!ground_truth)
+				labels["Orientation"] = pose_array;
 
 			//jsonfile << labels;
 
@@ -650,8 +665,12 @@ int main()
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
 			std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
 			std::cout << "center point: " << projected_point[0] <<" "<<projected_point[1]<<" "<< projected_point[2] << std::endl;
-			labels["center_point"] = projected_point;
-			jsonfile << labels;
+			if (!ground_truth)
+			{
+				labels["center_point"] = projected_point;
+				jsonfile << labels;
+			}
+			
 
 			//////////////////////////setting shader for semantic segmentation////////////////////////////
 			if (ground_truth)
@@ -785,10 +804,7 @@ int main()
 			}
 
 
-			std::string number = to_format(i);
-			std::string picture = "E:/data/single_object2/tr/.jpg";
-			std::string picture_multiobject = "E:/data/multi_object/image_tr.jpg";
-			std::string picture_sm_seg = "E:/data/semantic_segmentation/image_tr.jpg";
+
 			if (ground_truth)
 			{
 				picture = "E:/data/single_object2/gt/.jpg";
@@ -799,7 +815,6 @@ int main()
 			picture.insert(26, number);
 			picture_multiobject.insert(26, number);
 			picture_sm_seg.insert(35, number);
-			labels["img_name"] = picture.c_str();
 			//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 
@@ -807,10 +822,12 @@ int main()
 			GLCall(glfwPollEvents());
 
 			//std::cin.get();
+			if(!ground_truth)
+			jsonfile.close();
 
 		}
 
-		jsonfile.close();
+
 
 		if (ground_truth)
 		{
