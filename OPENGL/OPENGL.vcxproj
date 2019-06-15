@@ -75,13 +75,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\include;$(SolutionDir)Dependencies\DevIL\include;$(SolutionDir)Dependencies\freeimage\;$(SolutionDir)Dependencies\Json\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\include;$(SolutionDir)Dependencies\DevIL\include;$(SolutionDir)Dependencies\freeimage\;$(SolutionDir)Dependencies\Json\include;$(SolutionDir)Dependencies\freeglut\freeglut\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalOptions>-lGLU %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2015;$(SolutionDir)Dependencies\GLEW\lib\Release\Win32;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\lib\Debug;$(SolutionDir)Dependencies\DevIL\lib\x86\Release;$(SolutionDir)Dependencies\freeimage\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;glew32s.lib;User32.lib;Gdi32.lib;Shell32.lib;DevIL.lib;ILU.lib;ILUT.lib;FreeImage.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2015;$(SolutionDir)Dependencies\GLEW\lib\Release\Win32;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\lib\Debug;$(SolutionDir)Dependencies\DevIL\lib\x86\Release;$(SolutionDir)Dependencies\freeimage\;$(SolutionDir)Dependencies\freeglut\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;glew32s.lib;User32.lib;Gdi32.lib;Shell32.lib;DevIL.lib;ILU.lib;ILUT.lib;FreeImage.lib;freeglut.lib</AdditionalDependencies>
+      <AdditionalOptions>-lGLU %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

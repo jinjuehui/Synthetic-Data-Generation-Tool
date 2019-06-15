@@ -1,5 +1,8 @@
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
+#include<GL/GL.h>
+#include<GL/GLU.h>
+#include<GL/glut.h>
 #include<glm.hpp>
 #include<gtc/matrix_transform.hpp>
 #include<gtc/type_ptr.hpp>
@@ -16,7 +19,7 @@
 #include <random>
 #include <iomanip>
 
-
+#define RADPERDEG 0.0174533 // use to draw arrow for coordinate
 
 using json = nlohmann::json;
 
@@ -28,8 +31,6 @@ struct CameraOrientation
 	glm::vec3 camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
 	
 };
-
-
 
 //define object fragment shader setup
 struct object_setting_for_fragment_shader
@@ -62,6 +63,14 @@ struct light
 }; //lightning setup for fragment shader
 
 //bounding box in normal convention, the label is formed in this structure
+
+struct Quaternion
+{
+	float x;
+	float y;
+	float z;
+	float w;
+};
 
 class BoundingBox {
 public:
@@ -182,4 +191,7 @@ CameraOrientation rotateCamera(int P, int Y, float distance);
 GLFWwindow* initialize_window(int width, int height, const char* name);
 void generate_yaml_label(std::ofstream &jsonfile,std::string json_path,json labels, std::string object_path, BoundingBox::bounding_box bb, int P, int Y, int R);
 void screenshot_freeimage(const char* screenshotFile, int width, int height);
+inline void calculateRotation(Quaternion& q, glm::mat4 a);
+void Arrow(GLdouble x1, GLdouble y1, GLdouble z1, GLdouble x2, GLdouble y2, GLdouble z2, GLdouble D);
+void drawAxes(GLdouble length);
 

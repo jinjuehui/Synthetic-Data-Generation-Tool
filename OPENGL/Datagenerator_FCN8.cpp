@@ -224,6 +224,14 @@ void convert_array(glm::mat4 mat, float pose[][4])
 	}
 }
 
+void conver_quaternion_to_array(glm::quat q, float quaternion[4])
+{
+	for (int i = 0; i < 4; i++)
+	{
+		quaternion[i] = q[i];
+	}
+}
+
 float verticesLight[] = {
 	-0.01f, -0.01f, -0.01f,
 	 0.01f, -0.01f, -0.01f,
@@ -351,9 +359,9 @@ int main()
 
 	//read file list int the folder
 	std::cout << "creating image list..." << std::endl;
-	std::map<std::string, int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
+	std::map<std::string, int> Filelist = read_images_in_folder("E:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
 	std::map<std::string, int>::iterator it = Filelist.begin();
-	std::advance(it, 2000);  //2000
+	std::advance(it, 0);  //2000  //3000(80000 data)
 
 	std::cout << "image list created!" << std::endl;
 	Model TrainingObject(LOAD_MODEL);
@@ -437,19 +445,20 @@ int main()
 		}
 
 		//important to set random seed on this position, if this is done in the for loop, the randomization will behave locally
-		random_number_generator.seed(4);   //2000 pic, seed3, 10000 pic seed1, 10000 seed2, 60000, seed4
+		random_number_generator.seed(7);   //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
+		float light_strength = 1.f;
 
-		for (int i = 20000; i < 40000; i++)
+		for (int i = 20000; i < 40000; i++) // 80000 data, i=60000, i<800000
 		{
 
 			//initialize data name for generated picture
 			std::string number = to_format(i);
-			std::string picture = "E:/data/single_object2/tr/.jpg";
+			std::string picture = "E:/data/noobstacles_gt/tr/.jpg";
 			std::string picture_multiobject = "E:/data/multi_object/image_tr.jpg";
 			std::string picture_sm_seg = "E:/data/semantic_segmentation/image_tr.jpg";
 
 			//initialize json:
-			std::string json_path = "D:/data/single_object2/label/.json";
+			std::string json_path = "E:/data/noobstacles_gt/label/.json";
 			json_path.insert(29, number);
 			json labels;
 			std::ofstream jsonfile;
@@ -551,23 +560,7 @@ int main()
 				
 			}
 
-			glm::mat4 camera_transpose = glm::transpose(camera);
-
-			//object pose in Camera coordinate system:
-			//pose = view * model
-			glm::mat4 pose = camera * object_model;//<-------------------------after add roll angle this should be modified
-			float pose_array[4][4];
-			convert_array(pose, pose_array);
-			if(!ground_truth)
-				labels["Orientation"] = pose_array;
-
-			//jsonfile << labels;
-
-			//std::cout << pose_array[0][0] << std::endl;
-
-
 			multiple_lightning_shader.use();
-
 			multiple_lightning_shader.setMatrix4fv("view", camera);
 			multiple_lightning_shader.setVector3f("viewPos", Setup.camera_pose);
 			multiple_lightning_shader.setMatrix4fv("projection", projection);
@@ -587,13 +580,16 @@ int main()
 			//pointLight.ambient = glm::vec3{ 0.05f,0.05f,0.05f };
 			//pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
 			//pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f };
-
-
+			
+			
+			if ((i + 1) % 2000 == 0)
+				light_strength += 1;
 			for (int n = 0; n < light_positions.size(); n++)
 			{
+				
 				if (ENABLE_RANDOM_LIGHT_SOURCE_POSITION)
 				{
-					light_positions[n] = random_vec3(random_number_generator, -15.f, 15.f, -15.f, 15.f);															//randomize light position
+					light_positions[n] = random_vec3(random_number_generator, -light_strength, light_strength, -light_strength, light_strength);						// -15, 15, -15, 15									//randomize light position
 				}
 				std::string number = std::to_string(n);
 				std::string uniform_position = "pointlights[].position";
@@ -624,7 +620,6 @@ int main()
 
 			}//<--for different light position
 
-
 			spotLight.ambient = glm::vec3{ 0.0f,0.0f,0.0f };
 			spotLight.diffuse = glm::vec3{ 1.0f,1.0f,1.0f };
 			spotLight.specular = glm::vec3{ 1.0f,1.0f,1.0f };
@@ -640,7 +635,6 @@ int main()
 			multiple_lightning_shader.setFloat("spotlight.cutoff", spotLight.cutoff);
 			multiple_lightning_shader.setFloat("spotlight.outercutoff", spotLight.outercutoff);
 
-
 			multiple_lightning_shader.setVector3f("material.ambient", train_object.ambient);
 			multiple_lightning_shader.setVector3f("material.diffuse", train_object.diffuse);
 			multiple_lightning_shader.setVector3f("material.specular", train_object.specular);
@@ -652,26 +646,31 @@ int main()
 			//glm::vec3 ObjectPosition = glm::vec3(0.08f, 0.0f, 0.0f);
 			//std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
-
-			/*std::cout<<"object position matrix:"<<std::endl;
-			std::cout << "	" << object_model[0][0] << "	" << object_model[0][1] << "	" << object_model[0][2] << "	" << object_model[0][3] << "	" << std::endl;
-			std::cout << "	" << object_model[1][0] << "	" << object_model[1][1] << "	" << object_model[1][2] << "	" << object_model[1][3] << "	" << std::endl;
-			std::cout << "	" << object_model[2][0] << "	" << object_model[2][1] << "	" << object_model[2][2] << "	" << object_model[2][3] << "	" << std::endl;
-			std::cout << "	" << object_model[3][0] << "	" << object_model[3][1] << "	" << object_model[3][2] << "	" << object_model[3][3] << "	" << std::endl;
-
-*/
-
+	
 			glm::mat4 rotation_matrix = rotate_object_3axis_randomly(object_model, random_number_generator);
+			//glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(3.14/2.f), glm::vec3(0.0f, 1.0f, 0.0f));
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
 			std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
-			std::cout << "center point: " << projected_point[0] <<" "<<projected_point[1]<<" "<< projected_point[2] << std::endl;
+			float pose_array[4][4], quaternion[4];
 			if (!ground_truth)
 			{
-				labels["center_point"] = projected_point;
+				glm::mat4 camera_transpose = glm::transpose(camera);
+				labels["center_point"] = projected_point;  //careful its not tranlation, but [pic_centerx, pic_centery, distance]
+				glm::mat4 pose = camera * object_model;
+				pose = glm::transpose(pose);
+				convert_array(pose, pose_array);
+				conver_quaternion_to_array(glm::quat_cast(pose),quaternion);
+				labels["Orientation"] = pose_array;
+				labels["Quaternion"] = quaternion;
 				jsonfile << labels;
 			}
-			
-
+			std::cout << "center point: " << projected_point[0] << " " << projected_point[1] << " " << projected_point[2] << std::endl;
+			std::cout << "quaternion: " << quaternion[0] << " " << quaternion[1] << " " << quaternion[2] << " " << quaternion[3] << std::endl;
+			std::cout<<"object position matrix:"<<std::endl;
+			std::cout << "	" << pose_array[0][0] << "	" << pose_array[0][1] << "	" << pose_array[0][2] << "	" << pose_array[0][3] << "	" << std::endl;
+			std::cout << "	" << pose_array[1][0] << "	" << pose_array[1][1] << "	" << pose_array[1][2] << "	" << pose_array[1][3] << "	" << std::endl;
+			std::cout << "	" << pose_array[2][0] << "	" << pose_array[2][1] << "	" << pose_array[2][2] << "	" << pose_array[2][3] << "	" << std::endl;
+			std::cout << "	" << pose_array[3][0] << "	" << pose_array[3][1] << "	" << pose_array[3][2] << "	" << pose_array[3][3] << "	" << std::endl;
 			//////////////////////////setting shader for semantic segmentation////////////////////////////
 			if (ground_truth)
 			{
@@ -685,6 +684,7 @@ int main()
 			}
 			else
 			{
+				std::cout << "draw training object" << std::endl;
 				TrainingObject.Draw(multiple_lightning_shader);
 			}
 			
@@ -774,7 +774,7 @@ int main()
 				Segmentation.setMatrix4fv("projection", projection);
 				Segmentation.setMatrix4fv("model", cube);
 				Segmentation.setVector3f("fragcolor", train_object_color);
-				ReferenceObject.Draw(Segmentation);//obstacles
+				//ReferenceObject.Draw(Segmentation);//obstacles																	//draw obstacles
 
 			}
 
@@ -804,10 +804,9 @@ int main()
 			}
 
 
-
 			if (ground_truth)
 			{
-				picture = "E:/data/single_object2/gt/.jpg";
+				picture = "E:/data/noobstacles_gt/gt/.jpg";//"E:/data/single_object2/gt/.jpg";
 				picture_multiobject = "E:/data/multi_object/image_gt.jpg";
 				picture_sm_seg = "E:/data/semantic_segmentation/image_gt.jpg";
 
@@ -815,7 +814,7 @@ int main()
 			picture.insert(26, number);
 			picture_multiobject.insert(26, number);
 			picture_sm_seg.insert(35, number);
-			//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 
 			GLCall(glfwSwapBuffers(window[0]));
