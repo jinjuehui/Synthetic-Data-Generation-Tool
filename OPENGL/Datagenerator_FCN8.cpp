@@ -297,12 +297,11 @@ unsigned int back_indicies[] =
 
 
 //TODO:
-//* Object Position randomization
+
 //* bench marking
 //* photo realistic rendering
 //* output data in PascalVOC structure
 //* add instance segmentation
-//* add semantic segmentation
 //* check rotation information
 //* Image Loading problem, some image cause glTexImage2D exception break(walk arounded with deleting image from folder, probably related with aspect ration of the picture)
 //* implement the split window to show both the rendered data and the ground truth data, multi processing might needed here
@@ -314,7 +313,8 @@ unsigned int back_indicies[] =
 //* Add in plane rotation
 //* set pictures as the background of the window
 //* optimize all of the VAO and VBOs
-
+//* Object Position randomization
+//* add semantic segmentation
 
 //void window_size_callback(GLFWwindow* window, int width, int height)
 //{
@@ -445,21 +445,21 @@ int main()
 		}
 
 		//important to set random seed on this position, if this is done in the for loop, the randomization will behave locally
-		random_number_generator.seed(7);   //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
+		random_number_generator.seed(10);   //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
 		float light_strength = 1.f;
 
-		for (int i = 20000; i < 40000; i++) // 80000 data, i=60000, i<800000
+		for (int i = 60000; i < 80000; i++) // 80000 data, i=60000, i<800000
 		{
 
 			//initialize data name for generated picture
 			std::string number = to_format(i);
-			std::string picture = "E:/data/noobstacles_gt/tr/.jpg";
+			std::string picture = "E:/data/pose_estimation/tr/.jpg";//"E:/data/noobstacles_gt/tr/.jpg";
 			std::string picture_multiobject = "E:/data/multi_object/image_tr.jpg";
 			std::string picture_sm_seg = "E:/data/semantic_segmentation/image_tr.jpg";
 
 			//initialize json:
-			std::string json_path = "E:/data/noobstacles_gt/label/.json";
-			json_path.insert(29, number);
+			std::string json_path = "E:/data/pose_estimation/label/.json";//"E:/data/noobstacles_gt/label/.json";
+			json_path.insert(30, number);
 			json labels;
 			std::ofstream jsonfile;
 			if (!ground_truth)
@@ -495,7 +495,7 @@ int main()
 
 			std::cout << "light position check: " << random_float(random_number_generator, -1.0f, 1.0f) << std::endl;
 			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
-			projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+			projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 100.0f);
 
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
@@ -509,7 +509,7 @@ int main()
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));//added for object (bounding box use line)
 			//use background image
 
-			pointLight.ambient = random_v3_norm(random_number_generator, 0.08, 0.08, 0.08, 0.02);																			//randomize lightning color
+			pointLight.ambient = random_v3_norm(random_number_generator, 0.08, 0.08, 0.08, 0.05);																			//randomize lightning color
 			pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
 			pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f };
 
@@ -583,7 +583,7 @@ int main()
 			
 			
 			if ((i + 1) % 2000 == 0)
-				light_strength += 1;
+				light_strength +=2.5;
 			for (int n = 0; n < light_positions.size(); n++)
 			{
 				
@@ -642,7 +642,7 @@ int main()
 
 
 			//glm::vec3 ObjectPosition = random_vec3(random_number_generator, -0.1, 0.1, 0.0, 0.0);
-			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, 0, 0.09, 0.01);                //object position 0.03, 0.02
+			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, 0, 0.09, 0.001);                //object position 0.03, 0.02
 			//glm::vec3 ObjectPosition = glm::vec3(0.08f, 0.0f, 0.0f);
 			//std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
@@ -662,7 +662,7 @@ int main()
 				conver_quaternion_to_array(glm::quat_cast(pose),quaternion);
 				labels["Orientation"] = pose_array;
 				labels["Quaternion"] = quaternion;
-				jsonfile << labels;
+				//jsonfile << labels;
 			}
 			std::cout << "center point: " << projected_point[0] << " " << projected_point[1] << " " << projected_point[2] << std::endl;
 			std::cout << "quaternion: " << quaternion[0] << " " << quaternion[1] << " " << quaternion[2] << " " << quaternion[3] << std::endl;
@@ -774,7 +774,7 @@ int main()
 				Segmentation.setMatrix4fv("projection", projection);
 				Segmentation.setMatrix4fv("model", cube);
 				Segmentation.setVector3f("fragcolor", train_object_color);
-				//ReferenceObject.Draw(Segmentation);//obstacles																	//draw obstacles
+				ReferenceObject.Draw(Segmentation);//obstacles																	//draw obstacles
 
 			}
 
@@ -806,12 +806,12 @@ int main()
 
 			if (ground_truth)
 			{
-				picture = "E:/data/noobstacles_gt/gt/.jpg";//"E:/data/single_object2/gt/.jpg";
+				picture = "E:/data/pose_estimation/gt_color/.jpg";//"E:/data/pose_estimation/gt/.jpg";//"E:/data/noobstacles_gt/gt/.jpg";//"E:/data/single_object2/gt/.jpg";
 				picture_multiobject = "E:/data/multi_object/image_gt.jpg";
 				picture_sm_seg = "E:/data/semantic_segmentation/image_gt.jpg";
 
 			}
-			picture.insert(26, number);
+			picture.insert(33, number);
 			picture_multiobject.insert(26, number);
 			picture_sm_seg.insert(35, number);
 			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
