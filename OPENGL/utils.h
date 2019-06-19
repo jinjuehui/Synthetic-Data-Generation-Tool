@@ -178,12 +178,13 @@ public:
 
 std::string to_format(const int number);
 glm::vec3 set_random_position(int range);
+glm::vec3 set_random_with_distribution(std::default_random_engine &generator, float xy, float z, float sigma, float sigma2);
 glm::vec3 set_random_with_distribution(std::default_random_engine &generator, float xy, float z, float sigma);
 glm::vec3 random_vec3(std::default_random_engine &generator, float xy_min, float xy_max, float z_min, float z_max);
 void rotate_object(glm::mat4 &model, int axis, float velocity);
 void rotate_light(glm::mat4 &light_model, int P, int Y, float distance);
-glm::mat4 rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_engine &generator);
-void inverse_object_3axis_rotation(glm::mat4 &model, glm::mat4 rotation_matrix);
+std::vector<float> rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_engine &generator);
+void inverse_object_3axis_rotation(glm::mat4 &model, std::vector<float> rotation_matrix);
 float random_float(std::default_random_engine &generator, float v_min, float v_max);
 glm::vec3 random_v3_norm(std::default_random_engine &generator, float a, float b, float c, float d);
 std::vector<float> projection_single_point_on_creen(glm::vec3 point, glm::mat4 model, glm::mat4 camera, glm::mat4 projection);

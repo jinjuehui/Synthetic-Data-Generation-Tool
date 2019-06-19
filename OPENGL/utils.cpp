@@ -45,6 +45,28 @@ glm::vec3 set_random_with_distribution(std::default_random_engine &generator, fl
 	return glm::vec3(position[0], position[1], position[2]);
 }
 
+glm::vec3 set_random_with_distribution(std::default_random_engine &generator, float xy, float z, float sigma, float sigma2)
+{
+	/*
+		use <random> library to generate random numbers, in this case a better random generator with
+		certain distribution can be used
+		Input generator: a random number generator, need tobe initialized outside this funciton, in order to set the random seed, generator.seed()
+			  sigma: this variance of the distribution, default normal distribution is unbiased
+		return: a 3d-vector, wich convert the integer number to floats.
+		set seed use set srand(i) i=1,2,3,4,5.. this will be needed out side the function
+	*/
+
+	std::normal_distribution<double> distribution_xy(xy, sigma);
+	std::normal_distribution<double> distribution_z(z, sigma2);
+
+	std::vector<float> position;
+	position.push_back(distribution_xy(generator));
+	position.push_back(distribution_xy(generator));
+	position.push_back(distribution_z(generator));
+
+	return glm::vec3(position[0], position[1], position[2]);
+}
+
 glm::vec3 random_v3_norm(std::default_random_engine &generator, float a, float b, float c, float d)
 {
 
@@ -141,7 +163,7 @@ void rotate_object(glm::mat4 &model, int axis, float velocity)
 	}
 }
 
-glm::mat4 rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_engine &generator)
+std::vector<float> rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_engine &generator)
 {
 	//model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 0.0f, 0.0f));
 	//std::cout << "Object Rotation Enabled!" << std::endl;
@@ -151,19 +173,18 @@ glm::mat4 rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_eng
 	random_angle.push_back(distribution(generator));
 	random_angle.push_back(distribution(generator));
 
-	glm::mat4 rotation_matrix = glm::rotate(model, random_angle[0], glm::vec3(1.0f, 0.0f, 0.0f))*
-								glm::rotate(model, random_angle[1], glm::vec3(0.0f, 1.0f, 0.0f))*
-								glm::rotate(model, random_angle[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::rotate(model, random_angle[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, random_angle[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, random_angle[2], glm::vec3(0.0f, 0.0f, 1.0f));
 
-	model = model*rotation_matrix;
-
-	return rotation_matrix;
+	return random_angle;
 }
 
-void inverse_object_3axis_rotation(glm::mat4 &model, glm::mat4 rotation_matrix)
+void inverse_object_3axis_rotation(glm::mat4 &model, std::vector<float> random_angle)
 {
-	rotation_matrix = glm::inverse(rotation_matrix);
-	model = model * rotation_matrix;
+	model = glm::rotate(model, random_angle[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::rotate(model, random_angle[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, random_angle[0], glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 void rotate_light(glm::mat4 &light_model, int P, int Y, float distance)
@@ -247,9 +268,11 @@ std::vector<float> projection_single_point_on_creen(glm::vec3 point, glm::mat4 m
 	std::vector<float> coordinate;
 	glm::vec4 projected_point;
 	projected_point = projection * camera* model * glm::vec4(point,1.0f);
+	glm::vec4 camera_coordinate = camera * model*glm::vec4(point, 1.0f);
 	coordinate.push_back((projected_point[0] / projected_point[3]+1)/2);
 	coordinate.push_back((1-projected_point[1] / projected_point[3])/2);
-	coordinate.push_back(projected_point[2] / projected_point[3]);
+	//coordinate.push_back(projected_point[2] / projected_point[3]);
+	coordinate.push_back(camera_coordinate[2] / camera_coordinate[3]);
 
 	return coordinate;
 }

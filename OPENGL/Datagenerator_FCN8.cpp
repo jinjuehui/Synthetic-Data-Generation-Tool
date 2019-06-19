@@ -429,15 +429,12 @@ int main()
 	{
 		//GLCall(glViewport(0,0,1024,768));
 
-		glm::mat4 object_model = glm::mat4(1.0f);  //trainning object matrix 
-		glm::mat4 cube = glm::mat4(1.0f);
+		//glm::mat4 object_model = glm::mat4(1.0f);  //trainning object matrix 
+	
 		glm::mat4 camera = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
 
-		object_model = glm::scale(object_model, glm::vec3(1.0f, 1.0f, 1.0f));
-
-		cube = glm::translate(cube, glm::vec3(3.0f, 0.0f, 0.0f));
-		cube = glm::scale(cube, glm::vec3(0.3f, 0.3f, 0.3f));
+		//object_model = glm::scale(object_model, glm::vec3(1.0f, 1.0f, 1.0f));
 
 		if (ground_truth)
 		{
@@ -450,6 +447,11 @@ int main()
 
 		for (int i = 60000; i < 80000; i++) // 80000 data, i=60000, i<800000
 		{
+			glm::mat4 object_model = glm::mat4(1.0f);  //trainning object matrix 
+			object_model = glm::scale(object_model, glm::vec3(1.0f, 1.0f, 1.0f));
+			glm::mat4 cube = glm::mat4(1.0f);
+			cube = glm::translate(cube, glm::vec3(3.0f, 0.0f, 0.0f));
+			cube = glm::scale(cube, glm::vec3(0.3f, 0.3f, 0.3f));
 
 			//initialize data name for generated picture
 			std::string number = to_format(i);
@@ -642,12 +644,12 @@ int main()
 
 
 			//glm::vec3 ObjectPosition = random_vec3(random_number_generator, -0.1, 0.1, 0.0, 0.0);
-			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, 0, 0.09, 0.001);                //object position 0.03, 0.02
+			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, 0, 0.09, 0.05, 0.1);                //object position 0.03, 0.02
 			//glm::vec3 ObjectPosition = glm::vec3(0.08f, 0.0f, 0.0f);
-			//std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
+			std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
 	
-			glm::mat4 rotation_matrix = rotate_object_3axis_randomly(object_model, random_number_generator);
+			std::vector<float> angle = rotate_object_3axis_randomly(object_model, random_number_generator);
 			//glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(3.14/2.f), glm::vec3(0.0f, 1.0f, 0.0f));
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
 			std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
@@ -657,7 +659,7 @@ int main()
 				glm::mat4 camera_transpose = glm::transpose(camera);
 				labels["center_point"] = projected_point;  //careful its not tranlation, but [pic_centerx, pic_centery, distance]
 				glm::mat4 pose = camera * object_model;
-				pose = glm::transpose(pose);
+				//pose = glm::transpose(pose);
 				convert_array(pose, pose_array);
 				conver_quaternion_to_array(glm::quat_cast(pose),quaternion);
 				labels["Orientation"] = pose_array;
@@ -666,7 +668,17 @@ int main()
 			}
 			std::cout << "center point: " << projected_point[0] << " " << projected_point[1] << " " << projected_point[2] << std::endl;
 			std::cout << "quaternion: " << quaternion[0] << " " << quaternion[1] << " " << quaternion[2] << " " << quaternion[3] << std::endl;
-			std::cout<<"object position matrix:"<<std::endl;
+			std::cout << "camera matrix:" << std::endl;
+			std::cout << "	" << camera[0][0] << "	" << camera[0][1] << "	" << camera[0][2] << "	" << camera[0][3] << "	" << std::endl;
+			std::cout << "	" << camera[1][0] << "	" << camera[1][1] << "	" << camera[1][2] << "	" << camera[1][3] << "	" << std::endl;
+			std::cout << "	" << camera[2][0] << "	" << camera[2][1] << "	" << camera[2][2] << "	" << camera[2][3] << "	" << std::endl;
+			std::cout << "	" << camera[3][0] << "	" << camera[3][1] << "	" << camera[3][2] << "	" << camera[3][3] << "	" << std::endl;
+			std::cout << "object position matrix:" << std::endl;
+			std::cout << "	" << object_model[0][0] << "	" << object_model[0][1] << "	" << object_model[0][2] << "	" << object_model[0][3] << "	" << std::endl;
+			std::cout << "	" << object_model[1][0] << "	" << object_model[1][1] << "	" << object_model[1][2] << "	" << object_model[1][3] << "	" << std::endl;
+			std::cout << "	" << object_model[2][0] << "	" << object_model[2][1] << "	" << object_model[2][2] << "	" << object_model[2][3] << "	" << std::endl;
+			std::cout << "	" << object_model[3][0] << "	" << object_model[3][1] << "	" << object_model[3][2] << "	" << object_model[3][3] << "	" << std::endl;
+			std::cout<<"camera*object_model matrix:"<<std::endl;
 			std::cout << "	" << pose_array[0][0] << "	" << pose_array[0][1] << "	" << pose_array[0][2] << "	" << pose_array[0][3] << "	" << std::endl;
 			std::cout << "	" << pose_array[1][0] << "	" << pose_array[1][1] << "	" << pose_array[1][2] << "	" << pose_array[1][3] << "	" << std::endl;
 			std::cout << "	" << pose_array[2][0] << "	" << pose_array[2][1] << "	" << pose_array[2][2] << "	" << pose_array[2][3] << "	" << std::endl;
@@ -691,8 +703,8 @@ int main()
 			
 			//TrainingObject.Draw(multiple_lightning_shader);//main object for training
 			//object_model = glm::rotate(object_model, -float(glm::radians(1.0)), glm::vec3(1.0, 0.0, 0.0));
-			inverse_object_3axis_rotation(object_model, rotation_matrix);
-			object_model = glm::translate(object_model, -ObjectPosition); //after drawing the object traslate it back to origin
+			//inverse_object_3axis_rotation(object_model, angle);
+			//object_model = glm::translate(object_model, -ObjectPosition); //after drawing the object traslate it back to origin
 
 			/*std::cout << "object position matrix:" << std::endl;
 			std::cout << "	" << object_model[0][0] << "	" << object_model[0][1] << "	" << object_model[0][2] << "	" << object_model[0][3] << "	" << std::endl;
@@ -747,7 +759,7 @@ int main()
 			glm::vec3 cube_position = set_random_with_distribution(random_number_generator, 0.0, 0.2, 0.05);							//0.03, 0.02			//cube position
 			object_setting_for_fragment_shader obstacles;
 			float scale = random_float(random_number_generator, 0.2, 0.5);
-			glm::mat4 cube_rotation_matrix = rotate_object_3axis_randomly(cube, random_number_generator);
+			std::vector<float> cube_angle = rotate_object_3axis_randomly(cube, random_number_generator);
 			cube = glm::translate(cube, cube_position);
 			cube = glm::scale(cube, glm::vec3(scale));
 
@@ -784,8 +796,8 @@ int main()
 			//Segmentation.setMatrix4fv("projection", projection);
 			//Segmentation.setMatrix4fv("model", cube);
 			//Segmentation.setVector3f("fragcolor", obstacles.diffuse);
-			inverse_object_3axis_rotation(cube, cube_rotation_matrix);
-			cube = glm::translate(cube, -cube_position);
+			//inverse_object_3axis_rotation(cube, cube_angle);
+			//cube = glm::translate(cube, -cube_position);
 			/////////////////////////////////////////////////////////////////////////////////
 
 			//GLCall(glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -811,16 +823,16 @@ int main()
 				picture_sm_seg = "E:/data/semantic_segmentation/image_gt.jpg";
 
 			}
-			picture.insert(33, number);
+			picture.insert(27, number);
 			picture_multiobject.insert(26, number);
 			picture_sm_seg.insert(35, number);
-			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+			//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 
 			GLCall(glfwSwapBuffers(window[0]));
 			GLCall(glfwPollEvents());
 
-			//std::cin.get();
+			std::cin.get();
 			if(!ground_truth)
 			jsonfile.close();
 
