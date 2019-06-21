@@ -383,6 +383,7 @@ int main()
 	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader"); //draw 2d bb
 	Shader Boundingbox_8p_shader("boundingbox_8p_vertex.shader", "boundingbox_8p_fragment.shader"); //draw 3d bb
 	Shader Segmentation("semantic_vertex.shader", "semantic_fragment.shader");
+	Shader Simplelightning_shader("Simple_vertex.shader", "Simple_Fragment.shader");
 	// setup bounding box object
 	BoundingBox boundingbox(TrainingObject);
 	float bounding_box_vertex_8point[24] =
@@ -419,7 +420,7 @@ int main()
 
 	GLCall(glEnable(GL_DEPTH_TEST));
 	std::cout << "rendering..." << std::endl;
-	bool ground_truth = false;
+	bool ground_truth = true;
 	
 	int delta_P(5), delta_Y(5), delta_R(10);
 
@@ -464,7 +465,7 @@ int main()
 			json_path.insert(30, number);
 			json labels;
 			std::ofstream jsonfile;
-			if (!ground_truth)
+			if (ground_truth)
 			{
 				std::cout << "generate label" << std::endl;
 				jsonfile.open(json_path);
@@ -648,26 +649,35 @@ int main()
 			//glm::vec3 ObjectPosition = glm::vec3(0.08f, 0.0f, 0.0f);
 			std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
+			//object_model = glm::translate(object_model, glm::vec3(0.1, 0.0, 0.25));
 	
 			std::vector<float> angle = rotate_object_3axis_randomly(object_model, random_number_generator);
-			//glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(3.14/2.f), glm::vec3(0.0f, 1.0f, 0.0f));
+			//glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(0), glm::vec3(0.0f, 1.0f, 0.0f));
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
 			std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
 			float pose_array[4][4], quaternion[4];
-			if (!ground_truth)
+			glm::quat quaternion_original;
+			if (ground_truth)
 			{
 				glm::mat4 camera_transpose = glm::transpose(camera);
 				labels["center_point"] = projected_point;  //careful its not tranlation, but [pic_centerx, pic_centery, distance]
-				glm::mat4 pose = camera * object_model;
+				glm::mat4 pose = camera_transpose * object_model;
 				//pose = glm::transpose(pose);
 				convert_array(pose, pose_array);
+				quaternion_original = glm::quat_cast(pose);
 				conver_quaternion_to_array(glm::quat_cast(pose),quaternion);
 				labels["Orientation"] = pose_array;
 				labels["Quaternion"] = quaternion;
-				//jsonfile << labels;
+				jsonfile << labels;
+				std::cout << "camera*object_model matrix:" << std::endl;
+				std::cout << "	" << pose[0][0] << "	" << pose[0][1] << "	" << pose[0][2] << "	" << pose[0][3] << "	" << std::endl;
+				std::cout << "	" << pose[1][0] << "	" << pose[1][1] << "	" << pose[1][2] << "	" << pose[1][3] << "	" << std::endl;
+				std::cout << "	" << pose[2][0] << "	" << pose[2][1] << "	" << pose[2][2] << "	" << pose[2][3] << "	" << std::endl;
+				std::cout << "	" << pose[3][0] << "	" << pose[3][1] << "	" << pose[3][2] << "	" << pose[3][3] << "	" << std::endl;
 			}
 			std::cout << "center point: " << projected_point[0] << " " << projected_point[1] << " " << projected_point[2] << std::endl;
-			std::cout << "quaternion: " << quaternion[0] << " " << quaternion[1] << " " << quaternion[2] << " " << quaternion[3] << std::endl;
+			std::cout << "quaternion: x: " << quaternion_original.x << " y: " << quaternion_original.y << " z: " << quaternion_original.z << " w: " << quaternion_original.w << std::endl;
+			std::cout << "quaternion: 0: " << quaternion[0] << " 1: " << quaternion[1] << " 2: " << quaternion[2] << " 3: " << quaternion[3] << std::endl;
 			std::cout << "camera matrix:" << std::endl;
 			std::cout << "	" << camera[0][0] << "	" << camera[0][1] << "	" << camera[0][2] << "	" << camera[0][3] << "	" << std::endl;
 			std::cout << "	" << camera[1][0] << "	" << camera[1][1] << "	" << camera[1][2] << "	" << camera[1][3] << "	" << std::endl;
@@ -686,13 +696,53 @@ int main()
 			//////////////////////////setting shader for semantic segmentation////////////////////////////
 			if (ground_truth)
 			{
-				Segmentation.use();
-				glm::vec3 train_object_color(1.0f, 1.0f, 1.0f);
-				Segmentation.setMatrix4fv("view", camera);
-				Segmentation.setMatrix4fv("projection", projection);
-				Segmentation.setMatrix4fv("model", object_model);
-				Segmentation.setVector3f("fragcolor", train_object_color);
-				TrainingObject.Draw(Segmentation);
+				object_model[3][0] = object_model[3][1] = 0.0f;
+				object_model[3][2] = 0.25f;
+				std::cout << "	" << object_model[0][0] << "	" << object_model[0][1] << "	" << object_model[0][2] << "	" << object_model[0][3] << "	" << std::endl;
+				std::cout << "	" << object_model[1][0] << "	" << object_model[1][1] << "	" << object_model[1][2] << "	" << object_model[1][3] << "	" << std::endl;
+				std::cout << "	" << object_model[2][0] << "	" << object_model[2][1] << "	" << object_model[2][2] << "	" << object_model[2][3] << "	" << std::endl;
+				std::cout << "	" << object_model[3][0] << "	" << object_model[3][1] << "	" << object_model[3][2] << "	" << object_model[3][3] << "	" << std::endl;
+				multiple_lightning_shader.setMatrix4fv("model", object_model);
+				//Segmentation.use();
+				//glm::vec3 train_object_color(1.0f, 1.0f, 1.0f);
+				//Segmentation.setMatrix4fv("view", camera);
+				//Segmentation.setMatrix4fv("projection", projection);
+				//Segmentation.setMatrix4fv("model", object_model);
+				//Segmentation.setVector3f("fragcolor", train_object_color);
+				//TrainingObject.Draw(Segmentation);
+
+				light simple_light;
+				simple_light.light_position = glm::vec3(0.1,0.1,0.9);
+				simple_light.ambient = glm::vec3(0.2);
+				simple_light.diffuse = glm::vec3(0.5);
+				simple_light.specular = glm::vec3(0.5);
+				/*simple_light.constantoffset = 1.f;
+				simple_light.linearfactor = 0.5;
+				simple_light.quadraticfactor = 0.5;
+				simple_light.cutoff = glm::cos(glm::radians(20.5f));
+				simple_light.outercutoff = glm::cos(glm::radians(35.0f));*/
+
+				
+				train_object.ambient = glm::vec3(0.9);
+				train_object.diffuse = glm::vec3(0.9);
+				train_object.specular = glm::vec3(0.7);
+				Simplelightning_shader.use();
+				Simplelightning_shader.setMatrix4fv("model", object_model);
+				Simplelightning_shader.setMatrix4fv("view", camera);
+				Simplelightning_shader.setMatrix4fv("projection",projection);
+				Simplelightning_shader.setVector3f("viewPos", Setup.camera_pose);
+				Simplelightning_shader.setVector3f("material.ambient", train_object.ambient);
+				Simplelightning_shader.setVector3f("material.diffuse", train_object.diffuse);
+				Simplelightning_shader.setVector3f("material.specular", train_object.specular);
+				Simplelightning_shader.setFloat("material.shininess", train_object.shininess);
+				Simplelightning_shader.setVector3f("light.position", simple_light.light_position);
+				Simplelightning_shader.setFloat("light.cutoff", simple_light.cutoff);
+				Simplelightning_shader.setFloat("light.outerutoff", simple_light.outercutoff);
+				Simplelightning_shader.setVector3f("light.ambient", simple_light.ambient);
+				Simplelightning_shader.setVector3f("light.diffuse", simple_light.diffuse);
+				Simplelightning_shader.setVector3f("light.specular", simple_light.specular);
+
+				TrainingObject.Draw(Simplelightning_shader);
 			}
 			else
 			{
@@ -786,7 +836,7 @@ int main()
 				Segmentation.setMatrix4fv("projection", projection);
 				Segmentation.setMatrix4fv("model", cube);
 				Segmentation.setVector3f("fragcolor", train_object_color);
-				ReferenceObject.Draw(Segmentation);//obstacles																	//draw obstacles
+				//ReferenceObject.Draw(Segmentation);//obstacles																	//draw obstacles
 
 			}
 
@@ -823,16 +873,16 @@ int main()
 				picture_sm_seg = "E:/data/semantic_segmentation/image_gt.jpg";
 
 			}
-			picture.insert(27, number);
+			picture.insert(33, number);
 			picture_multiobject.insert(26, number);
 			picture_sm_seg.insert(35, number);
-			//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 
 			GLCall(glfwSwapBuffers(window[0]));
 			GLCall(glfwPollEvents());
 
-			std::cin.get();
+			//std::cin.get();
 			if(!ground_truth)
 			jsonfile.close();
 
