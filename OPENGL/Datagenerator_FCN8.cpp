@@ -44,7 +44,7 @@ float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for key
 //User Input Mouse and cursor
 bool firstMouse(true);
 double lastX(SCR_WIDTH / 2), lastY(SCR_HEIGHT / 2);
-float yaw(-90.0f), pitch(0.0f), fov(45.0f);
+float yaw(-90.0f), pitch(0.0f), fov(60.0f);
 //Drawing object	
 glm::mat4 lamp, back_position;
 glm::vec3 back_ground_position(1.0f, 1.0f, 1.0f);
@@ -499,7 +499,16 @@ int main()
 			std::cout << "light position check: " << random_float(random_number_generator, -1.0f, 1.0f) << std::endl;
 			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
 			projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 100.0f);
+			if (ground_truth)
+			{
+				projection = glm::perspective(glm::radians(20.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 100.0f);
+				//projection = glm::ortho(0.0f, float(SCR_WIDTH), 0.0f, float(SCR_HEIGHT), 0.01f, -10.0f);
+				//projection = glm::ortho(0.0f, 10.f, 0.0f, 10.f, 0.01f, -10.0f);
 
+			}
+
+
+				
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
@@ -697,7 +706,7 @@ int main()
 			if (ground_truth)
 			{
 				object_model[3][0] = object_model[3][1] = 0.0f;
-				object_model[3][2] = 0.25f;
+				object_model[3][2] = 0.2f;
 				std::cout << "	" << object_model[0][0] << "	" << object_model[0][1] << "	" << object_model[0][2] << "	" << object_model[0][3] << "	" << std::endl;
 				std::cout << "	" << object_model[1][0] << "	" << object_model[1][1] << "	" << object_model[1][2] << "	" << object_model[1][3] << "	" << std::endl;
 				std::cout << "	" << object_model[2][0] << "	" << object_model[2][1] << "	" << object_model[2][2] << "	" << object_model[2][3] << "	" << std::endl;
