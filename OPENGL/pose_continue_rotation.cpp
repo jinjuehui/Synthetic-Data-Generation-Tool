@@ -30,6 +30,7 @@ namespace fs = std::filesystem;
 #define ROTATE_CAMERA true
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
+#define GENERATE_MASK true
 bool USE_BACKGROUND_IMAGE = true;
 bool STATIC_CAMERA_VIEW = true;
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
@@ -339,7 +340,7 @@ int main()
 	bool ground_truth = true;
 
 	int delta_P(10), delta_Y(10), delta_R(10);
-
+	bool generate_mask = false;
 	while (!glfwWindowShouldClose(window[0]))  //start the game
 	{
 		//GLCall(glViewport(0,0,1024,768));
@@ -366,18 +367,9 @@ int main()
 
 			for (int Y = 0; Y < 361; Y += delta_Y)
 			{
-				for (int P = 0; P < 361; P += delta_P)
+				for (int P = 0; P < 181; P += delta_P)
 				{
 					std::string number_str = to_format(number);
-
-					std::string json_path = "E:/data/pose_estimation/continue_rotation_label/.json";
-					json_path.insert(48, number_str);
-					json labels;
-					std::ofstream jsonfile;
-					jsonfile.open(json_path);
-					labels["name"] = number;
-					labels["object_id"] = path.substr(0, path.find_last_of('/')+1);
-
 					std::cout << "R: " << R << "Y: " << Y << "P: " << P <<std::endl;
 					object_model = object_model = glm::mat4(1.0f);
 					object_model = glm::translate(object_model, glm::vec3(0.0f, 0.0f, 0.0));
@@ -430,36 +422,48 @@ int main()
 						Background.UnBind();
 						stbi_image_free(data);
 					}
+					if (!generate_mask)
+					{
+						std::string json_path = "E:/data/pose_estimation/continue_rotation_label/.json";
+						json_path.insert(48, number_str);
+						json labels;
+						std::ofstream jsonfile;
+						jsonfile.open(json_path);
+						labels["name"] = number;
+						labels["object_id"] = path.substr(path.find_last_of('/') + 4, path.find_last_of('/') + 6);
 
-					float pose_array[4][4], quaternion[4];
-					glm::quat quaternion_original;
-					std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
-					glm::mat4 camera_transpose = glm::transpose(camera);
-					glm::mat4 pose = camera_transpose * object_model;
-					for (int u = 0; u < 3; u++)
-						for (int v = 0; v < 3; v++)
-						{
-							if (std::abs(pose[u][v]) < 1e-7)
-								pose[u][v] = 0;
-						}
-					convert_array(pose, pose_array);
-					quaternion_original = glm::quat_cast(pose);
-					conver_quaternion_to_array(quaternion_original, quaternion);
-					labels["center_point"] = projected_point;
-					labels["Orientation"] = pose_array;
-					labels["Quaternion"] = quaternion;
-					jsonfile << labels;
-					std::cout << "camera_transpose*object_model matrix:" << std::endl;
-					std::cout << "	" << pose[0][0] << "	" << pose[0][1] << "	" << pose[0][2] << "	" << pose[0][3] << "	" << std::endl;
-					std::cout << "	" << pose[1][0] << "	" << pose[1][1] << "	" << pose[1][2] << "	" << pose[1][3] << "	" << std::endl;
-					std::cout << "	" << pose[2][0] << "	" << pose[2][1] << "	" << pose[2][2] << "	" << pose[2][3] << "	" << std::endl;
-					std::cout << "	" << pose[3][0] << "	" << pose[3][1] << "	" << pose[3][2] << "	" << pose[3][3] << "	" << std::endl;
+						float pose_array[4][4], quaternion[4];
+						glm::quat quaternion_original;
+						std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
+						glm::mat4 camera_transpose = glm::transpose(camera);
+						glm::mat4 pose = camera_transpose * object_model;
+						for (int u = 0; u < 3; u++)
+							for (int v = 0; v < 3; v++)
+							{
+								if (std::abs(pose[u][v]) < 1e-7)
+									pose[u][v] = 0;
+							}
+						convert_array(pose, pose_array);
+						quaternion_original = glm::quat_cast(pose);
+						conver_quaternion_to_array(quaternion_original, quaternion);
+						labels["center_point"] = projected_point;
+						labels["Orientation"] = pose_array;
+						labels["Quaternion"] = quaternion;
+						jsonfile << labels;
+						std::cout << "camera_transpose*object_model matrix:" << std::endl;
+						std::cout << "	" << pose[0][0] << "	" << pose[0][1] << "	" << pose[0][2] << "	" << pose[0][3] << "	" << std::endl;
+						std::cout << "	" << pose[1][0] << "	" << pose[1][1] << "	" << pose[1][2] << "	" << pose[1][3] << "	" << std::endl;
+						std::cout << "	" << pose[2][0] << "	" << pose[2][1] << "	" << pose[2][2] << "	" << pose[2][3] << "	" << std::endl;
+						std::cout << "	" << pose[3][0] << "	" << pose[3][1] << "	" << pose[3][2] << "	" << pose[3][3] << "	" << std::endl;
 
-					std::cout << "quaternion:" << std::endl;
-					std::cout << "	" << quaternion[0] << "	" << quaternion[1] << "	" << quaternion[2] << "	" << quaternion[3] << "	" << std::endl;
+						std::cout << "quaternion:" << std::endl;
+						std::cout << "	" << quaternion[0] << "	" << quaternion[1] << "	" << quaternion[2] << "	" << quaternion[3] << "	" << std::endl;
 
-					std::cout << "centroid:" << std::endl;
-					std::cout << "	" << projected_point[0] << "	" << projected_point[1] << "	" << projected_point[2]<< std::endl;
+						std::cout << "centroid:" << std::endl;
+						std::cout << "	" << projected_point[0] << "	" << projected_point[1] << "	" << projected_point[2] << std::endl;
+						jsonfile.close();
+					}
+					
 
 					if (!USE_SIMPLE_LIGHTNING_MODEL)
 					{
@@ -513,44 +517,51 @@ int main()
 						multiple_lightning_shader.setMatrix4fv("model", object_model);
 
 						//////////////////////////setting shader for semantic segmentation////////////////////////////
-						//Segmentation.use();
-						//glm::vec3 train_object_color(1.0f, 0.0f, 0.0f);
-						//Segmentation.setMatrix4fv("view", camera);
-						//Segmentation.setMatrix4fv("projection", projection);
-						//Segmentation.setMatrix4fv("model", object_model);
-						//Segmentation.setVector3f("fragcolor", train_object_color);
+						if (generate_mask)
+						{
+							Segmentation.use();
+							glm::vec3 train_object_color(1.0f, 1.0f, 1.0f);
+							Segmentation.setMatrix4fv("view", camera);
+							Segmentation.setMatrix4fv("projection", projection);
+							Segmentation.setMatrix4fv("model", object_model);
+							Segmentation.setVector3f("fragcolor", train_object_color);
+							TrainingObject.Draw(Segmentation);
+						}
+						else
+						{
+							light simple_light;
+							simple_light.light_position = glm::vec3(0.1, 0.1, 0.9);
+							simple_light.ambient = glm::vec3(0.2);
+							simple_light.diffuse = glm::vec3(0.5);
+							simple_light.specular = glm::vec3(0.5);
+							/*simple_light.constantoffset = 1.f;
+							simple_light.linearfactor = 0.5;
+							simple_light.quadraticfactor = 0.5;
+							simple_light.cutoff = glm::cos(glm::radians(20.5f));
+							simple_light.outercutoff = glm::cos(glm::radians(35.0f));*/
 
-						light simple_light;
-						simple_light.light_position = glm::vec3(0.1, 0.1, 0.9);
-						simple_light.ambient = glm::vec3(0.2);
-						simple_light.diffuse = glm::vec3(0.5);
-						simple_light.specular = glm::vec3(0.5);
-						/*simple_light.constantoffset = 1.f;
-						simple_light.linearfactor = 0.5;
-						simple_light.quadraticfactor = 0.5;
-						simple_light.cutoff = glm::cos(glm::radians(20.5f));
-						simple_light.outercutoff = glm::cos(glm::radians(35.0f));*/
-
-						train_object.ambient = glm::vec3(0.9);
-						train_object.diffuse = glm::vec3(0.9);
-						train_object.specular = glm::vec3(0.7);
-						Simplelightning_shader.use();
-						Simplelightning_shader.setMatrix4fv("model", object_model);
-						Simplelightning_shader.setMatrix4fv("view", camera);
-						Simplelightning_shader.setMatrix4fv("projection", projection);
-						Simplelightning_shader.setVector3f("viewPos", Setup.camera_pose);
-						Simplelightning_shader.setVector3f("material.ambient", train_object.ambient);
-						Simplelightning_shader.setVector3f("material.diffuse", train_object.diffuse);
-						Simplelightning_shader.setVector3f("material.specular", train_object.specular);
-						Simplelightning_shader.setFloat("material.shininess", train_object.shininess);
-						Simplelightning_shader.setVector3f("light.position", simple_light.light_position);
-						Simplelightning_shader.setFloat("light.cutoff", simple_light.cutoff);
-						Simplelightning_shader.setFloat("light.outerutoff", simple_light.outercutoff);
-						Simplelightning_shader.setVector3f("light.ambient", simple_light.ambient);
-						Simplelightning_shader.setVector3f("light.diffuse", simple_light.diffuse);
-						Simplelightning_shader.setVector3f("light.specular", simple_light.specular);
-
-						TrainingObject.Draw(Simplelightning_shader);//main object for training
+							train_object.ambient = glm::vec3(0.9);
+							train_object.diffuse = glm::vec3(0.9);
+							train_object.specular = glm::vec3(0.7);
+							Simplelightning_shader.use();
+							Simplelightning_shader.setMatrix4fv("model", object_model);
+							Simplelightning_shader.setMatrix4fv("view", camera);
+							Simplelightning_shader.setMatrix4fv("projection", projection);
+							Simplelightning_shader.setVector3f("viewPos", Setup.camera_pose);
+							Simplelightning_shader.setVector3f("material.ambient", train_object.ambient);
+							Simplelightning_shader.setVector3f("material.diffuse", train_object.diffuse);
+							Simplelightning_shader.setVector3f("material.specular", train_object.specular);
+							Simplelightning_shader.setFloat("material.shininess", train_object.shininess);
+							Simplelightning_shader.setVector3f("light.position", simple_light.light_position);
+							Simplelightning_shader.setFloat("light.cutoff", simple_light.cutoff);
+							Simplelightning_shader.setFloat("light.outerutoff", simple_light.outercutoff);
+							Simplelightning_shader.setVector3f("light.ambient", simple_light.ambient);
+							Simplelightning_shader.setVector3f("light.diffuse", simple_light.diffuse);
+							Simplelightning_shader.setVector3f("light.specular", simple_light.specular);
+							GLCall(glClear(GL_COLOR_BUFFER_BIT))
+							TrainingObject.Draw(Simplelightning_shader);//main object for training
+						}
+						
 
 						//////////////////////using bounding box//////////////////////////////////////////////////////
 						/*std::cout << "first loop:" << P << std::endl;
@@ -652,11 +663,21 @@ int main()
 						}//<--ground truth
 					}//<--use multiple light source
 
-					std::string picture = "E:/data/pose_estimation/continue_rotation/.jpg";
-					picture.insert(42, number_str);
-					//std::cout << picture;
-					screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
-					jsonfile.close();
+					if (generate_mask)
+					{
+						std::string picture = "E:/data/pose_estimation/continue_rotation_gt/.jpg";
+						picture.insert(45, number_str);
+						//std::cout << picture;
+						screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+					}
+					else {
+						std::string picture = "E:/data/pose_estimation/continue_rotation/.jpg";
+						picture.insert(42, number_str);
+						//std::cout << picture;
+						screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+
+					}
+					
 					number += 1;
 					GLCall(glfwSwapBuffers(window[0]));
 					GLCall(glfwPollEvents());
@@ -665,8 +686,13 @@ int main()
 				}//<---end loop for roll
 			}//<---Y loop
 		}//<--P loop
-		glfwTerminate();//destroy glcontext
-		exit(EXIT_SUCCESS);
+		if (generate_mask)
+		{
+			glfwTerminate();//destroy glcontext
+			exit(EXIT_SUCCESS);
+		}
+		generate_mask = true;
+
 	}//<--while loop
 	exit(EXIT_SUCCESS);
 	return 0;

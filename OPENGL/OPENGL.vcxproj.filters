@@ -98,7 +98,7 @@
     <ClCompile Include="utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="continue_rotation.cpp">
+    <ClCompile Include="pose_continue_rotation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

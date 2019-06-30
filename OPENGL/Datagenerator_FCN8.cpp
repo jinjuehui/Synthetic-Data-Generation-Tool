@@ -116,103 +116,6 @@ std::map<std::string, int> read_images_in_folder(std::string path)
 }
 
 
-//call back function for mouse scrolling to zoom the view
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	if (fov >= 1.0f && fov <= 45.0f)
-	{
-		fov -= yoffset;
-		//std::cout <<"fov: " <<fov << std::endl;
-	}
-
-	if (fov <= 1.0f)
-		fov = 1.0f;
-	if (fov >= 45.0f)
-		fov = 45.0f;
-}
-
-
-//call back function for mouse move to view different orientations
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-	if (firstMouse)
-	{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
-	}
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos;
-	lastX = xpos;
-	lastY = ypos;
-
-	float sensitivity = 0.05;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	yaw += xoffset;
-	pitch += yoffset;
-
-	if (pitch > 89.0f)
-	{
-		pitch = 89.0f;
-	}
-	if (pitch < -89.0f)
-	{
-		pitch = -89.0f;
-	}
-
-	glm::vec3 front;
-	front.x = cos(glm::radians(yaw))*cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw))*cos(glm::radians(pitch));
-	Setup.camera_front = glm::normalize(front);
-
-}
-
-//move the camera forward, backward, sideways
-void wasd_keyinput(GLFWwindow* window)
-{
-	float camera_speed = 5.0f*deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		Setup.camera_pose += camera_speed * glm::normalize(Setup.camera_front);
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		Setup.camera_pose -= camera_speed * glm::normalize(Setup.camera_front);
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		Setup.camera_pose -= camera_speed * glm::normalize(glm::cross(Setup.camera_front, Setup.camera_up));
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		Setup.camera_pose += camera_speed * glm::normalize(glm::cross(Setup.camera_front, Setup.camera_up));
-	}
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-	{
-		Setup.camera_pose += camera_speed * glm::normalize(Setup.camera_up);
-	}
-	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-	{
-		Setup.camera_pose -= camera_speed * glm::normalize(Setup.camera_up);
-	}
-};
-
-
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod)
-{
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-	{
-		std::cout << "escape pressed!" << std::endl;
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-		//glfwTerminate();
-	}
-}
-
-
 void convert_array(glm::mat4 mat, float pose[][4])
 {
 	for (int i = 0; i < 4; i++)
@@ -296,33 +199,6 @@ unsigned int back_indicies[] =
 };
 
 
-//TODO:
-
-//* bench marking
-//* photo realistic rendering
-//* output data in PascalVOC structure
-//* add instance segmentation
-//* check rotation information
-//* Image Loading problem, some image cause glTexImage2D exception break(walk arounded with deleting image from folder, probably related with aspect ration of the picture)
-//* implement the split window to show both the rendered data and the ground truth data, multi processing might needed here
-
-//Done(need be checked):
-//* fix no rendering happens when P=0  (walk arounded with P set to 1)
-//* Generating bounding box
-//* generating 3d bounding box
-//* Add in plane rotation
-//* set pictures as the background of the window
-//* optimize all of the VAO and VBOs
-//* Object Position randomization
-//* add semantic segmentation
-
-//void window_size_callback(GLFWwindow* window, int width, int height)
-//{
-//	glfwGetWindowSize(window, &width, &height);
-//}
-
-
-
 int main()
 {
 	//0.create window====================================================================
@@ -332,7 +208,6 @@ int main()
 	//glfwMakeContextCurrent(window[0]);
 	//glfwSetWindowSizeCallback(window[0], window_size_callback);
 	std::cout << "use ESC to exit the Window" << std::endl;
-	glfwSetKeyCallback(window[0], key_callback);
 	glfwSetWindowPos(window[0], 500, 500);
 
 	//===============move into vertex classes to parse layout automatically====================
@@ -885,13 +760,13 @@ int main()
 			picture.insert(33, number);
 			picture_multiobject.insert(26, number);
 			picture_sm_seg.insert(35, number);
-			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+			//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 
 			GLCall(glfwSwapBuffers(window[0]));
 			GLCall(glfwPollEvents());
 
-			//std::cin.get();
+			std::cin.get();
 			if(!ground_truth)
 			jsonfile.close();
 
