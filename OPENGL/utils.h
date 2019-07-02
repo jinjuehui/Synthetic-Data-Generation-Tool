@@ -36,12 +36,12 @@ struct CameraOrientation
 struct object_setting_for_fragment_shader
 {
 	//default white plastic												//change object material here
-	glm::vec3 color{ 1.0f,1.0f,1.0f };
+	glm::vec3 color{ 0.5f,0.5f,0.5f };
 	glm::vec3 position{ 0.0f,0.0f,0.0f };
-	glm::vec3 ambient{ 1.0f,1.0f,1.0f };
+	glm::vec3 ambient{ 0.1f,0.1f,0.1f };
 	glm::vec3 diffuse{ 0.55f,0.55f,0.55f };
-	glm::vec3 specular{ 0.7f,0.7f,0.7f };
-	float shininess = 15.0f;
+	glm::vec3 specular{ 0.2f,0.2f,0.2f };
+	float shininess = 1.0f;
 };
 
 struct light
@@ -52,7 +52,7 @@ struct light
 
 	glm::vec3 ambient = { 0.2f,0.2f,0.2f };
 	glm::vec3 diffuse = { 0.1f,0.1f,0.1f };
-	glm::vec3 specular = light_color;
+	glm::vec3 specular = {0.8f, 0.8f, 0.8f};
 
 	float constantoffset = 1.0f;
 	float linearfactor = 0.09f;
@@ -183,6 +183,7 @@ glm::vec3 set_random_with_distribution(std::default_random_engine &generator, fl
 glm::vec3 random_vec3(std::default_random_engine &generator, float xy_min, float xy_max, float z_min, float z_max);
 void rotate_object(glm::mat4 &model, int axis, float velocity);
 void rotate_light(glm::mat4 &light_model, int P, int Y, float distance);
+std::vector<float> rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_engine &generator, float min, float max);
 std::vector<float> rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_engine &generator);
 void inverse_object_3axis_rotation(glm::mat4 &model, std::vector<float> rotation_matrix);
 float random_float(std::default_random_engine &generator, float v_min, float v_max);
