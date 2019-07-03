@@ -27,7 +27,7 @@ bool STATIC_CAMERA_VIEW = true; //set to true,camera won't moved by keybords inp
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 1000;
+const unsigned int SCR_WIDTH = 224;
 const unsigned int SCR_HEIGHT = SCR_WIDTH;
 using json = nlohmann::json;
 glm::mat4 back_position;
