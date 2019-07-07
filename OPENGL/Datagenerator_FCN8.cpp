@@ -27,7 +27,7 @@ bool STATIC_CAMERA_VIEW = true; //set to true,camera won't moved by keybords inp
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 224;
+const unsigned int SCR_WIDTH = 1000;
 const unsigned int SCR_HEIGHT = SCR_WIDTH;
 using json = nlohmann::json;
 glm::mat4 back_position;
@@ -78,7 +78,7 @@ unsigned int indicies_cube[] = {
 };
 
 
-glm::mat4 model_matrix_generator(glm::mat4 &model, std::default_random_engine randomizer, std::vector<float> scale_factor, std::vector<float> pose_params)
+glm::mat4 model_matrix_generator(glm::mat4 &model, std::default_random_engine &randomizer, std::vector<float> scale_factor, std::vector<float> pose_params)
 {
 	model = glm::mat4(1.0f);
 	glm::vec3 position = set_random_with_distribution(randomizer, pose_params[2], pose_params[3], pose_params[4], pose_params[5]);							//0.03, 0.02			//cube position
@@ -91,7 +91,7 @@ glm::mat4 model_matrix_generator(glm::mat4 &model, std::default_random_engine ra
 	return model;
 }
 
-Shader setting_object_properties_in_shader(Shader &shader, object_setting_for_fragment_shader model, glm::mat4 model_matrix)
+void setting_object_properties_in_shader(Shader &shader, object_setting_for_fragment_shader &model, glm::mat4 &model_matrix)
 {
 	shader.use();
 	shader.setMatrix4fv("model", model_matrix);
@@ -99,12 +99,11 @@ Shader setting_object_properties_in_shader(Shader &shader, object_setting_for_fr
 	shader.setVector3f("material.diffuse", model.diffuse);
 	shader.setVector3f("material.specular", model.specular);
 	shader.setFloat("material.shininess", model.shininess);
-	return shader;
 }
 
 
 object_setting_for_fragment_shader random_object_color(object_setting_for_fragment_shader &mesh_model, 
-														std::default_random_engine randomizer,
+														std::default_random_engine &randomizer,
 														std::vector<float> ambient,
 														std::vector<float> diffuse,
 														std::vector<float> specular,
@@ -116,6 +115,20 @@ object_setting_for_fragment_shader random_object_color(object_setting_for_fragme
 	mesh_model.shininess = random_float(randomizer, shininess[0], shininess[1]);
 	return mesh_model;
 
+}
+
+void dump_iterating(std::default_random_engine &randomizer,
+	int n,
+	std::vector<float> ambient,
+	std::vector<float> diffuse,
+	std::vector<float> specular,
+	std::vector<float> shininess)
+{
+	for (int i = 0; i < n; i++)
+	{
+		object_setting_for_fragment_shader dump;
+		dump = random_object_color(dump, randomizer, ambient, diffuse, specular, shininess);
+	}
 }
 
 
@@ -336,10 +349,11 @@ int main()
 
 		float light_strength = 1.f;
 		random_number_generator.seed(5);   //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
-		for (int i = 10000; i < 20000; i++) // 80000 data, i=60000, i<800000
+		for (int i = 0; i < 20; i++) // 80000 data, i=60000, i<800000
 		{
 			std::cout << "iterations: " << i << std::endl;
 			std::cout << "random test: " << random_float(random_number_generator, 1.0f,5.0f) << std::endl;
+
 			glm::mat4 object_model = glm::mat4(1.0f);  //trainning object matrix 
 			glm::mat4 cube = glm::mat4(1.0f);
 			object_model = glm::scale(object_model, glm::vec3(1.0f, 1.0f, 1.0f));
@@ -585,7 +599,7 @@ int main()
 
 			////////////////////////////////////////////////////////////////////////////////////////
 
-			object_setting_for_fragment_shader obstacles;
+			object_setting_for_fragment_shader obstacles, cones, spheres, donass;
 
 			cube = glm::mat4(1.0f);
 			//glm::vec3 cube_position = set_random_with_distribution(random_number_generator, 0.0, 0.2, 0.05);							//0.03, 0.02			//cube position
@@ -599,7 +613,7 @@ int main()
 			glm::mat4 donas = glm::mat4(1.0f);
 
 
-			cube = model_matrix_generator(cube, random_number_generator, obstacles_scale_factor, cube_position);		//angle min,max, traslation xy_mean, zmean, sigma	
+			cube = model_matrix_generator(cube, random_number_generator, obstacles_scale_factor, cube_position);		//angle min,max, traslation xy_mean, zmean, sigma
 			cone = model_matrix_generator(cylinder, random_number_generator, obstacles_scale_factor2, cone_position);
 			sphere = model_matrix_generator(cylinder, random_number_generator, obstacles_scale_factor2, sphere_position);
 			donas = model_matrix_generator(cylinder, random_number_generator, obstacles_scale_factor2, donas_position);
@@ -608,33 +622,48 @@ int main()
 			{
 				obstacles = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
 
-				multiple_lightning_shader.use();
-				multiple_lightning_shader.setMatrix4fv("model", cube);
-				multiple_lightning_shader.setVector3f("material.ambient", obstacles.ambient);
-				multiple_lightning_shader.setVector3f("material.diffuse", obstacles.diffuse);
-				multiple_lightning_shader.setVector3f("material.specular", obstacles.specular);
-				multiple_lightning_shader.setFloat("material.shininess", obstacles.shininess);
-				//multiple_lightning_shader = setting_object_properties_in_shader(multiple_lightning_shader, obstacles, cube);
+				//multiple_lightning_shader.use();
+				//multiple_lightning_shader.setMatrix4fv("model", cube);
+				//multiple_lightning_shader.setVector3f("material.ambient", obstacles.ambient);
+				//multiple_lightning_shader.setVector3f("material.diffuse", obstacles.diffuse);
+				//multiple_lightning_shader.setVector3f("material.specular", obstacles.specular);
+				//multiple_lightning_shader.setFloat("material.shininess", obstacles.shininess);
+				setting_object_properties_in_shader(multiple_lightning_shader, obstacles, cube);
 				ReferenceObject.Draw(multiple_lightning_shader);
-				//obstacles = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
-
-				multiple_lightning_shader.use();
-				multiple_lightning_shader.setMatrix4fv("model", cone);
+				cones = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+				//multiple_lightning_shader.use();
+				//multiple_lightning_shader.setMatrix4fv("model", cone);
+				//multiple_lightning_shader.setVector3f("material.ambient", cones.ambient);
+				//multiple_lightning_shader.setVector3f("material.diffuse", cones.diffuse);
+				//multiple_lightning_shader.setVector3f("material.specular", cones.specular);
+				//multiple_lightning_shader.setFloat("material.shininess", cones.shininess);
+				setting_object_properties_in_shader(multiple_lightning_shader, cones, cone);
 				ConeObject.Draw(multiple_lightning_shader);	
 
-				multiple_lightning_shader.use();
-				multiple_lightning_shader.setMatrix4fv("model", donas);
+				donass = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+				//multiple_lightning_shader.use();
+				//multiple_lightning_shader.setMatrix4fv("model", donas);
+				//multiple_lightning_shader.setVector3f("material.ambient", donass.ambient);
+				//multiple_lightning_shader.setVector3f("material.diffuse", donass.diffuse);
+				//multiple_lightning_shader.setVector3f("material.specular", donass.specular);
+				//multiple_lightning_shader.setFloat("material.shininess", donass.shininess);
+				setting_object_properties_in_shader(multiple_lightning_shader, donass, donas);
 				DonasObject.Draw(multiple_lightning_shader);
 
-				multiple_lightning_shader.use();
-				multiple_lightning_shader.setMatrix4fv("model", sphere);
+				spheres = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+				//multiple_lightning_shader.use();
+				//multiple_lightning_shader.setMatrix4fv("model", sphere);
+				//multiple_lightning_shader.setVector3f("material.ambient", spheres.ambient);
+				//multiple_lightning_shader.setVector3f("material.diffuse", spheres.diffuse);
+				//multiple_lightning_shader.setVector3f("material.specular", spheres.specular);
+				//multiple_lightning_shader.setFloat("material.shininess", spheres.shininess);
+				setting_object_properties_in_shader(multiple_lightning_shader, donass, donas);
 				SphereObject.Draw(multiple_lightning_shader);
 
 			}
 			else
 			{
-				object_setting_for_fragment_shader dump = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
-
+				dump_iterating(random_number_generator, 4, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
 				Segmentation.use();
 				glm::vec3 train_object_color(0.0f, 0.0f, 0.0f);
 
