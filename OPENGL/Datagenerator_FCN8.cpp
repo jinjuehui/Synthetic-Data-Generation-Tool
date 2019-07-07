@@ -22,12 +22,12 @@ namespace fs = std::filesystem;
 #define ROTATE_CAMERA false
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
-bool USE_BACKGROUND_IMAGE = false;
+bool USE_BACKGROUND_IMAGE = true;
 bool STATIC_CAMERA_VIEW = true; //set to true,camera won't moved by keybords input
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 1000;
+const unsigned int SCR_WIDTH = 224;
 const unsigned int SCR_HEIGHT = SCR_WIDTH;
 using json = nlohmann::json;
 glm::mat4 back_position;
@@ -230,7 +230,7 @@ unsigned int back_indicies[] =
 //1. lighting conditions, no spot light now
 std::vector<float> light_number_range = { 3.0f, 5.0f };						//minimum>=2	maximum
 std::vector<float> light_position_step = { 2000, 0.5 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
-std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.1f };	// r mean, g mean, b mean, sigma
+std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
 std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.01f };	//
 std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.01f };
 //std::vector<float> point_light_position = { 1.0f , 1.0f, 5.0f };			//start position, step size, end position (meter)
@@ -252,7 +252,7 @@ std::vector<float> distractor_shininess = { 0.1f, 16.0f };
 //3.object position
 std::vector<float> object_position_distribution = { 0, 0.25, 0.06, 0.05 };	//xy_mean, z_mean, xy_sigma, z_sigma
 std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };						//minimum maximum
-std::vector<float> obstacles_scale_factor2 = {90.f, 100.f};
+std::vector<float> obstacles_scale_factor2 = {60.f, 80.f};
 
 std::vector<float> cube_position = { 0.f, 3.14f, 0.0, 0.4, 0.01, 0.1 };		//angle min,max, traslation xy_mean, z_mean, xy_sigma, z_sigma	
 std::vector<float> cone_position = { 0.f, 7.f, 0.0, 0.4, 0.01, 0.1 };
@@ -348,8 +348,8 @@ int main()
 		}
 
 		float light_strength = 1.f;
-		random_number_generator.seed(5);   //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
-		for (int i = 0; i < 20; i++) // 80000 data, i=60000, i<800000
+		random_number_generator.seed(8);   // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
+		for (int i = 30000; i < 40000; i++) // 80000 data, i=60000, i<800000
 		{
 			std::cout << "iterations: " << i << std::endl;
 			std::cout << "random test: " << random_float(random_number_generator, 1.0f,5.0f) << std::endl;
@@ -614,9 +614,9 @@ int main()
 
 
 			cube = model_matrix_generator(cube, random_number_generator, obstacles_scale_factor, cube_position);		//angle min,max, traslation xy_mean, zmean, sigma
-			cone = model_matrix_generator(cylinder, random_number_generator, obstacles_scale_factor2, cone_position);
-			sphere = model_matrix_generator(cylinder, random_number_generator, obstacles_scale_factor2, sphere_position);
-			donas = model_matrix_generator(cylinder, random_number_generator, obstacles_scale_factor2, donas_position);
+			cone = model_matrix_generator(cone, random_number_generator, obstacles_scale_factor2, cone_position);
+			sphere = model_matrix_generator(sphere, random_number_generator, obstacles_scale_factor2, sphere_position);
+			donas = model_matrix_generator(donas, random_number_generator, obstacles_scale_factor2, donas_position);
 
 			if (!ground_truth)
 			{
@@ -630,7 +630,7 @@ int main()
 				//multiple_lightning_shader.setFloat("material.shininess", obstacles.shininess);
 				setting_object_properties_in_shader(multiple_lightning_shader, obstacles, cube);
 				ReferenceObject.Draw(multiple_lightning_shader);
-				cones = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+				cones = random_object_color(cones, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
 				//multiple_lightning_shader.use();
 				//multiple_lightning_shader.setMatrix4fv("model", cone);
 				//multiple_lightning_shader.setVector3f("material.ambient", cones.ambient);
@@ -640,7 +640,7 @@ int main()
 				setting_object_properties_in_shader(multiple_lightning_shader, cones, cone);
 				ConeObject.Draw(multiple_lightning_shader);	
 
-				donass = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+				donass = random_object_color(donass, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
 				//multiple_lightning_shader.use();
 				//multiple_lightning_shader.setMatrix4fv("model", donas);
 				//multiple_lightning_shader.setVector3f("material.ambient", donass.ambient);
@@ -650,14 +650,14 @@ int main()
 				setting_object_properties_in_shader(multiple_lightning_shader, donass, donas);
 				DonasObject.Draw(multiple_lightning_shader);
 
-				spheres = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+				spheres = random_object_color(spheres, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
 				//multiple_lightning_shader.use();
 				//multiple_lightning_shader.setMatrix4fv("model", sphere);
 				//multiple_lightning_shader.setVector3f("material.ambient", spheres.ambient);
 				//multiple_lightning_shader.setVector3f("material.diffuse", spheres.diffuse);
 				//multiple_lightning_shader.setVector3f("material.specular", spheres.specular);
 				//multiple_lightning_shader.setFloat("material.shininess", spheres.shininess);
-				setting_object_properties_in_shader(multiple_lightning_shader, donass, donas);
+				setting_object_properties_in_shader(multiple_lightning_shader, spheres, sphere);
 				SphereObject.Draw(multiple_lightning_shader);
 
 			}
@@ -705,7 +705,7 @@ int main()
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
 
-			std::cin.get();
+			//std::cin.get();
 
 		}
 
