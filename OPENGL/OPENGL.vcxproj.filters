@@ -101,6 +101,9 @@
     <ClCompile Include="pose_continue_rotation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Load_Texture_models.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">

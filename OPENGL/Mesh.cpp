@@ -35,7 +35,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies)
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies, std::vector<Texture> textures)
 {
-	this->Vertecies = vertices;//it looks like there s no problem without "this" pointer
+	this->Vertecies = vertices;
 	this->Indicies = indicies;
 	this->Textures = textures;
 	setupMesh();

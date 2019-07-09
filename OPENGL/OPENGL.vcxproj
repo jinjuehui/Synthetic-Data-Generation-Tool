@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClCompile Include="image_loader.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
+    <ClCompile Include="Load_Texture_models.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="pose_continue_rotation.cpp" />
     <ClCompile Include="Renderer.cpp" />
