@@ -180,6 +180,23 @@ std::vector<float> rotate_object_3axis_randomly(glm::mat4 &model, std::default_r
 	return random_angle;
 }
 
+std::vector<float> rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_engine &generator, float min,float max)
+{
+	//model = glm::rotate(model, glm::radians(velocity), glm::vec3(0.0f, 0.0f, 0.0f));
+	//std::cout << "Object Rotation Enabled!" << std::endl;
+	std::uniform_real_distribution<float> distribution(min, max);
+	std::vector<float> random_angle;
+	random_angle.push_back(distribution(generator));
+	random_angle.push_back(distribution(generator));
+	random_angle.push_back(distribution(generator));
+
+	model = glm::rotate(model, random_angle[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, random_angle[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, random_angle[2], glm::vec3(0.0f, 0.0f, 1.0f));
+
+	return random_angle;
+}
+
 void inverse_object_3axis_rotation(glm::mat4 &model, std::vector<float> random_angle)
 {
 	model = glm::rotate(model, random_angle[2], glm::vec3(0.0f, 0.0f, 1.0f));
