@@ -19,10 +19,15 @@ namespace fs = std::filesystem;
 #define LOAD_CONE "mesh/distractions/cone.stl"
 #define LOAD_DONAS  "mesh/distractions/torus.stl"//"mesh/distractions/donas.stl"
 #define LOAD_SPHERE "mesh/distractions/sphere.stl"
+#define IMAGE_BACKGROUND_PATH "D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages"
+#define TRAINING_IMAGE_SAVE_PATH "D:/data/position_estimation/training_data/.jpg"
+#define JSON_LABEL_PATH "D:/data/position_estimation/label/.json"
+#define MASK_LABEL_PATH "D:/data/position_estimation/mask_data/.jpg"
+
 #define ROTATE_CAMERA false
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
-bool USE_BACKGROUND_IMAGE = true;
+bool USE_BACKGROUND_IMAGE = false;
 bool STATIC_CAMERA_VIEW = true; //set to true,camera won't moved by keybords input
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
@@ -102,12 +107,12 @@ void setting_object_properties_in_shader(Shader &shader, object_setting_for_frag
 }
 
 
-object_setting_for_fragment_shader random_object_color(object_setting_for_fragment_shader &mesh_model, 
-														std::default_random_engine &randomizer,
-														std::vector<float> ambient,
-														std::vector<float> diffuse,
-														std::vector<float> specular,
-														std::vector<float> shininess)
+object_setting_for_fragment_shader random_object_color(object_setting_for_fragment_shader &mesh_model,
+	std::default_random_engine &randomizer,
+	std::vector<float> ambient,
+	std::vector<float> diffuse,
+	std::vector<float> specular,
+	std::vector<float> shininess)
 {
 	mesh_model.ambient = random_v3_norm(randomizer, ambient[0], ambient[1], ambient[2], ambient[3]);
 	mesh_model.diffuse = random_v3_norm(randomizer, diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
@@ -223,6 +228,49 @@ unsigned int back_indicies[] =
 	3,0,2
 };
 
+void generate_json_label(std::string json_path, int number, glm::mat4 object_model, glm::mat4 camera, glm::mat4 projection, BoundingBox::bounding_box bb)
+{ 
+	std::string number_str = to_format(number); //"E:/data/pose_estimation/continue_rotation_label/.json";
+	json_path.insert(json_path.find_last_of('/') + 1, number_str);
+	json labels;
+	std::ofstream jsonfile;
+	jsonfile.open(json_path);
+	labels["name"] = number;
+	labels["object_id"] = path.substr(path.find_last_of('/') + 4, path.find_last_of('/') + 6);
+
+	std::vector<float> bb_2d;
+	bb_2d.push_back(bb.x_min);
+	bb_2d.push_back(bb.y_min);
+	bb_2d.push_back(bb.x_max);
+	bb_2d.push_back(bb.y_max);
+
+
+	float pose_array[4][4], quaternion[4];
+	glm::quat quaternion_original;
+	std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
+	glm::mat4 camera_transpose = glm::transpose(camera);
+	glm::mat4 pose = camera_transpose * object_model;
+	for (int u = 0; u < 3; u++)
+		for (int v = 0; v < 3; v++)
+		{
+			if (std::abs(pose[u][v]) < 1e-7)
+				pose[u][v] = 0;
+		}
+	convert_array(pose, pose_array);
+	quaternion_original = glm::quat_cast(pose);
+	conver_quaternion_to_array(quaternion_original, quaternion);
+	labels["center_point"] = projected_point;
+	labels["Orientation"] = pose_array;
+	labels["Quaternion"] = quaternion;
+	labels["BoundingBox"] = bb_2d;
+	jsonfile << labels;
+	std::cout << "quaternion:" << std::endl;
+	std::cout << "	" << quaternion[0] << "	" << quaternion[1] << "	" << quaternion[2] << "	" << quaternion[3] << "	" << std::endl;
+	std::cout << "centroid:" << std::endl;
+	std::cout << "	" << projected_point[0] << "	" << projected_point[1] << "	" << projected_point[2] << std::endl;
+	std::cout << "bounding box" << bb_2d[0]<<" " << bb_2d[1] <<" "<< bb_2d[2] << " "<< bb_2d[3]<< std::endl;
+	jsonfile.close();
+}
 
 //Randomization factors
 //1. lighting conditions
@@ -230,7 +278,7 @@ unsigned int back_indicies[] =
 //1. lighting conditions, no spot light now
 std::vector<float> light_number_range = { 3.0f, 5.0f };						//minimum>=2	maximum
 std::vector<float> light_position_step = { 2000, 0.5 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
-std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
+std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.1f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2, 0.3, 0.4
 std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.01f };	//
 std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.01f };
 //std::vector<float> point_light_position = { 1.0f , 1.0f, 5.0f };			//start position, step size, end position (meter)
@@ -252,7 +300,7 @@ std::vector<float> distractor_shininess = { 0.1f, 16.0f };
 //3.object position
 std::vector<float> object_position_distribution = { 0, 0.25, 0.06, 0.05 };	//xy_mean, z_mean, xy_sigma, z_sigma
 std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };						//minimum maximum
-std::vector<float> obstacles_scale_factor2 = {60.f, 80.f};
+std::vector<float> obstacles_scale_factor2 = { 60.f, 80.f };
 
 std::vector<float> cube_position = { 0.f, 3.14f, 0.0, 0.4, 0.01, 0.1 };		//angle min,max, traslation xy_mean, z_mean, xy_sigma, z_sigma	
 std::vector<float> cone_position = { 0.f, 7.f, 0.0, 0.4, 0.01, 0.1 };
@@ -264,7 +312,7 @@ int main()
 {
 	GLFWwindow* window;
 	window = initialize_window(SCR_WIDTH, SCR_HEIGHT, "Rendering...");
-	glfwSetWindowPos(window, 2000, 0);
+	glfwSetWindowPos(window, 1000, 500);
 
 	//===============move into vertex classes to parse layout automatically====================
 	std::map<std::string, int> AttribPointer_cube, AttribPointer_Background;
@@ -287,7 +335,7 @@ int main()
 	//===============move into vertex classes to parse layout automatically=====================
 
 	std::cout << "creating image list..." << std::endl;
-	std::map<std::string, int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
+	std::map<std::string, int> Filelist = read_images_in_folder(IMAGE_BACKGROUND_PATH);//SegmentationClass
 	std::map<std::string, int>::iterator it = Filelist.begin();
 	std::advance(it, 0);  //2000  //3000(80000 data)
 
@@ -305,6 +353,7 @@ int main()
 	Shader Segmentation("semantic_vertex.shader", "semantic_fragment.shader");
 	Shader Simplelightning_shader("Simple_vertex.shader", "Simple_Fragment.shader");
 	BoundingBox boundingbox(TrainingObject);
+
 	float bounding_box_vertex_8point[24] =
 	{
 		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
@@ -316,6 +365,7 @@ int main()
 		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_min,
 		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max
 	};
+	boundingbox.fill_bb_glm_vec3(bounding_box_vertex_8point);
 
 	std::map<std::string, int> AttribPointer_BB; //problem by extracting to calss: pass array result in uncorrect bing VAO
 	AttribPointer_BB["layout_0"] = 0;
@@ -335,7 +385,7 @@ int main()
 	std::cout << "rendering..." << std::endl;
 	bool ground_truth = false;
 	std::default_random_engine random_number_generator;
-	
+
 	while (!glfwWindowShouldClose(window))  //start the game
 	{
 
@@ -348,11 +398,11 @@ int main()
 		}
 
 		float light_strength = 1.f;
-		random_number_generator.seed(8);   // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
-		for (int i = 30000; i < 40000; i++) // 80000 data, i=60000, i<800000
+		random_number_generator.seed(8);//9 //8  // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
+		for (int i = 0; i < 8188; i++)//16377//8189 // 80000 data, i=60000, i<800000
 		{
 			std::cout << "iterations: " << i << std::endl;
-			std::cout << "random test: " << random_float(random_number_generator, 1.0f,5.0f) << std::endl;
+			std::cout << "random test: " << random_float(random_number_generator, 1.0f, 5.0f) << std::endl;
 
 			glm::mat4 object_model = glm::mat4(1.0f);  //trainning object matrix 
 			glm::mat4 cube = glm::mat4(1.0f);
@@ -360,8 +410,8 @@ int main()
 			//cube = glm::translate(cube, glm::vec3(3.0f, 0.0f, 0.0f));
 			//cube = glm::scale(cube, glm::vec3(0.3f, 0.3f, 0.3f));
 			std::string number = to_format(i);
-			std::string picture = "D:/data/segmentation/training_data/.jpg";
-			
+			std::string picture = TRAINING_IMAGE_SAVE_PATH;
+
 			//create light and cube vertex setting in OpenGL
 			VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
 			VertexBuffer Cube(cube_vertex,
@@ -375,7 +425,7 @@ int main()
 			std::vector<glm::vec3> light_positions;
 			int light_num = int(random_float(random_number_generator, light_number_range[0], light_number_range[1]));
 
-			std::cout << "light number: "<<light_num << std::endl;
+			std::cout << "light number: " << light_num << std::endl;
 
 			for (int n = 0; n < light_num; n++)
 			{
@@ -384,7 +434,7 @@ int main()
 
 
 
-			std::cout << "light position check: " << light_positions[0].x<<" "<<light_positions[0].y<<" "<<light_positions[0].z << std::endl;
+			std::cout << "light position check: " << light_positions[0].x << " " << light_positions[0].y << " " << light_positions[0].z << std::endl;
 			projection = glm::perspective(glm::radians(60.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 100.0f);
 			camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
 
@@ -392,7 +442,7 @@ int main()
 			GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 			//GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));//added for object (bounding box use line)
 
-			pointLight.ambient = random_v3_norm(random_number_generator,point_light_ambient_color[0], point_light_ambient_color[1], point_light_ambient_color[2], point_light_ambient_color[3]);																			//randomize lightning color
+			pointLight.ambient = random_v3_norm(random_number_generator, point_light_ambient_color[0], point_light_ambient_color[1], point_light_ambient_color[2], point_light_ambient_color[3]);																			//randomize lightning color
 			pointLight.diffuse = random_v3_norm(random_number_generator, point_light_diffuse_color[0], point_light_diffuse_color[1], point_light_diffuse_color[2], point_light_diffuse_color[3]);
 			pointLight.specular = random_v3_norm(random_number_generator, point_light_specular_color[0], point_light_specular_color[1], point_light_specular_color[2], point_light_specular_color[3]);
 
@@ -438,7 +488,7 @@ int main()
 
 				Background.UnBind();
 				stbi_image_free(data);
-				
+
 			}
 
 			multiple_lightning_shader.use();
@@ -456,12 +506,12 @@ int main()
 			multiple_lightning_shader.setVector3f("directionlight.ambient", dirLight.ambient);
 			multiple_lightning_shader.setVector3f("directionlight.diffuse", dirLight.diffuse);
 			multiple_lightning_shader.setVector3f("directionlight.specular", dirLight.specular);
-						
+
 			if ((i + 1) % int(light_position_step[0]) == 0)
 				light_strength += light_position_step[1];
 			for (int n = 0; n < light_positions.size(); n++)
 			{
-				
+
 				if (ENABLE_RANDOM_LIGHT_SOURCE_POSITION)
 				{
 					light_positions[n] = random_vec3(random_number_generator, -light_strength, light_strength, -light_strength, light_strength);						// -15, 15, -15, 15									//randomize light position
@@ -516,7 +566,7 @@ int main()
 			//glm::vec3 ObjectPosition = random_vec3(random_number_generator, -0.1, 0.1, 0.0, 0.0);
 			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, object_position_distribution[0], object_position_distribution[1], object_position_distribution[2], object_position_distribution[3]);                //object position 0.03, 0.02
 			//glm::vec3 ObjectPosition = glm::vec3(0.08f, 0.0f, 0.0f);
-			std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
+			std::cout << "position: " << " " << ObjectPosition[0] << " " << ObjectPosition[1] << " " << ObjectPosition[2] << std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
 			//object_model = glm::translate(object_model, glm::vec3(0.1, 0.0, 0.25));
 			std::vector<float> angle = rotate_object_3axis_randomly(object_model, random_number_generator);
@@ -525,7 +575,7 @@ int main()
 			std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
 			float pose_array[4][4], quaternion[4];
 			glm::quat quaternion_original;
-	
+
 			if (ground_truth)
 			{
 
@@ -544,8 +594,8 @@ int main()
 				TrainingObject.Draw(multiple_lightning_shader);
 				//DonasObject.Draw(multiple_lightning_shader);
 			}
-			
-			
+
+
 			//TrainingObject.Draw(multiple_lightning_shader);//main object for training
 			//object_model = glm::rotate(object_model, -float(glm::radians(1.0)), glm::vec3(1.0, 0.0, 0.0));
 			//inverse_object_3axis_rotation(object_model, angle);
@@ -561,9 +611,6 @@ int main()
 
 			//////////////////////using bounding box//////////////////////////////////////////////////////
 
-			boundingbox.fill_bb_glm_vec3(bounding_box_vertex_8point);
-			//boundingbox.generate_bounding_box_labels_3d(SCR_WIDTH, SCR_HEIGHT, P, Y, R, projection, camera, object_model, jsonfile, json_path);
-			//std::cout << "labels generated" << std::endl;
 			//3d Bounding Box
 			Boundingbox_8p_shader.use();
 			Boundingbox_8p_shader.setMatrix4fv("model", object_model);
@@ -572,6 +619,8 @@ int main()
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 			//BB_3d.Draw("draw_elements");
 
+			boundingbox.generate_bounding_box_3d_2d(projection, camera, object_model, int(SCR_WIDTH), int(SCR_HEIGHT));
+
 			float bounding_box_vertex_4point[] = {
 				boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
 				boundingbox.bb_v.x_max,	boundingbox.bb_v.y_min,	0.f,  // bottom right
@@ -579,6 +628,8 @@ int main()
 				boundingbox.bb_v.x_min,	boundingbox.bb_v.y_max,	0.f
 			};
 
+			std::cout << "bounding box vertex points: "<< boundingbox.bb_v.x_max << ", "<< boundingbox.bb_v.x_min <<", " << boundingbox.bb_v.y_max
+				<<", " << boundingbox.bb_v.y_min <<std::endl;
 			//2dBounding Box
 			VertexBuffer BB_2d(bounding_box_vertex_4point,
 				boundingbox.bounding_box_vertex_4point_indecies,
@@ -618,51 +669,26 @@ int main()
 			sphere = model_matrix_generator(sphere, random_number_generator, obstacles_scale_factor2, sphere_position);
 			donas = model_matrix_generator(donas, random_number_generator, obstacles_scale_factor2, donas_position);
 
-			if (!ground_truth)
-			{
-				obstacles = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+			//if (!ground_truth)
+			//{
+			//	obstacles = random_object_color(obstacles, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+			//	setting_object_properties_in_shader(multiple_lightning_shader, obstacles, cube);
+			//	ReferenceObject.Draw(multiple_lightning_shader);
+			//	cones = random_object_color(cones, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+			//	setting_object_properties_in_shader(multiple_lightning_shader, cones, cone);
+			//	ConeObject.Draw(multiple_lightning_shader);
 
-				//multiple_lightning_shader.use();
-				//multiple_lightning_shader.setMatrix4fv("model", cube);
-				//multiple_lightning_shader.setVector3f("material.ambient", obstacles.ambient);
-				//multiple_lightning_shader.setVector3f("material.diffuse", obstacles.diffuse);
-				//multiple_lightning_shader.setVector3f("material.specular", obstacles.specular);
-				//multiple_lightning_shader.setFloat("material.shininess", obstacles.shininess);
-				setting_object_properties_in_shader(multiple_lightning_shader, obstacles, cube);
-				ReferenceObject.Draw(multiple_lightning_shader);
-				cones = random_object_color(cones, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
-				//multiple_lightning_shader.use();
-				//multiple_lightning_shader.setMatrix4fv("model", cone);
-				//multiple_lightning_shader.setVector3f("material.ambient", cones.ambient);
-				//multiple_lightning_shader.setVector3f("material.diffuse", cones.diffuse);
-				//multiple_lightning_shader.setVector3f("material.specular", cones.specular);
-				//multiple_lightning_shader.setFloat("material.shininess", cones.shininess);
-				setting_object_properties_in_shader(multiple_lightning_shader, cones, cone);
-				ConeObject.Draw(multiple_lightning_shader);	
+			//	donass = random_object_color(donass, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+			//	setting_object_properties_in_shader(multiple_lightning_shader, donass, donas);
+			//	DonasObject.Draw(multiple_lightning_shader);
 
-				donass = random_object_color(donass, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
-				//multiple_lightning_shader.use();
-				//multiple_lightning_shader.setMatrix4fv("model", donas);
-				//multiple_lightning_shader.setVector3f("material.ambient", donass.ambient);
-				//multiple_lightning_shader.setVector3f("material.diffuse", donass.diffuse);
-				//multiple_lightning_shader.setVector3f("material.specular", donass.specular);
-				//multiple_lightning_shader.setFloat("material.shininess", donass.shininess);
-				setting_object_properties_in_shader(multiple_lightning_shader, donass, donas);
-				DonasObject.Draw(multiple_lightning_shader);
+			//	spheres = random_object_color(spheres, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
+			//	setting_object_properties_in_shader(multiple_lightning_shader, spheres, sphere);
+			//	SphereObject.Draw(multiple_lightning_shader);
 
-				spheres = random_object_color(spheres, random_number_generator, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
-				//multiple_lightning_shader.use();
-				//multiple_lightning_shader.setMatrix4fv("model", sphere);
-				//multiple_lightning_shader.setVector3f("material.ambient", spheres.ambient);
-				//multiple_lightning_shader.setVector3f("material.diffuse", spheres.diffuse);
-				//multiple_lightning_shader.setVector3f("material.specular", spheres.specular);
-				//multiple_lightning_shader.setFloat("material.shininess", spheres.shininess);
-				setting_object_properties_in_shader(multiple_lightning_shader, spheres, sphere);
-				SphereObject.Draw(multiple_lightning_shader);
-
-			}
-			else
-			{
+			//}
+			//else
+			//{
 				dump_iterating(random_number_generator, 4, distractor_ambient, distractor_diffuse, distractor_specular, train_shininess);
 				Segmentation.use();
 				glm::vec3 train_object_color(0.0f, 0.0f, 0.0f);
@@ -681,7 +707,7 @@ int main()
 				Segmentation.use();
 				Segmentation.setMatrix4fv("model", sphere);
 				SphereObject.Draw(Segmentation);//obstacle
-			}
+			//}
 
 			///////////////////////////////////////semantic segmentation///////////////////
 			//Segmentation.use();
@@ -692,20 +718,21 @@ int main()
 			//inverse_object_3axis_rotation(cube, cube_angle);
 			//cube = glm::translate(cube, -cube_position);
 			/////////////////////////////////////////////////////////////////////////////////
-
+			std::string json_path = JSON_LABEL_PATH; 
+			//generate_json_label(json_path, i, object_model, camera, projection, boundingbox.bb);
 
 			if (ground_truth)
 			{
-				picture = "E:/data/segmentation/mask_data/.jpg";//"E:/data/pose_estimation/gt/.jpg";//"E:/data/noobstacles_gt/gt/.jpg";//"E:/data/single_object2/gt/.jpg";
+				picture = MASK_LABEL_PATH;//"E:/data/pose_estimation/gt/.jpg";//"E:/data/noobstacles_gt/gt/.jpg";//"E:/data/single_object2/gt/.jpg";
 			}
-			picture.insert(picture.find_last_of('/')+1, number);
+			picture.insert(picture.find_last_of('/') + 1, number);
 			std::cout << picture << std::endl;
-			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+			//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
 
-			//std::cin.get();
+			std::cin.get();
 
 		}
 

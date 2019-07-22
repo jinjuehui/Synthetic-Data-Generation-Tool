@@ -360,8 +360,14 @@ void BoundingBox::calculate_boundingbox(float x_min,
 	//calculate the coordinate with regard to lower left origin of the whole picture
 	bb.x = int(0.5*screen_w*x_min+screen_w/2);
 	bb.y = int(0.5*screen_h*y_min+screen_h/2);
-	bb.w = int(screen_w*(x_max - x_min));
-	bb.h = int(screen_h*(y_max - y_min));
+	bb.w = int(screen_w*(x_max - x_min)/2);
+	bb.h = int(screen_h*(y_max - y_min)/2);
+	//transform to top left coordinate
+	bb.x_min = (0.5*screen_w*x_min + screen_w / 2)/screen_w;
+	bb.y_min = (screen_h/2 - 0.5*screen_h*y_max)/screen_h;
+	bb.x_max = (0.5*screen_w*x_max + screen_w / 2)/screen_w;
+	bb.y_max = (screen_h/2 - 0.5*screen_h*y_min)/screen_h;
+
 
 }
 
@@ -405,7 +411,7 @@ void BoundingBox::generate_bounding_box_labels_2d(Model train_object,
 	bb_v.y_min = *std::min_element(V.begin(), V.end());
 	//std::cout << "delta x: " << bb_X_min<<" "<<bb_X_max-bb_X_min << std::endl;
 
-	calculate_boundingbox(bb_v.x_max, bb_v.x_min, bb_v.y_max, bb_v.y_min, screen_w, screen_h);
+	calculate_boundingbox(bb_v.x_min, bb_v.x_max, bb_v.y_min, bb_v.y_max, screen_w, screen_h);
 
 	json bb_labels;
 	generate_yaml_label(jf,json_path,bb_labels,"mesh/obj_05.stl",bb,P,Y,R);
@@ -414,6 +420,32 @@ void BoundingBox::generate_bounding_box_labels_2d(Model train_object,
 
 }
 
+void BoundingBox::generate_bounding_box_2d(Model train_object, glm::mat4 projection, glm::mat4 camera, glm::mat4 model, int screen_w, int screen_h)//run only once, once object is created
+{
+	std::vector<float> U;
+	std::vector<float> V;
+
+	int i = 0;
+	while (i < train_object.meshes[0].Vertecies.size())
+	{
+		glm::vec4 vertex_position_on_image = projection * camera * model * glm::vec4(train_object.meshes[0].Vertecies[i].Position, 1.0f);
+		//std::cout << "vertex position on image: " << vertex_position_on_image[0]/ vertex_position_on_image[3]
+		//			<< " " << vertex_position_on_image[1]/ vertex_position_on_image[3] << " " 
+		//			<< vertex_position_on_image[2]/ vertex_position_on_image[3] << " " << vertex_position_on_image[3]/ vertex_position_on_image[3] << std::endl;
+
+		U.push_back(vertex_position_on_image[0] / vertex_position_on_image[3]);
+		V.push_back(vertex_position_on_image[1] / vertex_position_on_image[3]);
+
+		i++;
+	}
+	bb_v.x_max = *std::max_element(U.begin(), U.end());//top right
+	bb_v.x_min = *std::min_element(U.begin(), U.end());//buttom right
+	bb_v.y_max = *std::max_element(V.begin(), V.end());//buttom left
+	bb_v.y_min = *std::min_element(V.begin(), V.end());
+	//std::cout << "delta x: " << bb_X_min<<" "<<bb_X_max-bb_X_min << std::endl;
+
+	calculate_boundingbox(bb_v.x_min, bb_v.x_max, bb_v.y_min, bb_v.y_max, screen_w, screen_h);
+}
 
 void BoundingBox::generate_bounding_box_3d(Model train_object)//run only once, once object is created
 {
@@ -440,6 +472,29 @@ void BoundingBox::generate_bounding_box_3d(Model train_object)//run only once, o
 	bb_v_3d.z_min = *std::min_element(W.begin(), W.end());
 	//std::cout << " bounding box 3d: "<< bb_v_3d.x_max << std::endl;
 
+}
+
+void BoundingBox::generate_bounding_box_3d_2d(glm::mat4 projection, glm::mat4 camera, glm::mat4 model, int screen_w, int screen_h)//run only once, once object is created
+{
+	std::vector<float> U;
+	std::vector<float> V;
+	int i = 0;
+	//std::cout << "bounding box" << bounding_box_3d_vertex[5]<<" "<< bounding_box_3d_vertex[1]<<" "<< bounding_box_3d_vertex[2] << std::endl;
+	//std::cout << "size of array: " <<sizeof(bounding_box_3d_vertex) << std::endl;
+	while (i < bb_glm_vec3.size())
+	{
+		//do transformation
+		glm::vec4 vertex_position_on_image = projection * camera*model*glm::vec4(bb_glm_vec3[i], 1.0f);
+		U.push_back(vertex_position_on_image[0] / vertex_position_on_image[3]);
+		V.push_back(vertex_position_on_image[1] / vertex_position_on_image[3]);
+		i++;
+	}
+
+	bb_v.x_max = *std::max_element(U.begin(), U.end());
+	bb_v.x_min = *std::min_element(U.begin(), U.end());
+	bb_v.y_max = *std::max_element(V.begin(), V.end());
+	bb_v.y_min = *std::min_element(V.begin(), V.end());
+	calculate_boundingbox(bb_v.x_min, bb_v.x_max, bb_v.y_min, bb_v.y_max, screen_w, screen_h);
 }
 
 void BoundingBox::generate_bounding_box_labels_3d(
@@ -473,7 +528,7 @@ void BoundingBox::generate_bounding_box_labels_3d(
 	bb_v.x_min = *std::min_element(U.begin(), U.end());
 	bb_v.y_max = *std::max_element(V.begin(), V.end());
 	bb_v.y_min = *std::min_element(V.begin(), V.end());
-	calculate_boundingbox(bb_v.x_max, bb_v.x_min, bb_v.y_max, bb_v.y_min, screen_w, screen_h);
+	calculate_boundingbox(bb_v.x_min, bb_v.x_max, bb_v.y_min, bb_v.y_max, screen_w, screen_h);
 	//std::cout << "delta x: " << bb_v.x_min<<" "<<bb_v.x_max-bb_v.x_min << std::endl;
 
 	json bb_labels;

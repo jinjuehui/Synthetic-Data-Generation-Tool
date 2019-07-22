@@ -425,7 +425,7 @@ int main()
 					if (!generate_mask)
 					{
 						std::string json_path = "E:/data/pose_estimation/continue_rotation_label/.json";
-						json_path.insert(48, number_str);
+						json_path.insert(json_path.find_last_of('/')+1, number_str);
 						json labels;
 						std::ofstream jsonfile;
 						jsonfile.open(json_path);

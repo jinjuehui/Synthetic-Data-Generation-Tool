@@ -81,6 +81,10 @@ public:
 		int y;
 		int w;
 		int h;
+		float x_min;
+		float y_min;
+		float x_max;
+		float y_max;
 	
 	}bb;
 	
@@ -148,6 +152,8 @@ public:
 	void fill_bb_glm_vec3(float* bounding_box_vertex_8point);
 	void calculate_boundingbox(float x_min, float x_max, float y_min, float y_max, int screen_w, int screen_h);
 	void generate_bounding_box_3d(Model train_object);
+	void generate_bounding_box_2d(Model train_object, glm::mat4 projection, glm::mat4 camera, glm::mat4 model, int screen_w, int screen_h);
+	void generate_bounding_box_3d_2d(glm::mat4 projection, glm::mat4 camera, glm::mat4 model, int screen_w, int screen_h);
 	void generate_bounding_box_labels_2d(Model train_object,
 										int screen_w,
 										int screen_h,

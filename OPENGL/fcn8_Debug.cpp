@@ -37,8 +37,8 @@ bool ROTATE_LIGHT = false;
 //parameters
 //Screen Parameters:
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 224;
-const unsigned int SCR_HEIGHT = 224;
+const unsigned int SCR_WIDTH = 1000;
+const unsigned int SCR_HEIGHT = 1000;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
 //User Input Mouse and cursor
@@ -325,7 +325,7 @@ int main()
 	//glfwSetWindowSizeCallback(window[0], window_size_callback);
 	std::cout << "use ESC to exit the Window" << std::endl;
 	glfwSetKeyCallback(window[0], key_callback);
-	glfwSetWindowPos(window[0], 500, 500);
+	glfwSetWindowPos(window[0], 1000, -1000);
 
 	//===============move into vertex classes to parse layout automatically====================
 	std::map<std::string, int> AttribPointer_cube, AttribPointer_Background;
@@ -633,7 +633,7 @@ int main()
 
 */
 
-			glm::mat4 rotation_matrix = rotate_object_3axis_randomly(object_model, random_number_generator);
+			//glm::mat4 rotation_matrix = rotate_object_3axis_randomly(object_model, random_number_generator);
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
 
 
@@ -647,7 +647,7 @@ int main()
 
 			TrainingObject.Draw(Segmentation);//main object for training
 			//object_model = glm::rotate(object_model, -float(glm::radians(1.0)), glm::vec3(1.0, 0.0, 0.0));
-			inverse_object_3axis_rotation(object_model, rotation_matrix);
+			//inverse_object_3axis_rotation(object_model, rotation_matrix);
 			object_model = glm::translate(object_model, -ObjectPosition); //after drawing the object traslate it back to origin
 
 			/*std::cout << "object position matrix:" << std::endl;
@@ -669,7 +669,7 @@ int main()
 			Boundingbox_8p_shader.setMatrix4fv("view", camera);
 			Boundingbox_8p_shader.setMatrix4fv("projection", projection);
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-			//BB_3d.Draw("draw_elements");
+			BB_3d.Draw("draw_elements");
 
 			float bounding_box_vertex_4point[] = {
 				boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
@@ -693,7 +693,7 @@ int main()
 			Basic_shader.setMatrix4fv("view", camera);
 			Basic_shader.setMatrix4fv("projection", projection);
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-			//BB_2d.Draw("draw_elements");
+			BB_2d.Draw("draw_elements");
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 
 			////////////////////////////////////////////////////////////////////////////////////////
@@ -703,7 +703,8 @@ int main()
 			glm::vec3 cube_position = set_random_with_distribution(random_number_generator, 0.0, 0.03, 0.02);
 			object_setting_for_fragment_shader obstacles;
 			float scale = random_float(random_number_generator, 0.2, 0.5);
-			glm::mat4 cube_rotation_matrix = rotate_object_3axis_randomly(cube, random_number_generator);
+			//glm::mat4 cube_rotation_matrix = rotate_object_3axis_randomly(cube, random_number_generator);
+			glm::mat4 cube_rotation_matrix = glm::mat4(1.0f);
 			cube = glm::translate(cube, cube_position);
 			cube = glm::scale(cube, glm::vec3(scale));
 
@@ -741,7 +742,7 @@ int main()
 			//Segmentation.setMatrix4fv("projection", projection);
 			//Segmentation.setMatrix4fv("model", cube);
 			//Segmentation.setVector3f("fragcolor", obstacles.diffuse);
-			inverse_object_3axis_rotation(cube, cube_rotation_matrix);
+			//inverse_object_3axis_rotation(cube, cube_rotation_matrix);
 			cube = glm::translate(cube, -cube_position);
 			/////////////////////////////////////////////////////////////////////////////////
 
@@ -775,13 +776,13 @@ int main()
 			picture.insert(26, number);
 			picture_multiobject.insert(26, number);
 			picture_sm_seg.insert(35, number);
-			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+			//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 
 			GLCall(glfwSwapBuffers(window[0]));
 			GLCall(glfwPollEvents());
 
-			//std::cin.get();
+			std::cin.get();
 
 		}
 

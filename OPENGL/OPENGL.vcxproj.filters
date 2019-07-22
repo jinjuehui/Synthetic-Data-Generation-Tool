@@ -98,10 +98,7 @@
     <ClCompile Include="utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Datagenerator_FCN8.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Load_Texture_models.cpp">
+    <ClCompile Include="position_estimation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
