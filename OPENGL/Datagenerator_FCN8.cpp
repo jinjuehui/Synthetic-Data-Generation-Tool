@@ -19,6 +19,10 @@ namespace fs = std::filesystem;
 #define LOAD_CONE "mesh/distractions/cone.stl"
 #define LOAD_DONAS  "mesh/distractions/torus.stl"//"mesh/distractions/donas.stl"
 #define LOAD_SPHERE "mesh/distractions/sphere.stl"
+#define BACK_GROUND_IMAGE_PATH "D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages"
+#define JSON_LABEL "D:/data/human_error/640x480/test_real_label_error/label/.json"
+#define SAVE_IMAGE_PATH "D:/data/human_error/640x480/test_real_label_error/image/.jpg"  //D:/data/segmentation/training_data/.jpg
+#define MASK_DATA_PATH "D:/data/human_error/640x480/test_real_label_error/mask_data/.jpg"
 #define ROTATE_CAMERA false
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
@@ -26,10 +30,10 @@ bool USE_BACKGROUND_IMAGE = true;
 bool STATIC_CAMERA_VIEW = true; //set to true,camera won't moved by keybords input
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
-std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 224;
-const unsigned int SCR_HEIGHT = SCR_WIDTH;
+const unsigned int SCR_WIDTH = 640;
+const unsigned int SCR_HEIGHT = 480;
 using json = nlohmann::json;
+std::string const path = LOAD_MODEL;
 glm::mat4 back_position;
 glm::vec3 back_ground_position(1.0f, 1.0f, 1.0f);
 glm::vec3 light_position(1.0f, 0.0f, 2.0f);
@@ -224,6 +228,51 @@ unsigned int back_indicies[] =
 };
 
 
+void generate_json_label(std::string json_path, int number, glm::mat4 object_model, glm::mat4 camera, glm::mat4 projection, BoundingBox::bounding_box bb)
+{
+	std::string number_str = to_format(number); //"E:/data/pose_estimation/continue_rotation_label/.json";
+	json_path.insert(json_path.find_last_of('/') + 1, number_str);
+	json labels;
+	std::ofstream jsonfile;
+	jsonfile.open(json_path);
+	labels["name"] = number;
+	labels["object_id"] = path.substr(path.find_last_of('/') + 4, path.find_last_of('/') + 6);
+
+	std::vector<float> bb_2d;
+	bb_2d.push_back(bb.x_min);
+	bb_2d.push_back(bb.y_min);
+	bb_2d.push_back(bb.x_max);
+	bb_2d.push_back(bb.y_max);
+
+
+	float pose_array[4][4], quaternion[4];
+	glm::quat quaternion_original;
+	std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
+	glm::mat4 camera_transpose = glm::transpose(camera);
+	glm::mat4 pose = camera_transpose * object_model;
+	for (int u = 0; u < 3; u++)
+		for (int v = 0; v < 3; v++)
+		{
+			if (std::abs(pose[u][v]) < 1e-7)
+				pose[u][v] = 0;
+		}
+	convert_array(pose, pose_array);
+	quaternion_original = glm::quat_cast(pose);
+	conver_quaternion_to_array(quaternion_original, quaternion);
+	labels["center_point"] = projected_point;
+	labels["Orientation"] = pose_array;
+	labels["Quaternion"] = quaternion;
+	labels["BoundingBox"] = bb_2d;
+	jsonfile << labels;
+	std::cout << "quaternion:" << std::endl;
+	std::cout << "	" << quaternion[0] << "	" << quaternion[1] << "	" << quaternion[2] << "	" << quaternion[3] << "	" << std::endl;
+	std::cout << "centroid:" << std::endl;
+	std::cout << "	" << projected_point[0] << "	" << projected_point[1] << "	" << projected_point[2] << std::endl;
+	std::cout << "bounding box" << bb_2d[0] << " " << bb_2d[1] << " " << bb_2d[2] << " " << bb_2d[3] << std::endl;
+	jsonfile.close();
+}
+
+
 //Randomization factors
 //1. lighting conditions
 //Randomization factors
@@ -250,7 +299,7 @@ std::vector<float> distractor_diffuse = { 0.5f,0.5f, 0.5f,0.3f };
 std::vector<float> distractor_specular = { 0.1f,0.1f, 0.1f,0.3f };
 std::vector<float> distractor_shininess = { 0.1f, 16.0f };
 //3.object position
-std::vector<float> object_position_distribution = { 0, 0.25, 0.06, 0.05 };	//xy_mean, z_mean, xy_sigma, z_sigma
+std::vector<float> object_position_distribution = { 0, 0.0, 0.05, 0.15 };	//xy_mean, z_mean, xy_sigma, z_sigma
 std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };						//minimum maximum
 std::vector<float> obstacles_scale_factor2 = {60.f, 80.f};
 
@@ -264,7 +313,7 @@ int main()
 {
 	GLFWwindow* window;
 	window = initialize_window(SCR_WIDTH, SCR_HEIGHT, "Rendering...");
-	glfwSetWindowPos(window, 2000, 0);
+	glfwSetWindowPos(window, 1000, 1000);
 
 	//===============move into vertex classes to parse layout automatically====================
 	std::map<std::string, int> AttribPointer_cube, AttribPointer_Background;
@@ -287,9 +336,11 @@ int main()
 	//===============move into vertex classes to parse layout automatically=====================
 
 	std::cout << "creating image list..." << std::endl;
-	std::map<std::string, int> Filelist = read_images_in_folder("D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
+
+	std::map<std::string, int> Filelist = read_images_in_folder(BACK_GROUND_IMAGE_PATH);//SegmentationClass
 	std::map<std::string, int>::iterator it = Filelist.begin();
 	std::advance(it, 0);  //2000  //3000(80000 data)
+
 
 	std::cout << "image list created!" << std::endl;
 	Model TrainingObject(LOAD_MODEL);
@@ -349,7 +400,7 @@ int main()
 
 		float light_strength = 1.f;
 		random_number_generator.seed(8);   // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
-		for (int i = 30000; i < 40000; i++) // 80000 data, i=60000, i<800000
+		for (int i = 30000; i < 30500; i++) // 80000 data, i=60000, i<800000
 		{
 			std::cout << "iterations: " << i << std::endl;
 			std::cout << "random test: " << random_float(random_number_generator, 1.0f,5.0f) << std::endl;
@@ -360,7 +411,7 @@ int main()
 			//cube = glm::translate(cube, glm::vec3(3.0f, 0.0f, 0.0f));
 			//cube = glm::scale(cube, glm::vec3(0.3f, 0.3f, 0.3f));
 			std::string number = to_format(i);
-			std::string picture = "D:/data/segmentation/training_data/.jpg";
+			std::string picture = SAVE_IMAGE_PATH;
 			
 			//create light and cube vertex setting in OpenGL
 			VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
@@ -385,7 +436,7 @@ int main()
 
 
 			std::cout << "light position check: " << light_positions[0].x<<" "<<light_positions[0].y<<" "<<light_positions[0].z << std::endl;
-			projection = glm::perspective(glm::radians(60.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 100.0f);
+			projection = glm::perspective(glm::radians(30.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 100.0f);
 			camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
 
 			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
@@ -396,6 +447,7 @@ int main()
 			pointLight.diffuse = random_v3_norm(random_number_generator, point_light_diffuse_color[0], point_light_diffuse_color[1], point_light_diffuse_color[2], point_light_diffuse_color[3]);
 			pointLight.specular = random_v3_norm(random_number_generator, point_light_specular_color[0], point_light_specular_color[1], point_light_specular_color[2], point_light_specular_color[3]);
 
+			
 			if (USE_BACKGROUND_IMAGE)
 			{
 				VertexBuffer Background(background,
@@ -440,7 +492,7 @@ int main()
 				stbi_image_free(data);
 				
 			}
-
+			
 			multiple_lightning_shader.use();
 			multiple_lightning_shader.setMatrix4fv("view", camera);
 			multiple_lightning_shader.setVector3f("viewPos", Setup.camera_pose);
@@ -515,7 +567,7 @@ int main()
 
 			//glm::vec3 ObjectPosition = random_vec3(random_number_generator, -0.1, 0.1, 0.0, 0.0);
 			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, object_position_distribution[0], object_position_distribution[1], object_position_distribution[2], object_position_distribution[3]);                //object position 0.03, 0.02
-			//glm::vec3 ObjectPosition = glm::vec3(0.08f, 0.0f, 0.0f);
+			//glm::vec3 ObjectPosition = glm::vec3(0.0f, 0.0f, 0.1f);
 			std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
 			//object_model = glm::translate(object_model, glm::vec3(0.1, 0.0, 0.25));
@@ -682,7 +734,8 @@ int main()
 				Segmentation.setMatrix4fv("model", sphere);
 				SphereObject.Draw(Segmentation);//obstacle
 			}
-
+			std::string json_path = JSON_LABEL;
+			generate_json_label(json_path, i, object_model, camera, projection, boundingbox.bb);
 			///////////////////////////////////////semantic segmentation///////////////////
 			//Segmentation.use();
 			//Segmentation.setMatrix4fv("view", camera);
@@ -696,7 +749,7 @@ int main()
 
 			if (ground_truth)
 			{
-				picture = "E:/data/segmentation/mask_data/.jpg";//"E:/data/pose_estimation/gt/.jpg";//"E:/data/noobstacles_gt/gt/.jpg";//"E:/data/single_object2/gt/.jpg";
+				picture = MASK_DATA_PATH;//"E:/data/pose_estimation/gt/.jpg";//"E:/data/noobstacles_gt/gt/.jpg";//"E:/data/single_object2/gt/.jpg";
 			}
 			picture.insert(picture.find_last_of('/')+1, number);
 			std::cout << picture << std::endl;

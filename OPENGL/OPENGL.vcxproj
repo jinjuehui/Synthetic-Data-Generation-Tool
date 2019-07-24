@@ -150,10 +150,10 @@
     <None Include="VertexShader.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Datagenerator_FCN8.cpp" />
     <ClCompile Include="image_loader.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="position_estimation.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="utils.cpp" />

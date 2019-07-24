@@ -98,7 +98,7 @@
     <ClCompile Include="utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="position_estimation.cpp">
+    <ClCompile Include="Datagenerator_FCN8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
