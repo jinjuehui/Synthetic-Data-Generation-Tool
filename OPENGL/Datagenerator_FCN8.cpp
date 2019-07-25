@@ -8,6 +8,7 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "stb_image.h"
+#include "Camera.h"
 #include <fstream>
 #include <map>
 #include <string>
@@ -20,9 +21,9 @@ namespace fs = std::filesystem;
 #define LOAD_DONAS  "mesh/distractions/torus.stl"//"mesh/distractions/donas.stl"
 #define LOAD_SPHERE "mesh/distractions/sphere.stl"
 #define BACK_GROUND_IMAGE_PATH "D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages"
-#define JSON_LABEL "D:/data/human_error/640x480/test_real_label_error/label/.json"
-#define SAVE_IMAGE_PATH "D:/data/human_error/640x480/test_real_label_error/image/.jpg"  //D:/data/segmentation/training_data/.jpg
-#define MASK_DATA_PATH "D:/data/human_error/640x480/test_real_label_error/mask_data/.jpg"
+#define JSON_LABEL "D:/data/human_error/960x720/test_real_label_error/label/.json"
+#define SAVE_IMAGE_PATH "D:/data/human_error/960x720/test_real_label_error/image/.jpg"  //D:/data/segmentation/training_data/.jpg
+#define MASK_DATA_PATH "D:/data/human_error/960x720/test_real_label_error/mask_data/.jpg"
 #define ROTATE_CAMERA false
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define USE_SIMPLE_LIGHTNING_MODEL false
@@ -30,8 +31,8 @@ bool USE_BACKGROUND_IMAGE = true;
 bool STATIC_CAMERA_VIEW = true; //set to true,camera won't moved by keybords input
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
-const unsigned int SCR_WIDTH = 640;
-const unsigned int SCR_HEIGHT = 480;
+const unsigned int SCR_WIDTH = 960;
+const unsigned int SCR_HEIGHT = 720;
 using json = nlohmann::json;
 std::string const path = LOAD_MODEL;
 glm::mat4 back_position;
@@ -248,8 +249,15 @@ void generate_json_label(std::string json_path, int number, glm::mat4 object_mod
 	float pose_array[4][4], quaternion[4];
 	glm::quat quaternion_original;
 	std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
+	std::cout << "object center position: " << projected_point[0] << " " << projected_point[1] << " " <<projected_point[2] << std::endl;
 	glm::mat4 camera_transpose = glm::transpose(camera);
-	glm::mat4 pose = camera_transpose * object_model;
+	glm::mat4 pose = glm::transpose(camera * object_model);
+	std::cout << "pose" << std::endl;
+	std::cout << "	" << pose[0][0] << "	" << pose[0][1] << "	" << pose[0][2] << "	" << pose[0][3] << "	" << std::endl;
+	std::cout << "	" << pose[1][0] << "	" << pose[1][1] << "	" << pose[1][2] << "	" << pose[1][3] << "	" << std::endl;
+	std::cout << "	" << pose[2][0] << "	" << pose[2][1] << "	" << pose[2][2] << "	" << pose[2][3] << "	" << std::endl;
+	std::cout << "	" << pose[3][0] << "	" << pose[3][1] << "	" << pose[3][2] << "	" << pose[3][3] << "	" << std::endl;
+
 	for (int u = 0; u < 3; u++)
 		for (int v = 0; v < 3; v++)
 		{
@@ -299,7 +307,7 @@ std::vector<float> distractor_diffuse = { 0.5f,0.5f, 0.5f,0.3f };
 std::vector<float> distractor_specular = { 0.1f,0.1f, 0.1f,0.3f };
 std::vector<float> distractor_shininess = { 0.1f, 16.0f };
 //3.object position
-std::vector<float> object_position_distribution = { 0, 0.0, 0.05, 0.15 };	//xy_mean, z_mean, xy_sigma, z_sigma
+std::vector<float> object_position_distribution = { 0, 0.2, 0.02, 0.07};	//xy_mean, z_mean, xy_sigma, z_sigma
 std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };						//minimum maximum
 std::vector<float> obstacles_scale_factor2 = {60.f, 80.f};
 
@@ -386,7 +394,17 @@ int main()
 	std::cout << "rendering..." << std::endl;
 	bool ground_truth = false;
 	std::default_random_engine random_number_generator;
-	
+	std::vector<float> camera_intrin = { 810.4968405, 0.0, 487.5509672, 0.0, 810.61326022, 354.6674888, 0.0, 0.0, 1.0 };
+	Camera real_camera(camera_intrin[0], camera_intrin[4], camera_intrin[2], camera_intrin[5], SCR_WIDTH, SCR_HEIGHT, 0.1, 10000);
+	real_camera.perspective_NDC[1][1] = -real_camera.perspective_NDC[1][1];
+	glm::mat3 mat, mat1, mat2;
+	mat1 = {{1,2,3}, {3,4,5},{1,2,3}};
+	mat2 = {{5,6,7}, {7,8,9},{3,4,5}};
+	mat = glm::transpose(glm::transpose(mat1)*glm::transpose(mat2));
+	std::cout << "test mat multiply" << std::endl;
+	std::cout << mat[0][0] << ", " << mat[0][1] << ", " << mat[0][2] << std::endl;
+	std::cout << mat[1][0] << ", " << mat[1][1] << ", " << mat[1][2] << std::endl;
+	std::cout << mat[2][0] << ", " << mat[2][1] << ", " << mat[2][2] << std::endl;
 	while (!glfwWindowShouldClose(window))  //start the game
 	{
 
@@ -436,9 +454,11 @@ int main()
 
 
 			std::cout << "light position check: " << light_positions[0].x<<" "<<light_positions[0].y<<" "<<light_positions[0].z << std::endl;
-			projection = glm::perspective(glm::radians(30.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 100.0f);
-			camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
+			//projection = glm::perspective(glm::radians(30.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
+			projection = glm::transpose(real_camera.perspective_NDC);
 
+			camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
+			
 			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 			GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 			//GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));//added for object (bounding box use line)
@@ -567,12 +587,12 @@ int main()
 
 			//glm::vec3 ObjectPosition = random_vec3(random_number_generator, -0.1, 0.1, 0.0, 0.0);
 			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, object_position_distribution[0], object_position_distribution[1], object_position_distribution[2], object_position_distribution[3]);                //object position 0.03, 0.02
-			//glm::vec3 ObjectPosition = glm::vec3(0.0f, 0.0f, 0.1f);
+			//glm::vec3 ObjectPosition = glm::vec3(0.1f, 0.050f, 0.1f);
 			std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
 			object_model = glm::translate(object_model, ObjectPosition);
 			//object_model = glm::translate(object_model, glm::vec3(0.1, 0.0, 0.25));
 			std::vector<float> angle = rotate_object_3axis_randomly(object_model, random_number_generator);
-			//glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(0), glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(0), glm::vec3(1.0f, 0.0f, 0.0f));
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
 			std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
 			float pose_array[4][4], quaternion[4];
@@ -603,13 +623,30 @@ int main()
 			//inverse_object_3axis_rotation(object_model, angle);
 			//object_model = glm::translate(object_model, -ObjectPosition); //after drawing the object traslate it back to origin
 
-			/*std::cout << "object position matrix:" << std::endl;
-			std::cout << "	" << object_model[0][0] << "	" << object_model[0][1] << "	" << object_model[0][2] << "	" << object_model[0][3] << "	" << std::endl;
-			std::cout << "	" << object_model[1][0] << "	" << object_model[1][1] << "	" << object_model[1][2] << "	" << object_model[1][3] << "	" << std::endl;
-			std::cout << "	" << object_model[2][0] << "	" << object_model[2][1] << "	" << object_model[2][2] << "	" << object_model[2][3] << "	" << std::endl;
-			std::cout << "	" << object_model[3][0] << "	" << object_model[3][1] << "	" << object_model[3][2] << "	" << object_model[3][3] << "	" << std::endl;
+			std::cout << "NDC matrix:" << std::endl;
+			std::cout << "	" << real_camera.perspective_NDC[0][0] << "	" << real_camera.perspective_NDC[0][1] << "	" << real_camera.perspective_NDC[0][2] << "	" << real_camera.perspective_NDC[0][3] << "	" << std::endl;
+			std::cout << "	" << real_camera.perspective_NDC[1][0] << "	" << real_camera.perspective_NDC[1][1] << "	" << real_camera.perspective_NDC[1][2] << "	" << real_camera.perspective_NDC[1][3] << "	" << std::endl;
+			std::cout << "	" << real_camera.perspective_NDC[2][0] << "	" << real_camera.perspective_NDC[2][1] << "	" << real_camera.perspective_NDC[2][2] << "	" << real_camera.perspective_NDC[2][3] << "	" << std::endl;
+			std::cout << "	" << real_camera.perspective_NDC[3][0] << "	" << real_camera.perspective_NDC[3][1] << "	" << real_camera.perspective_NDC[3][2] << "	" << real_camera.perspective_NDC[3][3] << "	" << std::endl;
 
-			std::cout <<"object: "<< object_model[0][0] << std::endl;*/
+			std::cout << "perspective intrinsics:" << std::endl;
+			std::cout << "	" << real_camera.perspective_matrix[0][0] << "	" << real_camera.perspective_matrix[0][1] << "	" << real_camera.perspective_matrix[0][2] << "	" << std::endl;
+			std::cout << "	" << real_camera.perspective_matrix[1][0] << "	" << real_camera.perspective_matrix[1][1] << "	" << real_camera.perspective_matrix[1][2] << "	" << std::endl;
+			std::cout << "	" << real_camera.perspective_matrix[2][0] << "	" << real_camera.perspective_matrix[2][1] << "	" << real_camera.perspective_matrix[2][2] << "	" << std::endl;
+			
+			std::cout << "ortho ortho:" << std::endl;
+			std::cout << "	" << real_camera.glortho[0][0] << "	" << real_camera.glortho[0][1] << "	" << real_camera.glortho[0][2] << "	" << real_camera.glortho[0][3] << "	" << std::endl;
+			std::cout << "	" << real_camera.glortho[1][0] << "	" << real_camera.glortho[1][1] << "	" << real_camera.glortho[1][2] << "	" << real_camera.glortho[1][3] << "	" << std::endl;
+			std::cout << "	" << real_camera.glortho[2][0] << "	" << real_camera.glortho[2][1] << "	" << real_camera.glortho[2][2] << "	" << real_camera.glortho[2][3] << "	" << std::endl;
+			std::cout << "	" << real_camera.glortho[3][0] << "	" << real_camera.glortho[3][1] << "	" << real_camera.glortho[3][2] << "	" << real_camera.glortho[3][3] << "	" << std::endl;
+
+			std::cout << "old projection:" << std::endl;
+			std::cout << "	" << projection[0][0] << "	" << projection[0][1] << "	" << projection[0][2] << "	" << projection[0][3] << "	" << std::endl;
+			std::cout << "	" << projection[1][0] << "	" << projection[1][1] << "	" << projection[1][2] << "	" << projection[1][3] << "	" << std::endl;
+			std::cout << "	" << projection[2][0] << "	" << projection[2][1] << "	" << projection[2][2] << "	" << real_camera.perspective_matrix[2][3] << "	" << std::endl;
+			std::cout << "	" << real_camera.perspective_matrix[3][0] << "	" << real_camera.perspective_matrix[3][1] << "	" << real_camera.perspective_matrix[3][2] << "	" << real_camera.perspective_matrix[3][3] << "	" << std::endl;
+
+			//std::cout <<"object: "<< object_model[0][0] << std::endl;
 
 			//////////////////////using bounding box//////////////////////////////////////////////////////
 
@@ -735,7 +772,6 @@ int main()
 				SphereObject.Draw(Segmentation);//obstacle
 			}
 			std::string json_path = JSON_LABEL;
-			generate_json_label(json_path, i, object_model, camera, projection, boundingbox.bb);
 			///////////////////////////////////////semantic segmentation///////////////////
 			//Segmentation.use();
 			//Segmentation.setMatrix4fv("view", camera);
@@ -753,6 +789,7 @@ int main()
 			}
 			picture.insert(picture.find_last_of('/')+1, number);
 			std::cout << picture << std::endl;
+			generate_json_label(json_path, i, object_model, camera, projection, boundingbox.bb);
 			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 			GLCall(glfwSwapBuffers(window));

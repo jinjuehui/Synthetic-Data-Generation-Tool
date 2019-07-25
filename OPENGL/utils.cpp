@@ -285,6 +285,7 @@ std::vector<float> projection_single_point_on_creen(glm::vec3 point, glm::mat4 m
 	std::vector<float> coordinate;
 	glm::vec4 projected_point;
 	projected_point = projection * camera* model * glm::vec4(point,1.0f);
+	std::cout << projected_point[0]<<" " << projected_point[1]<<" "<<projected_point[2]<<" "<<projected_point[3]<<std::endl;
 	glm::vec4 camera_coordinate = camera * model*glm::vec4(point, 1.0f);
 	coordinate.push_back((projected_point[0] / projected_point[3]+1)/2);
 	coordinate.push_back((1-projected_point[1] / projected_point[3])/2);

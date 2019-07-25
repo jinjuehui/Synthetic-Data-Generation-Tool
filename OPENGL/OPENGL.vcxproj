@@ -150,6 +150,7 @@
     <None Include="VertexShader.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Datagenerator_FCN8.cpp" />
     <ClCompile Include="image_loader.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Renderer.h" />

@@ -27,7 +27,7 @@ using json = nlohmann::json;
 struct CameraOrientation
 {
 	glm::vec3 camera_pose = glm::vec3{ 0.0f,0.0f,0.5f };//{ 0.0f, 10.0f, 20.0f };
-	glm::vec3 camera_front = glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose;//the target camera look at - camera position
+	glm::vec3 camera_front = glm::normalize(glm::vec3{ 0.0f,0.0f,0.0f }-camera_pose);//the target camera look at - camera position
 	glm::vec3 camera_up = glm::vec3{ 0.0f,1.0f,0.0f };
 	
 };
