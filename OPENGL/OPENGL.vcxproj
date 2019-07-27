@@ -21,33 +21,33 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{95C14032-75F1-4ADB-9B96-B483AC9C8E19}</ProjectGuid>
     <RootNamespace>OPENGL</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>DataGeneration</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -75,13 +75,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\include;$(SolutionDir)Dependencies\DevIL\include;$(SolutionDir)Dependencies\freeimage\;$(SolutionDir)Dependencies\Json\include;$(SolutionDir)Dependencies\freeglut\freeglut\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\include;$(SolutionDir)Dependencies\DevIL\include;$(SolutionDir)Dependencies\freeimage\;$(SolutionDir)Dependencies\Json\include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\freeglut\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>-lGLU %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2015;$(SolutionDir)Dependencies\GLEW\lib\Release\Win32;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\lib\Debug;$(SolutionDir)Dependencies\DevIL\lib\x86\Release;$(SolutionDir)Dependencies\freeimage\;$(SolutionDir)Dependencies\freeglut\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2015;$(SolutionDir)Dependencies\GLEW\lib\Release\Win32;$(SolutionDir)Dependencies\linmath;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\ASSIMP\lib\Debug;$(SolutionDir)Dependencies\DevIL\lib\x86\Release;$(SolutionDir)Dependencies\freeimage\;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;glew32s.lib;User32.lib;Gdi32.lib;Shell32.lib;DevIL.lib;ILU.lib;ILUT.lib;FreeImage.lib;freeglut.lib</AdditionalDependencies>
       <AdditionalOptions>-lGLU %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -91,11 +91,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/GLFW/include;$(SolutionDir)Dependencies/GLEW/include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\freeimage;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\glm;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\ASSIMP\include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\DevIL\include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\Json\include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\linmath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/GLFW/include;$(SolutionDir)Dependencies/GLEW/include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\freeimage;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\glm;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\ASSIMP\include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\DevIL\include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\Json\include;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\linmath;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\GLFW\lib-vc2015;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\GLEW\lib\Release\Win32;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\DevIL\lib\x86\Release;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\freeimage;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\ASSIMP\lib\Debug;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\glm;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\linmath;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;glew32s.lib;User32.lib;Gdi32.lib;Shell32.lib;DevIL.lib;ILU.lib;ILUT.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\GLFW\lib-vc2015;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\GLEW\lib\Release\Win32;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\DevIL\lib\x86\Release;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\freeimage;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\ASSIMP\lib\Debug;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\glm;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\linmath;C:\Users\uteln\source\repos\opengl_tutorial\Dependencies\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;glew32s.lib;User32.lib;Gdi32.lib;Shell32.lib;DevIL.lib;ILU.lib;ILUT.lib;FreeImage.lib;freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

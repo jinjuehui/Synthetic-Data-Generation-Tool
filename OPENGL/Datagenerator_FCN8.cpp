@@ -789,13 +789,13 @@ int main()
 			}
 			picture.insert(picture.find_last_of('/')+1, number);
 			std::cout << picture << std::endl;
-			generate_json_label(json_path, i, object_model, camera, projection, boundingbox.bb);
-			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+			//generate_json_label(json_path, i, object_model, camera, projection, boundingbox.bb);
+			//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
 
-			//std::cin.get();
+			std::cin.get();
 
 		}
 
