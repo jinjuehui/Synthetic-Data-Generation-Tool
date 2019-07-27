@@ -16,7 +16,7 @@
 namespace fs = std::filesystem;
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
 #define LOAD_MODEL "mesh/obj_05.stl"//"mesh/obj_05_re.stl"//"mesh/obj_05.stl"																								#change model type
-#define LOAD_CYLINDER "mesh/distractions/Cylinder.obj"
+#define LOAD_CYLINDER "mesh/distractions/cylinder.obj"
 #define LOAD_CONE "mesh/distractions/cone.stl"
 #define LOAD_DONAS  "mesh/distractions/torus.stl"//"mesh/distractions/donas.stl"
 #define LOAD_SPHERE "mesh/distractions/sphere.stl"
@@ -592,7 +592,9 @@ int main()
 			object_model = glm::translate(object_model, ObjectPosition);
 			//object_model = glm::translate(object_model, glm::vec3(0.1, 0.0, 0.25));
 			std::vector<float> angle = rotate_object_3axis_randomly(object_model, random_number_generator);
-			glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(0), glm::vec3(1.0f, 0.0f, 0.0f));
+			std::cout << "object model:" << std::endl;
+			
+			//glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(0), glm::vec3(1.0f, 0.0f, 0.0f));
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
 			std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
 			float pose_array[4][4], quaternion[4];

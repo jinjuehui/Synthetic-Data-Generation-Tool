@@ -176,6 +176,12 @@ std::vector<float> rotate_object_3axis_randomly(glm::mat4 &model, std::default_r
 	model = glm::rotate(model, random_angle[0], glm::vec3(1.0f, 0.0f, 0.0f));
 	model = glm::rotate(model, random_angle[1], glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::rotate(model, random_angle[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	/*
+	std::cout << "	" << model[0][0] << "	" << model[0][1] << "	" << model[0][2] << "	" << model[0][3] << "	" << std::endl;
+	std::cout << "	" << model[1][0] << "	" << model[1][1] << "	" << model[1][2] << "	" << model[1][3] << "	" << std::endl;
+	std::cout << "	" << model[2][0] << "	" << model[2][1] << "	" << model[2][2] << "	" << model[2][3] << "	" << std::endl;
+	std::cout << "	" << model[3][0] << "	" << model[3][1] << "	" << model[3][2] << "	" << model[3][3] << "	" << std::endl;
+	*/
 
 	return random_angle;
 }
