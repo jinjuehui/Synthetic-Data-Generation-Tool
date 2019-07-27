@@ -3,6 +3,7 @@
 #include<GL/GL.h>
 #include<GL/GLU.h>
 #include<GL/glut.h>
+#include<GL/glut.h>
 #include<glm.hpp>
 #include<gtc/matrix_transform.hpp>
 #include<gtc/type_ptr.hpp>

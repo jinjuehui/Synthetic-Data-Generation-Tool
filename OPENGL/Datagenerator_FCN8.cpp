@@ -592,7 +592,9 @@ int main()
 			object_model = glm::translate(object_model, ObjectPosition);
 			//object_model = glm::translate(object_model, glm::vec3(0.1, 0.0, 0.25));
 			std::vector<float> angle = rotate_object_3axis_randomly(object_model, random_number_generator);
-			glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(0), glm::vec3(1.0f, 0.0f, 0.0f));
+			std::cout << "object model:" << std::endl;
+			
+			//glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(0), glm::vec3(1.0f, 0.0f, 0.0f));
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
 			std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
 			float pose_array[4][4], quaternion[4];
