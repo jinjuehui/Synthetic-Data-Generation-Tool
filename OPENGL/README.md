@@ -23,6 +23,7 @@
 	FreeImg.dll<br />
 	ILU.dll<br />
 	ILUT.dll<br />
+8. copy mesh folder to project root
 
 
 

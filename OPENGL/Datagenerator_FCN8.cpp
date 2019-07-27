@@ -16,7 +16,7 @@
 namespace fs = std::filesystem;
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
 #define LOAD_MODEL "mesh/obj_05.stl"//"mesh/obj_05_re.stl"//"mesh/obj_05.stl"																								#change model type
-#define LOAD_CYLINDER "mesh/distractions/Cylinder.obj"
+#define LOAD_CYLINDER "mesh/distractions/cylinder.obj"
 #define LOAD_CONE "mesh/distractions/cone.stl"
 #define LOAD_DONAS  "mesh/distractions/torus.stl"//"mesh/distractions/donas.stl"
 #define LOAD_SPHERE "mesh/distractions/sphere.stl"
