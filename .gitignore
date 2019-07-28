@@ -242,4 +242,4 @@ ModelManifest.xml
 .fake/
 /OPENGL/mesh
 /OPENGL/vergleichen.cpp
-*.png
+#*.png
