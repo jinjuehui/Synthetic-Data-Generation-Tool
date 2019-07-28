@@ -653,7 +653,7 @@ int main()
 
 			//////////////////////using bounding box//////////////////////////////////////////////////////
 
-			boundingbox.fill_bb_glm_vec3(bounding_box_vertex_8point);
+			//boundingbox.fill_bb_glm_vec3(bounding_box_vertex_8point);
 			//boundingbox.generate_bounding_box_labels_3d(SCR_WIDTH, SCR_HEIGHT, P, Y, R, projection, camera, object_model, jsonfile, json_path);
 			//std::cout << "labels generated" << std::endl;
 			//3d Bounding Box
@@ -664,7 +664,7 @@ int main()
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 			//BB_3d.Draw("draw_elements");
 			
-			boundingbox.generate_bounding_box_3d_2d(projection, camera, object_model, int(SCR_WIDTH), int(SCR_HEIGHT));
+			//boundingbox.generate_bounding_box_3d_2d(projection, camera, object_model, int(SCR_WIDTH), int(SCR_HEIGHT));
 
 			float bounding_box_vertex_4point[] = {
 				boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
