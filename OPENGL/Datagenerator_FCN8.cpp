@@ -16,7 +16,7 @@
 namespace fs = std::filesystem;
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
 #define LOAD_MODEL "mesh/obj_05.stl"//"mesh/obj_05_re.stl"//"mesh/obj_05.stl"																								#change model type
-#define LOAD_CYLINDER "mesh/distractions/cylinder.obj"
+#define LOAD_CYLINDER "mesh/distractions/cylinder.stl"
 #define LOAD_CONE "mesh/distractions/cone.stl"
 #define LOAD_DONAS  "mesh/distractions/torus.stl"//"mesh/distractions/donas.stl"
 #define LOAD_SPHERE "mesh/distractions/sphere.stl"
@@ -272,6 +272,7 @@ void generate_json_label(std::string json_path, int number, glm::mat4 object_mod
 	labels["Quaternion"] = quaternion;
 	labels["BoundingBox"] = bb_2d;
 	jsonfile << labels;
+	std::cout << "bounding_box, x_min: " << bb_2d[0] << "y_min: " << bb_2d[1] << "x_max: " << bb_2d[2] << "y_max: " << bb_2d[3] << std::endl;
 	std::cout << "quaternion:" << std::endl;
 	std::cout << "	" << quaternion[0] << "	" << quaternion[1] << "	" << quaternion[2] << "	" << quaternion[3] << "	" << std::endl;
 	std::cout << "centroid:" << std::endl;
@@ -321,7 +322,7 @@ int main()
 {
 	GLFWwindow* window;
 	window = initialize_window(SCR_WIDTH, SCR_HEIGHT, "Rendering...");
-	glfwSetWindowPos(window, 1000, 1000);
+	glfwSetWindowPos(window, 2000, 100);
 
 	//===============move into vertex classes to parse layout automatically====================
 	std::map<std::string, int> AttribPointer_cube, AttribPointer_Background;
@@ -418,7 +419,7 @@ int main()
 
 		float light_strength = 1.f;
 		random_number_generator.seed(8);   // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
-		for (int i = 30000; i < 30500; i++) // 80000 data, i=60000, i<800000
+		for (int i = 30000; i < 31000; i++) // 80000 data, i=60000, i<800000
 		{
 			std::cout << "iterations: " << i << std::endl;
 			std::cout << "random test: " << random_float(random_number_generator, 1.0f,5.0f) << std::endl;
@@ -662,6 +663,8 @@ int main()
 			Boundingbox_8p_shader.setMatrix4fv("projection", projection);
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 			//BB_3d.Draw("draw_elements");
+			
+			boundingbox.generate_bounding_box_3d_2d(projection, camera, object_model, int(SCR_WIDTH), int(SCR_HEIGHT));
 
 			float bounding_box_vertex_4point[] = {
 				boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
@@ -791,13 +794,13 @@ int main()
 			}
 			picture.insert(picture.find_last_of('/')+1, number);
 			std::cout << picture << std::endl;
-			//generate_json_label(json_path, i, object_model, camera, projection, boundingbox.bb);
-			//screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
+			generate_json_label(json_path, i, object_model, camera, projection, boundingbox.bb);
+			screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
 
-			std::cin.get();
+			//std::cin.get();
 
 		}
 
