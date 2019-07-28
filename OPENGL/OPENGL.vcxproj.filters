@@ -99,10 +99,10 @@
     <ClCompile Include="utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Datagenerator_FCN8.cpp">
+    <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
+    <ClCompile Include="Datagenerator_FCN8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
