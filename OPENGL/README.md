@@ -33,6 +33,7 @@
     z -> out of image plane
 
 ## Data Generation for Detection and Segmentation Comparison
+file name: Experiment1_dection_or_segmentation.cpp
 1. generated image size: 960x720
 2. image data with whole randomization
 3. mask data with occlusion (* full mask data **not** generated)
