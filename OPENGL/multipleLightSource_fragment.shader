@@ -51,10 +51,11 @@ uniform vec3 viewPos;
 uniform Material material;
 
 
-#define NR_POINT_LIGHTS 4
+#define MAX_LIGHT_NUMBER 10
+uniform int point_light_num;
 
 uniform DirLight directionlight;
-uniform PointLight pointlights[NR_POINT_LIGHTS];
+uniform PointLight pointlights[MAX_LIGHT_NUMBER];
 uniform SpotLight spotlight;
 
 
@@ -70,7 +71,7 @@ void main()
 	vec3 viewDir = normalize(viewPos - fragPosition);
 	vec3 result = CalcDirLight(directionlight, norm, viewDir);
 
-	for (int i=0; i<NR_POINT_LIGHTS; i++)
+	for (int i=0; i<point_light_num; i++)
 	{
 		result += CalcPointLight(pointlights[i], norm, fragPosition, viewDir);
 	}
