@@ -25,10 +25,11 @@ namespace fs = std::filesystem;
 #define SAVE_IMAGE_PATH "D:/data/segmentation/training_data/.jpg"  //D:/data/segmentation/training_data/.jpg
 #define MASK_DATA_PATH "D:/data/segmentation/mask_data/.jpg"
 #define FULL_MASK "D:/data/segmentation/full_mask/.jpg"
-#define ROTATE_CAMERA false
-#define ENABLE_RANDOM_LIGHT_SOURCE_POSITION false
 #define USE_SIMPLE_LIGHTNING_MODEL false
-#define ENABLE_FOREGROUND_OBJECT false
+#define ROTATE_CAMERA false
+#define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
+#define ENABLE_FOREGROUND_OBJECT true
+#define SINGLE_LIGHT false
 bool USE_BACKGROUND_IMAGE = true;
 bool STATIC_CAMERA_VIEW = true; //set to true,camera won't moved by keybords input
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
@@ -289,20 +290,21 @@ void generate_json_label(std::string json_path, int number, glm::mat4 object_mod
 //1. lighting conditions
 //Randomization factors
 //1. lighting conditions, no spot light now
+int light_num = 1;
 glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
-std::vector<float> light_number_range = { 1.0f, 5.0f };						//minimum>=2	maximum
-std::vector<float> light_position_step = { 2000, 0.5 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
-std::vector<float> point_light_ambient_color = { 0.1f,0.1f,0.1f,0.04f };//{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
+std::vector<float> light_number_range = { 1.0f, 10.0f };					//minimum>=2	maximum
+std::vector<float> light_position_step = { 1, 2, 3 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
+std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.1f };  //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
 std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.01f };	//
 std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.01f };
 //std::vector<float> point_light_position = { 1.0f , 1.0f, 5.0f };			//start position, step size, end position (meter)
-std::vector<float> direction_light_direction = { -0.2f,-1.0f,-0.3f, 0.5f }; //
+std::vector<float> direction_light_direction = { -0.2f,-1.0f,-0.3f, 0.5f }; 
 std::vector<float> direction_light_ambient = { 0.15f,0.15f,0.15f,0.01f };
 std::vector<float> direction_light_diffuse = { 0.4f,0.4f,0.4f,0.01f };
 std::vector<float> direction_light_specular = { 0.5f,0.5,0.5f,0.01f };
 //2. object material	
 //std::vector<float> train_color = { 0.5f,0.5f, 0.5f, 0.01f };
-std::vector<float> train_ambient = { 0.2,0.2,0.2, 0.01 };//{ 0.1f,0.1f, 0.1, 0.01f };
+std::vector<float> train_ambient = { 0.1,0.1,0.1, 0.01 };//{ 0.1f,0.1f, 0.1, 0.01f };
 std::vector<float> train_diffuse = { 0.55f,0.55f, 0.55,0.01f };
 std::vector<float> train_specular = { 0.2f,0.2f, 0.2f, 0.01f };
 std::vector<float> train_shininess = { 0.1f, 16.0f };						//minimum, maximum
@@ -313,7 +315,7 @@ std::vector<float> distractor_specular = { 0.1f,0.1f, 0.1f,0.3f };
 std::vector<float> distractor_shininess = { 0.1f, 16.0f };
 //3.object position
 std::vector<float> object_position_distribution = { 0, 0.2, 0.02, 0.07};	//xy_mean, z_mean, xy_sigma, z_sigma
-std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };						//minimum maximum
+std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };				    //minimum maximum
 std::vector<float> obstacles_scale_factor2 = {60.f, 80.f};
 
 std::vector<float> cube_position = { 0.f, 3.14f, 0.0, 0.4, 0.01, 0.1 };		//angle min,max, traslation xy_mean, z_mean, xy_sigma, z_sigma	
@@ -397,7 +399,7 @@ int main()
 
 	GLCall(glEnable(GL_DEPTH_TEST));
 	std::cout << "rendering..." << std::endl;
-	bool ground_truth = false;
+	bool ground_truth = true;
 	bool full_mask = false;
 	std::default_random_engine random_number_generator;
 	//std::vector<float> camera_intrin = { 810.4968405, 0.0, 487.5509672, 0.0, 810.61326022, 354.6674888, 0.0, 0.0, 1.0 };
@@ -449,24 +451,12 @@ int main()
 				AttribPointer_cube);
 			//std::cout << "create Background buffers and layout!" << std::endl;
 			std::vector<glm::vec3> light_positions;
-			int light_num = int(random_float(random_number_generator, light_number_range[0], light_number_range[1]));
-			//int light_num = 1;
-
-			//std::cout << "light number: "<<light_num << std::endl;
-			//if(random_light_positions)
-			//{
-			//	for (int n = 0; n < light_num; n++)
-			//	{
-			//		light_positions.push_back(random_vec3(random_number_generator, -1.0, 1.0, -1.0, 1.0));
-			//	}
-			//}
-			//else
-			//{
-			//	for (int n = 0; n < light_num; n++)
-			//	{
-			//		light_positions.push_back({ 10.0, 10.0, 10.0 });
-			//	}
-			//}
+			if (!SINGLE_LIGHT)
+			{
+				light_num = int(random_float(random_number_generator, light_number_range[0], light_number_range[1]));
+			}
+			else
+				light_num = 1;
 
 			//std::cout << "light position check: " << light_positions[0].x<<" "<<light_positions[0].y<<" "<<light_positions[0].z << std::endl;
 			//projection = glm::perspective(glm::radians(30.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
@@ -544,14 +534,14 @@ int main()
 			multiple_lightning_shader.setVector3f("directionlight.diffuse", dirLight.diffuse);
 			multiple_lightning_shader.setVector3f("directionlight.specular", dirLight.specular);
 						
-			if ((i + 1) % int(light_position_step[0]) == 0)
-				light_strength += light_position_step[1];
+			//if ((i + 1) % int(light_position_step[0]) == 0)
+			//	light_strength += light_position_step[1];
 			for (int n = 0; n < light_num; n++)
 			{
 				
 				if (ENABLE_RANDOM_LIGHT_SOURCE_POSITION)
 				{
-					light_positions.push_back(random_vec3(random_number_generator, -light_strength, light_strength, -light_strength, light_strength));						// -15, 15, -15, 15									//randomize light position
+					light_positions.push_back(random_vec3(random_number_generator, -light_position_step[0], light_position_step[0], -light_position_step[0], light_position_step[0]));						// -15, 15, -15, 15									//randomize light position
 				}
 				else
 				{

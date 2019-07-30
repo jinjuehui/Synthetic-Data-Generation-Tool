@@ -55,4 +55,47 @@ file name: Experiment1_dection_or_segmentation.cpp
 
 ```
 
+## Experiment Configurations:
+    1. no random
+    not really no random, basic randomization with background, position and pose
+    
+    
+```c++
+#define ENABLE_RANDOM_LIGHT_SOURCE_POSITION false
+#define ENABLE_FOREGROUND_OBJECT false
+#define SINGLE_LIGHT true
+
+int light_num = 1;
+glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
+std::vector<float> light_number_range = { 1.0f, 5.0f };						    //minimum>=2	maximum
+std::vector<float> light_position_step = { 2000, 0.5 };						    //step_number, step_size, x,y,z min=-step_size and max=step_size
+std::vector<float> point_light_ambient_color = { 0.1f,0.1f,0.1f,0.04f };     //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
+std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.01f };	    //
+std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.01f };
+//std::vector<float> point_light_position = { 1.0f , 1.0f, 5.0f };			    //start position, step size, end position (meter)
+std::vector<float> direction_light_direction = { -0.2f,-1.0f,-0.3f, 0.5f };     //
+std::vector<float> direction_light_ambient = { 0.15f,0.15f,0.15f,0.01f };
+std::vector<float> direction_light_diffuse = { 0.4f,0.4f,0.4f,0.01f };
+std::vector<float> direction_light_specular = { 0.5f,0.5,0.5f,0.01f };
+//2. object material	
+//std::vector<float> train_color = { 0.5f,0.5f, 0.5f, 0.01f };
+std::vector<float> train_ambient = { 0.2,0.2,0.2, 0.01 };                      //{ 0.1f,0.1f, 0.1, 0.01f };
+std::vector<float> train_diffuse = { 0.55f,0.55f, 0.55,0.01f };
+std::vector<float> train_specular = { 0.2f,0.2f, 0.2f, 0.01f };
+std::vector<float> train_shininess = { 0.1f, 16.0f };						       //minimum, maximum
+std::vector<float> distractor_color = { 0.5f,0.5f, 0.5f,0.8f };
+std::vector<float> distractor_ambient = { 0.5f,0.5f, 0.5f,0.3f };
+std::vector<float> distractor_diffuse = { 0.5f,0.5f, 0.5f,0.3f };
+std::vector<float> distractor_specular = { 0.1f,0.1f, 0.1f,0.3f };
+std::vector<float> distractor_shininess = { 0.1f, 16.0f };
+//3.object position
+std::vector<float> object_position_distribution = { 0, 0.2, 0.02, 0.07};	      //xy_mean, z_mean, xy_sigma, z_sigma
+std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };						   //minimum maximum
+std::vector<float> obstacles_scale_factor2 = {60.f, 80.f};
+
+std::vector<float> cube_position = { 0.f, 3.14f, 0.0, 0.4, 0.01, 0.1 };		   //angle min,max, traslation xy_mean, z_mean, xy_sigma, z_sigma	
+std::vector<float> cone_position = { 0.f, 7.f, 0.0, 0.4, 0.01, 0.1 };
+std::vector<float> sphere_position = { 0.f, 3.65f, 0.0, 0.4, 0.01, 0.1 };
+std::vector<float> donas_position = { 0.f, 2.48f, 0.0, 0.4, 0.01, 0.1 };
+```
       
