@@ -98,4 +98,11 @@ std::vector<float> cone_position = { 0.f, 7.f, 0.0, 0.4, 0.01, 0.1 };
 std::vector<float> sphere_position = { 0.f, 3.65f, 0.0, 0.4, 0.01, 0.1 };
 std::vector<float> donas_position = { 0.f, 2.48f, 0.0, 0.4, 0.01, 0.1 };
 ```
-      
+| Experiment|bg|fg|light_number|light_position(m) |pl_ambient(mean, sigma)|pl_diffuse(mean, sigma)|pl_specular(mean, sigma)|dr_direction(mean(x,y,z), sigma)|dr_ambient(mean, sigma)|dr_diffuse(mean, sigma)|dr_specular(mean, sigma)|ma_ambient(mean, sigma)|ma_diffuse(mean, sigma)|ma_speclar(mean, sigma)|ma_shiness(min, max)|_
+|----------|:-------------:|------:|
+| number |image|none|  1 | x=0.4,y=0.4,z=0.4 |0.1, 0.04|0.8, 0.01| 1.0, 0.01|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.01|0.4, 0.01|0.5, 0.01|0.2, 0.01|0.55,0.01|0.2, 0.01| 0.1, 16.0 |
+| number,position |image|none|    1,10   |  -1.0~1.0 |0.1, 0.04|0.8, 0.1| 1.0, 0.01|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.01|0.4, 0.01|0.5, 0.01|0.1, 0.01|0.55,0.01|0.2, 0.01| 0.f, 16.0| 
+| number,position,color |image|none| 1-10 |    -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1|0.5, 0.1|0.1, 0.01|0.55,0.01|0.2, 0.01| 0.1, 16.0|
+| number,position,color,material |image|none| 1-10 | -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1| 0.5, 0.1|0.1, 0.2|0.55,0.1|0.2, 0.1| 0.1, 16.0 |
+| number,position,color,material, background |color|none| 1-10 | -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1| 0.5, 0.1|0.1, 0.2|0.55,0.1|0.2, 0.1| 0.1, 16.0 |
+| number,position,color,material, background, foreground |image|cube, cone, torus, sphere| 1-10 | -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1| 0.5, 0.1|0.1, 0.2|0.55,0.1|0.2, 0.1| 0.1, 16.0 |

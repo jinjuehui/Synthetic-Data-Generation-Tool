@@ -27,9 +27,11 @@ namespace fs = std::filesystem;
 #define FULL_MASK "D:/data/segmentation/full_mask/.jpg"
 #define USE_SIMPLE_LIGHTNING_MODEL false
 #define ROTATE_CAMERA false
+
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
-#define ENABLE_FOREGROUND_OBJECT true
+#define ENABLE_FOREGROUND_OBJECT false
 #define SINGLE_LIGHT false
+#define USE_COLOR_BACKGROUND false
 bool USE_BACKGROUND_IMAGE = true;
 bool STATIC_CAMERA_VIEW = true; //set to true,camera won't moved by keybords input
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
@@ -294,9 +296,9 @@ int light_num = 1;
 glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
 std::vector<float> light_number_range = { 1.0f, 10.0f };					//minimum>=2	maximum
 std::vector<float> light_position_step = { 1, 2, 3 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
-std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.1f };  //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
-std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.01f };	//
-std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.01f };
+std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.4f };  //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
+std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.1f };	//
+std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.1f };
 //std::vector<float> point_light_position = { 1.0f , 1.0f, 5.0f };			//start position, step size, end position (meter)
 std::vector<float> direction_light_direction = { -0.2f,-1.0f,-0.3f, 0.5f }; 
 std::vector<float> direction_light_ambient = { 0.15f,0.15f,0.15f,0.01f };
@@ -399,7 +401,7 @@ int main()
 
 	GLCall(glEnable(GL_DEPTH_TEST));
 	std::cout << "rendering..." << std::endl;
-	bool ground_truth = true;
+	bool ground_truth = false;
 	bool full_mask = false;
 	std::default_random_engine random_number_generator;
 	//std::vector<float> camera_intrin = { 810.4968405, 0.0, 487.5509672, 0.0, 810.61326022, 354.6674888, 0.0, 0.0, 1.0 };
@@ -463,9 +465,20 @@ int main()
 			projection = glm::transpose(real_camera.perspective_NDC);
 
 			camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
+			std::vector<float> gl_random_color = { random_float(random_number_generator, 0, 1),random_float(random_number_generator, 0, 1),random_float(random_number_generator, 0, 1)};
+			if (USE_COLOR_BACKGROUND&&!ground_truth)
+			{
+				//std::cout << "random_backgournd color" << gl_random_color[0]<<" "<< gl_random_color[1] <<" "<<gl_random_color[2]<< std::endl;
+				GLCall(glClearColor(gl_random_color[0], gl_random_color[1], gl_random_color[2], 1.0f));
+			}
+			else if (!USE_COLOR_BACKGROUND || ground_truth)
+			{
+				std::cout << "black background color" << std::endl;
+				GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+			}
+				GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+
 			
-			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
-			GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 			//GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));//added for object (bounding box use line)
 
 			pointLight.ambient = random_v3_norm(random_number_generator,point_light_ambient_color[0], point_light_ambient_color[1], point_light_ambient_color[2], point_light_ambient_color[3]);																			//randomize lightning color
