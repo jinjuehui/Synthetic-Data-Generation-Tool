@@ -106,3 +106,4 @@ std::vector<float> donas_position = { 0.f, 2.48f, 0.0, 0.4, 0.01, 0.1 };
 | number,position,color,material |image|none| 1-10 | -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1| 0.5, 0.1|0.1, 0.2|0.55,0.1|0.2, 0.1| 0.1, 16.0 |
 | number,position,color,material, background |color|none| 1-10 | -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1| 0.5, 0.1|0.1, 0.2|0.55,0.1|0.2, 0.1| 0.1, 16.0 |
 | number,position,color,material, background, foreground |image|cube, cone, torus, sphere| 1-10 | -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1| 0.5, 0.1|0.1, 0.2|0.55,0.1|0.2, 0.1| 0.1, 16.0 |
+| number,position,color,material, background, foreground2 |image|cube, cone, torus, sphere| 1-10 | -1.0~1.0 |0.1, 0.5|0.8, 0.5| 1.0, 0.5|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.5|0.4, 0.5| 0.5, 0.5|0.1, 0.5|0.55,0.5|0.2, 0.5| 0.1, 16.0 |

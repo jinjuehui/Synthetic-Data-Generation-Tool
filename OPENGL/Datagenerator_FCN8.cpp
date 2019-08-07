@@ -29,7 +29,7 @@ namespace fs = std::filesystem;
 #define ROTATE_CAMERA false
 
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
-#define ENABLE_FOREGROUND_OBJECT false
+#define ENABLE_FOREGROUND_OBJECT true
 #define SINGLE_LIGHT false
 #define USE_COLOR_BACKGROUND false
 bool USE_BACKGROUND_IMAGE = true;
@@ -296,19 +296,19 @@ int light_num = 1;
 glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
 std::vector<float> light_number_range = { 1.0f, 10.0f };					//minimum>=2	maximum
 std::vector<float> light_position_step = { 1, 2, 3 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
-std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.4f };  //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
-std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.1f };	//
-std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.1f };
+std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.5f };  //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
+std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.5f };	//
+std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.5f };
 //std::vector<float> point_light_position = { 1.0f , 1.0f, 5.0f };			//start position, step size, end position (meter)
 std::vector<float> direction_light_direction = { -0.2f,-1.0f,-0.3f, 0.5f }; 
-std::vector<float> direction_light_ambient = { 0.15f,0.15f,0.15f,0.01f };
-std::vector<float> direction_light_diffuse = { 0.4f,0.4f,0.4f,0.01f };
-std::vector<float> direction_light_specular = { 0.5f,0.5,0.5f,0.01f };
+std::vector<float> direction_light_ambient = { 0.15f,0.15f,0.15f,0.5f };
+std::vector<float> direction_light_diffuse = { 0.4f,0.4f,0.4f,0.5f };
+std::vector<float> direction_light_specular = { 0.5f,0.5,0.5f,0.5f };
 //2. object material	
 //std::vector<float> train_color = { 0.5f,0.5f, 0.5f, 0.01f };
-std::vector<float> train_ambient = { 0.1,0.1,0.1, 0.01 };//{ 0.1f,0.1f, 0.1, 0.01f };
-std::vector<float> train_diffuse = { 0.55f,0.55f, 0.55,0.01f };
-std::vector<float> train_specular = { 0.2f,0.2f, 0.2f, 0.01f };
+std::vector<float> train_ambient = { 0.1,0.1,0.1, 0.5 };//{ 0.1f,0.1f, 0.1, 0.01f };
+std::vector<float> train_diffuse = { 0.55f,0.55f, 0.55,0.5f };
+std::vector<float> train_specular = { 0.2f,0.2f, 0.2f, 0.5f };
 std::vector<float> train_shininess = { 0.1f, 16.0f };						//minimum, maximum
 std::vector<float> distractor_color = { 0.5f,0.5f, 0.5f,0.8f };
 std::vector<float> distractor_ambient = { 0.5f,0.5f, 0.5f,0.3f };
@@ -401,7 +401,7 @@ int main()
 
 	GLCall(glEnable(GL_DEPTH_TEST));
 	std::cout << "rendering..." << std::endl;
-	bool ground_truth = false;
+	bool ground_truth = true;
 	bool full_mask = false;
 	std::default_random_engine random_number_generator;
 	//std::vector<float> camera_intrin = { 810.4968405, 0.0, 487.5509672, 0.0, 810.61326022, 354.6674888, 0.0, 0.0, 1.0 };
