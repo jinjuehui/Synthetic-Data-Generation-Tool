@@ -96,14 +96,31 @@ VertexBuffer::VertexBuffer(const void* data,
 VertexBuffer::~VertexBuffer()
 {
 	//std::cout << "destructor called!" << std::endl;
-	if(&VAO)
-	GLCall(glDeleteBuffers(1,&VAO));
-	if(&VBO)
-	GLCall(glDeleteBuffers(1, &VBO));
-	if(&EBO)
-	GLCall(glDeleteBuffers(1, &EBO));
+	if (&VAO)
+	{
+		GLCall(glDeleteBuffers(1, &VAO));
+		//std::cout << "vao called!" << std::endl;
+	}
+
+	if (&VBO)
+	{
+		GLCall(glDeleteBuffers(1, &VBO));
+		//std::cout << "vbo called!" << std::endl;
+
+	}
+	if (&EBO)
+	{
+		GLCall(glDeleteBuffers(1, &EBO));
+		//std::cout << "ebo called!" << std::endl;
+
+	}
 	if (&TEXTURE)
-	GLCall(glDeleteTextures(1, &TEXTURE));
+	{
+		GLCall(glDeleteTextures(1, &TEXTURE));
+		//std::cout << "texture called!" << std::endl;
+
+	}
+
 }
 
 void VertexBuffer::Bind(std::string key) const
@@ -147,7 +164,7 @@ void VertexBuffer::load_texture_image(GLenum target,
 	if (data) {
 		try
 		{
-
+			GLCall(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 			GLCall(glTexImage2D(target,	0,internalformat,width,height,border,format,GL_UNSIGNED_BYTE,data));
 			//.................texture target,mipmap level,legacy,format,and datatype,data
 			//GLCall(glGenerateMipmap(GL_TEXTURE_2D));

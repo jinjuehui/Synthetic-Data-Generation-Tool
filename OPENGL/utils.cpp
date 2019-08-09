@@ -255,7 +255,8 @@ GLFWwindow* initialize_window(int width, int height, const char* name)
 void screenshot_freeimage(const char* screenshotFile, int width, int height) {
 
 	// Make the BYTE array, factor of 3 because it's RBG.
-	BYTE* pixels = new BYTE[3 * width * height];
+	//BYTE* pixels = new BYTE[3 * width * height];
+	BYTE *pixels = (BYTE*)malloc(width * height * 3);
 
 	glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, pixels);
 
@@ -266,7 +267,8 @@ void screenshot_freeimage(const char* screenshotFile, int width, int height) {
 
 	// Free resources
 	FreeImage_Unload(image);
-	delete[] pixels;
+	//delete[] pixels;
+	free(pixels);
 }
 
 
@@ -291,7 +293,7 @@ std::vector<float> projection_single_point_on_creen(glm::vec3 point, glm::mat4 m
 	std::vector<float> coordinate;
 	glm::vec4 projected_point;
 	projected_point = projection * camera* model * glm::vec4(point,1.0f);
-	std::cout << projected_point[0]<<" " << projected_point[1]<<" "<<projected_point[2]<<" "<<projected_point[3]<<std::endl;
+	//std::cout << projected_point[0]<<" " << projected_point[1]<<" "<<projected_point[2]<<" "<<projected_point[3]<<std::endl;
 	glm::vec4 camera_coordinate = camera * model*glm::vec4(point, 1.0f);
 	coordinate.push_back((projected_point[0] / projected_point[3]+1)/2);
 	coordinate.push_back((1-projected_point[1] / projected_point[3])/2);
