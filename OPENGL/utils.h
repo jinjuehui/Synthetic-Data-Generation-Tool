@@ -194,6 +194,7 @@ std::vector<float> rotate_object_3axis_randomly(glm::mat4 &model, std::default_r
 std::vector<float> rotate_object_3axis_randomly(glm::mat4 &model, std::default_random_engine &generator);
 void inverse_object_3axis_rotation(glm::mat4 &model, std::vector<float> rotation_matrix);
 float random_float(std::default_random_engine &generator, float v_min, float v_max);
+float random_float(std::default_random_engine &generator, float mean, float sigma, int normal);
 glm::vec3 random_v3_norm(std::default_random_engine &generator, float a, float b, float c, float d);
 std::vector<float> projection_single_point_on_creen(glm::vec3 point, glm::mat4 model, glm::mat4 camera, glm::mat4 projection);
 CameraOrientation rotateCamera(int P, int Y, float distance);

@@ -105,7 +105,11 @@ float random_float(std::default_random_engine &generator, float v_min, float v_m
 	return distribution(generator);
 }
 
-
+float random_float(std::default_random_engine &generator, float mean, float sigma, int normal)
+{
+	std::normal_distribution<float> distribution(mean, sigma);
+	return distribution(generator);
+}
 
 
 //input: pitch and yaw angle, and the distance: TODO add roll angle in this function

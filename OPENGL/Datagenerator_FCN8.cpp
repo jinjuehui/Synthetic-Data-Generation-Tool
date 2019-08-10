@@ -124,7 +124,7 @@ object_setting_for_fragment_shader random_object_color(object_setting_for_fragme
 	mesh_model.ambient = random_v3_norm(randomizer, ambient[0], ambient[1], ambient[2], ambient[3]);
 	mesh_model.diffuse = random_v3_norm(randomizer, diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
 	mesh_model.specular = random_v3_norm(randomizer, specular[0], specular[1], specular[2], specular[3]);
-	mesh_model.shininess = random_float(randomizer, shininess[0], shininess[1]);
+	mesh_model.shininess = random_float(randomizer, shininess[0], shininess[1], 1);
 	return mesh_model;
 
 }
@@ -294,28 +294,29 @@ void generate_json_label(std::string json_path, int number, glm::mat4 object_mod
 //Randomization factors
 //1. lighting conditions, no spot light now
 int light_num = 1;
+float sigma = 0.05;
 glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
 std::vector<float> light_number_range = { 1.0f, 10.0f };					//minimum>=2	maximum
 std::vector<float> light_position_step = { 1, 2, 3 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
-std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.4f };  //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
-std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.05f };	//
-std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.1f };
+std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,sigma };  //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
+std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,sigma };	//
+std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,sigma };
 //std::vector<float> point_light_position = { 1.0f , 1.0f, 5.0f };			//start position, step size, end position (meter)
-std::vector<float> direction_light_direction = { -0.2f,-1.0f,-0.3f, 0.1f }; 
-std::vector<float> direction_light_ambient = { 0.15f,0.15f,0.15f,0.1f };
-std::vector<float> direction_light_diffuse = { 0.4f,0.4f,0.4f,0.1f };
-std::vector<float> direction_light_specular = { 0.5f,0.5,0.5f,0.1f };
+std::vector<float> direction_light_direction = { -0.2f,-1.0f,-0.3f, sigma }; 
+std::vector<float> direction_light_ambient = { 0.15f,0.15f,0.15f,sigma };
+std::vector<float> direction_light_diffuse = { 0.4f,0.4f,0.4f,sigma };
+std::vector<float> direction_light_specular = { 0.5f,0.5,0.5f,sigma };
 //2. object material	
 //std::vector<float> train_color = { 0.5f,0.5f, 0.5f, 0.01f };
-std::vector<float> train_ambient = { 0.1,0.1,0.1, 0.01 };//{ 0.1f,0.1f, 0.1, 0.01f };
-std::vector<float> train_diffuse = { 0.55f,0.55f, 0.55,0.01f };
-std::vector<float> train_specular = { 0.2f,0.2f, 0.2f, 0.01f };
-std::vector<float> train_shininess = { 0.1f, 16.0f };						//minimum, maximum
-std::vector<float> distractor_color = { 0.5f,0.5f, 0.5f,0.8f };
-std::vector<float> distractor_ambient = { 0.5f,0.5f, 0.5f,0.3f };
-std::vector<float> distractor_diffuse = { 0.5f,0.5f, 0.5f,0.3f };
-std::vector<float> distractor_specular = { 0.1f,0.1f, 0.1f,0.3f };
-std::vector<float> distractor_shininess = { 0.1f, 16.0f };
+std::vector<float> train_ambient = { 0.0,0.0,0.0, sigma };//{ 0.1f,0.1f, 0.1, 0.01f };
+std::vector<float> train_diffuse = { 0.55f,0.55f, 0.55,sigma };
+std::vector<float> train_specular = { 0.7f,0.7f, 0.7f, sigma };
+std::vector<float> train_shininess = { 20.f, 10*sigma };						//minimum, maximum
+std::vector<float> distractor_color = { 0.1f,0.1f, 0.1f,sigma };
+std::vector<float> distractor_ambient = { 0.5f,0.5f, 0.5f,sigma };
+std::vector<float> distractor_diffuse = { 0.5f,0.5f, 0.5f,sigma };
+std::vector<float> distractor_specular = { 0.1f,0.1f, 0.1f,sigma };
+std::vector<float> distractor_shininess = { 32.f, 100 * sigma };
 //3.object position
 std::vector<float> object_position_distribution = { 0, 0.2, 0.02, 0.07};	//xy_mean, z_mean, xy_sigma, z_sigma
 std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };				    //minimum maximum
