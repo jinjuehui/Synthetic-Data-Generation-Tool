@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 #define LOAD_CONE "mesh/distractions/cone.stl"
 #define LOAD_DONAS  "mesh/distractions/torus.stl"//"mesh/distractions/donas.stl"
 #define LOAD_SPHERE "mesh/distractions/sphere.stl"
-#define IMAGE_BACKGROUND_PATH "D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages"
+#define IMAGE_BACKGROUND_PATH ""//"D:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages"
 #define TRAINING_IMAGE_SAVE_PATH "D:/data/position_estimation/training_data/.jpg"
 #define JSON_LABEL_PATH "D:/data/position_estimation/label/.json"
 #define MASK_LABEL_PATH "D:/data/position_estimation/mask_data/.jpg"
@@ -276,7 +276,7 @@ void generate_json_label(std::string json_path, int number, glm::mat4 object_mod
 //1. lighting conditions
 //Randomization factors
 //1. lighting conditions, no spot light now
-std::vector<float> light_number_range = { 3.0f, 5.0f };						//minimum>=2	maximum
+std::vector<float> light_number_range = { 1.0f, 10.0f };						//minimum>=2	maximum
 std::vector<float> light_position_step = { 2000, 0.5 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
 std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.1f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2, 0.3, 0.4
 std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.01f };	//
@@ -288,7 +288,7 @@ std::vector<float> direction_light_diffuse = { 0.4f,0.4f,0.4f,0.01f };
 std::vector<float> direction_light_specular = { 0.5f,0.5,0.5f,0.01f };
 //2. object material	
 //std::vector<float> train_color = { 0.5f,0.5f, 0.5f, 0.01f };
-std::vector<float> train_ambient = { 0.1f,0.1f, 0.1, 0.01f };
+std::vector<float> train_ambient = { 0.1f,0.1f, 0.1f, 0.01f };
 std::vector<float> train_diffuse = { 0.55f,0.55f, 0.55,0.01f };
 std::vector<float> train_specular = { 0.2f,0.2f, 0.2f, 0.01f };
 std::vector<float> train_shininess = { 0.1f, 16.0f };						//minimum, maximum
@@ -352,6 +352,7 @@ int main()
 	Shader Boundingbox_8p_shader("boundingbox_8p_vertex.shader", "boundingbox_8p_fragment.shader"); //draw 3d bb
 	Shader Segmentation("semantic_vertex.shader", "semantic_fragment.shader");
 	Shader Simplelightning_shader("Simple_vertex.shader", "Simple_Fragment.shader");
+	Shader background_shader("background_vertex.shader", "background_fragment.shader");
 	BoundingBox boundingbox(TrainingObject);
 
 	float bounding_box_vertex_8point[24] =
@@ -386,6 +387,15 @@ int main()
 	bool ground_truth = false;
 	std::default_random_engine random_number_generator;
 
+	VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
+	VertexBuffer Cube(cube_vertex,
+		indicies_cube,
+		sizeof(cube_vertex) / sizeof(cube_vertex[0]),
+		sizeof(float),
+		sizeof(indicies_cube) / sizeof(indicies_cube[0]),
+		sizeof(int),
+		AttribPointer_cube);
+
 	while (!glfwWindowShouldClose(window))  //start the game
 	{
 
@@ -397,7 +407,7 @@ int main()
 			USE_BACKGROUND_IMAGE = false;
 		}
 
-		float light_strength = 1.f;
+		float light_strength = 0.5f;
 		random_number_generator.seed(8);//9 //8  // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
 		for (int i = 0; i < 8188; i++)//16377//8189 // 80000 data, i=60000, i<800000
 		{
@@ -413,14 +423,7 @@ int main()
 			std::string picture = TRAINING_IMAGE_SAVE_PATH;
 
 			//create light and cube vertex setting in OpenGL
-			VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
-			VertexBuffer Cube(cube_vertex,
-				indicies_cube,
-				sizeof(cube_vertex) / sizeof(cube_vertex[0]),
-				sizeof(float),
-				sizeof(indicies_cube) / sizeof(indicies_cube[0]),
-				sizeof(int),
-				AttribPointer_cube);
+
 			std::cout << "create Background buffers and layout!" << std::endl;
 			std::vector<glm::vec3> light_positions;
 			int light_num = int(random_float(random_number_generator, light_number_range[0], light_number_range[1]));
@@ -478,7 +481,7 @@ int main()
 					std::cout << "texture loaded" << std::endl;
 				}
 				it++;
-				Shader background_shader("background_vertex.shader", "background_fragment.shader");
+				
 				background_shader.use();
 				background_shader.setInt("texture1", 0);
 				background_shader.setVector3f("light", pointLight.ambient);
@@ -732,7 +735,7 @@ int main()
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
 
-			std::cin.get();
+			//std::cin.get();
 
 		}
 
