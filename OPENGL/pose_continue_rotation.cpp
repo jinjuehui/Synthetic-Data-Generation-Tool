@@ -39,8 +39,8 @@ bool ROTATE_LIGHT = false;
 //parameters
 //Screen Parameters:
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 224;
-const unsigned int SCR_HEIGHT = 224;
+const unsigned int SCR_WIDTH = 1000;//224;
+const unsigned int SCR_HEIGHT = 1000;//224;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
 //User Input Mouse and cursor
@@ -289,7 +289,7 @@ int main()
 		"generate texture");
 
 	//read file list int the folder
-	std::map<std::string, int> Filelist = read_images_in_folder("E:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages");//SegmentationClass
+	std::map<std::string, int> Filelist = read_images_in_folder("");//"E:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages"//SegmentationClass
 	std::map<std::string, int>::iterator it = Filelist.begin();
 	std::advance(it, 1);
 

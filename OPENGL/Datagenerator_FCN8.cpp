@@ -271,7 +271,7 @@ void generate_json_label(std::string json_path, int number, glm::mat4 object_mod
 	float pose_array[4][4], quaternion[4];
 	glm::quat quaternion_original;
 	std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
-	//std::cout << "object center position: " << projected_point[0] << " " << projected_point[1] << " " <<projected_point[2] << std::endl;
+	std::cout << "object center position: " << projected_point[0] << " " << projected_point[1] << " " <<projected_point[2] << std::endl;
 	glm::mat4 camera_transpose = glm::transpose(camera);
 	glm::mat4 pose = glm::transpose(camera * object_model);
 	//std::cout << "pose" << std::endl;
@@ -481,8 +481,8 @@ int main()
 		}
 
 		float light_strength = 1.f;
-		random_number_generator.seed(8);   // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
-		for (int i = 0; i < 40000; i++) // 80000 data, i=60000, i<800000
+		random_number_generator.seed(4);//all experiment use 8, evaluation use 4   // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
+		for (int i = 0; i <10000; i++) // 80000 data, i=60000, i<800000
 		{
 			std::cout << "iterations: " << i << std::endl;
 
@@ -657,7 +657,7 @@ int main()
 			
 			//glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(0), glm::vec3(1.0f, 0.0f, 0.0f));
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
-			std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
+			//std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
 			float pose_array[4][4], quaternion[4];
 			glm::quat quaternion_original;
 	
@@ -702,13 +702,13 @@ int main()
 			std::cout << "	" << real_camera.glortho[1][0] << "	" << real_camera.glortho[1][1] << "	" << real_camera.glortho[1][2] << "	" << real_camera.glortho[1][3] << "	" << std::endl;
 			std::cout << "	" << real_camera.glortho[2][0] << "	" << real_camera.glortho[2][1] << "	" << real_camera.glortho[2][2] << "	" << real_camera.glortho[2][3] << "	" << std::endl;
 			std::cout << "	" << real_camera.glortho[3][0] << "	" << real_camera.glortho[3][1] << "	" << real_camera.glortho[3][2] << "	" << real_camera.glortho[3][3] << "	" << std::endl;
-
-			std::cout << "old projection:" << std::endl;
+			
+			std::cout << "projection:" << std::endl;
 			std::cout << "	" << projection[0][0] << "	" << projection[0][1] << "	" << projection[0][2] << "	" << projection[0][3] << "	" << std::endl;
 			std::cout << "	" << projection[1][0] << "	" << projection[1][1] << "	" << projection[1][2] << "	" << projection[1][3] << "	" << std::endl;
-			std::cout << "	" << projection[2][0] << "	" << projection[2][1] << "	" << projection[2][2] << "	" << real_camera.perspective_matrix[2][3] << "	" << std::endl;
-			std::cout << "	" << real_camera.perspective_matrix[3][0] << "	" << real_camera.perspective_matrix[3][1] << "	" << real_camera.perspective_matrix[3][2] << "	" << real_camera.perspective_matrix[3][3] << "	" << std::endl;
-*/
+			std::cout << "	" << projection[2][0] << "	" << projection[2][1] << "	" << projection[2][2] << "	" << projection[2][3] << "	" << std::endl;
+			std::cout << "	" << projection[3][0] << "	" << projection[3][1] << "	" << projection[3][2] << "	" << projection[3][3] << "	" << std::endl;
+			*/
 			//std::cout <<"object: "<< object_model[0][0] << std::endl;
 
 			//////////////////////using bounding box//////////////////////////////////////////////////////
@@ -825,7 +825,7 @@ int main()
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
 
-			//std::cin.get();
+			std::cin.get();
 
 		}
 
