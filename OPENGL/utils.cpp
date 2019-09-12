@@ -2,7 +2,7 @@
 
 std::string to_format(const int number) {
 	std::stringstream ss;
-	ss << std::setw(5) << std::setfill('0') << number;																	//change file name digit here
+	ss << std::setw(6) << std::setfill('0') << number;																	//change file name digit here
 	return ss.str();
 }
 

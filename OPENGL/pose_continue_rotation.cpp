@@ -4,22 +4,16 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-//write image output
-//#include <FreeImage.h>
-
-//self defined headers
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "stb_image.h"
-
-
-//C++ basics
+#include "Camera.h"
 #include <fstream>
 #include <map>
 #include <string>
 #include <filesystem>
+
 namespace fs = std::filesystem;
 
 
@@ -39,8 +33,8 @@ bool ROTATE_LIGHT = false;
 //parameters
 //Screen Parameters:
 std::string const path = LOAD_MODEL;
-const unsigned int SCR_WIDTH = 1000;//224;
-const unsigned int SCR_HEIGHT = 1000;//224;
+const unsigned int SCR_WIDTH = 960;//224;
+const unsigned int SCR_HEIGHT = 720;//224;
 //System Time:
 float deltaTime(0.0f), lastFrame(0.0f);//now the variables are only used for keyboard input callback functions		
 //User Input Mouse and cursor
@@ -207,10 +201,14 @@ void conver_quaternion_to_array(glm::quat q, float quaternion[4])
 }
 
 
+
+
+
+
 int main()
 {
 	//0.create window====================================================================
-	GLFWwindow* window[2];
+	GLFWwindow* window;
 
 	//initialize glfw
 	if (!glfwInit())
@@ -219,11 +217,11 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//Why it doesn't work with 2,3
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//if core_profile is chosen, the vertex array object need to be manually created
-	window[0] = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, u8"Rendering...", NULL, NULL);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, u8"Rendering...", NULL, NULL);
 	//window[1] = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, u8"GroundTruth 正在进行渲染...", NULL, NULL);
 
 	//setting up the first window
-	if (!window[0])
+	if (!window)
 	{
 		glfwTerminate();
 		exit(EXIT_FAILURE);
@@ -233,10 +231,10 @@ int main()
 		std::cout << "Window creation succeed!" << std::endl;
 	}
 
-	glfwMakeContextCurrent(window[0]);
+	glfwMakeContextCurrent(window);
 	//glfwSetWindowSizeCallback(window[0], window_size_callback);
 	std::cout << "use ESC to exit the Window" << std::endl;
-	glfwSetWindowPos(window[0], 500, 500);
+	glfwSetWindowPos(window, 500, 500);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -269,8 +267,6 @@ int main()
 	AttribPointer_Background["offset_1"] = 3 * sizeof(float);
 	//draw lights
 	VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
-
-
 	VertexBuffer Cube(cube_vertex,
 		indicies_cube,
 		sizeof(cube_vertex) / sizeof(cube_vertex[0]),
@@ -278,7 +274,6 @@ int main()
 		sizeof(indicies_cube) / sizeof(indicies_cube[0]),
 		sizeof(int),
 		AttribPointer_cube);
-
 	VertexBuffer Background(background,
 		back_indicies,
 		sizeof(background) / sizeof(background[0]),
@@ -303,33 +298,7 @@ int main()
 	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader");
 	Shader Boundingbox_8p_shader("boundingbox_8p_vertex.shader", "boundingbox_8p_fragment.shader");
 	Shader Segmentation("semantic_vertex.shader", "semantic_fragment.shader");
-	///////////////////////////////////////////using bounding box/////////////////////////////////////////////////////
-	BoundingBox boundingbox(TrainingObject);
-	float bounding_box_vertex_8point[24] =
-	{
-		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
-		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_min,
-		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_min,
-		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max,
-		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
-		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_min,
-		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_min,
-		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max
-	};
-
-	std::map<std::string, int> AttribPointer_BB;//problem by extracting to calss: pass array result in uncorrect bing VAO
-	AttribPointer_BB["layout_0"] = 0;
-	AttribPointer_BB["size_of_vertex_0"] = 3;
-	AttribPointer_BB["stride_0"] = 3 * sizeof(float);
-	AttribPointer_BB["offset_0"] = 0;
-	VertexBuffer BB_3d(bounding_box_vertex_8point,
-		boundingbox.bounding_box_vertex_8point_indecies,
-		sizeof(bounding_box_vertex_8point) / sizeof(bounding_box_vertex_8point[0]),
-		sizeof(float),
-		sizeof(boundingbox.bounding_box_vertex_8point_indecies) / sizeof(boundingbox.bounding_box_vertex_8point_indecies[0]),
-		sizeof(int),
-		AttribPointer_BB,
-		"bb");
+	Shader background_shader("background_vertex.shader", "background_fragment.shader");
 
 	lamp = glm::translate(lamp, light_position);
 	lamp = glm::scale(lamp, glm::vec3(10.0f, 10.0f, 10.0f));
@@ -339,9 +308,13 @@ int main()
 	GLCall(glEnable(GL_DEPTH_TEST));
 	bool ground_truth = true;
 
-	int delta_P(10), delta_Y(10), delta_R(10);
+	int delta_P(5), delta_Y(5), delta_R(5);
 	bool generate_mask = false;
-	while (!glfwWindowShouldClose(window[0]))  //start the game
+	std::vector<float> camera_intrin = { 1059.4995, 0.0, 453.441, 0.0, 1059.912, 338.125, 0.0, 0.0, 1.0 };
+	Camera real_camera(camera_intrin[0], camera_intrin[4], camera_intrin[2], camera_intrin[5], SCR_WIDTH, SCR_HEIGHT, 0.1, 10000);
+	real_camera.perspective_NDC[1][1] = -real_camera.perspective_NDC[1][1];
+
+	while (!glfwWindowShouldClose(window))  //start the game
 	{
 		//GLCall(glViewport(0,0,1024,768));
 
@@ -359,11 +332,13 @@ int main()
 			USE_BACKGROUND_IMAGE = false;
 		}
 		camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
+		//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
+		//projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		projection = glm::transpose(real_camera.perspective_NDC);
 		int number = 0;
 		for (int R = 0; R < 361; R += delta_R)
 		{
-			//GLCall(glClearColor(0.03f, 0.05f, 0.05f, 1.0f));
-			projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
 
 			for (int Y = 0; Y < 361; Y += delta_Y)
 			{
@@ -412,7 +387,7 @@ int main()
 							continue;
 						}
 						it++;
-						Shader background_shader("background_vertex.shader", "background_fragment.shader");
+
 						background_shader.use();
 						background_shader.setInt("texture1", 0);
 						Background.Bind("bind_Texure");
@@ -424,7 +399,7 @@ int main()
 					}
 					if (!generate_mask)
 					{
-						std::string json_path = "E:/data/pose_estimation/continue_rotation_label/.json";
+						std::string json_path = "C:/Users/uteln/Pictures/EXP/pose_estimation/label/.json";
 						json_path.insert(json_path.find_last_of('/')+1, number_str);
 						json labels;
 						std::ofstream jsonfile;
@@ -436,7 +411,7 @@ int main()
 						glm::quat quaternion_original;
 						std::vector<float> projected_point = projection_single_point_on_creen(glm::vec3(0.0f, 0.0f, 0.0f), object_model, camera, projection);
 						glm::mat4 camera_transpose = glm::transpose(camera);
-						glm::mat4 pose = camera_transpose * object_model;
+						glm::mat4 pose = glm::transpose(camera * object_model);
 						for (int u = 0; u < 3; u++)
 							for (int v = 0; v < 3; v++)
 							{
@@ -450,12 +425,13 @@ int main()
 						labels["Orientation"] = pose_array;
 						labels["Quaternion"] = quaternion;
 						jsonfile << labels;
+						/*
 						std::cout << "camera_transpose*object_model matrix:" << std::endl;
 						std::cout << "	" << pose[0][0] << "	" << pose[0][1] << "	" << pose[0][2] << "	" << pose[0][3] << "	" << std::endl;
 						std::cout << "	" << pose[1][0] << "	" << pose[1][1] << "	" << pose[1][2] << "	" << pose[1][3] << "	" << std::endl;
 						std::cout << "	" << pose[2][0] << "	" << pose[2][1] << "	" << pose[2][2] << "	" << pose[2][3] << "	" << std::endl;
 						std::cout << "	" << pose[3][0] << "	" << pose[3][1] << "	" << pose[3][2] << "	" << pose[3][3] << "	" << std::endl;
-
+						*/
 						std::cout << "quaternion:" << std::endl;
 						std::cout << "	" << quaternion[0] << "	" << quaternion[1] << "	" << quaternion[2] << "	" << quaternion[3] << "	" << std::endl;
 
@@ -488,9 +464,7 @@ int main()
 						pointLight.ambient = glm::vec3{ 0.05f,0.05f,0.05f };
 						pointLight.diffuse = glm::vec3{ 0.8f,0.8f,0.8f };
 						pointLight.specular = glm::vec3{ 1.0f,1.0,1.0f };
-
-				
-
+			
 						spotLight.ambient = glm::vec3{ 0.0f,0.0f,0.0f };
 						spotLight.diffuse = glm::vec3{ 1.0f,1.0f,1.0f };
 						spotLight.specular = glm::vec3{ 1.0f,1.0f,1.0f };
@@ -561,52 +535,7 @@ int main()
 							GLCall(glClear(GL_COLOR_BUFFER_BIT))
 							TrainingObject.Draw(Simplelightning_shader);//main object for training
 						}
-						
 
-						//////////////////////using bounding box//////////////////////////////////////////////////////
-						/*std::cout << "first loop:" << P << std::endl;
-						std::cout << " " << object_model[0][0] << " " << object_model[0][1] << " " << object_model[0][2] << " " << object_model[0][3] << " " << std::endl;
-						std::cout << " " << object_model[1][0] << " " << object_model[1][1] << " " << object_model[1][2] << " " << object_model[1][3] << " " << std::endl;
-						std::cout << " " << object_model[2][0] << " " << object_model[2][1] << " " << object_model[2][2] << " " << object_model[2][3] << " " << std::endl;
-						std::cout << " " << object_model[3][0] << " " << object_model[3][1] << " " << object_model[3][2] << " " << object_model[3][3] << " " << std::endl;*/
-
-						boundingbox.fill_bb_glm_vec3(bounding_box_vertex_8point);
-						//boundingbox.generate_bounding_box_labels_3d(SCR_WIDTH, SCR_HEIGHT, P, Y, R, projection, camera, object_model, jsonfile, json_path);
-						//3d Bounding Box
-						Boundingbox_8p_shader.use();
-						Boundingbox_8p_shader.setMatrix4fv("model", object_model);
-						Boundingbox_8p_shader.setMatrix4fv("view", camera);
-						Boundingbox_8p_shader.setMatrix4fv("projection", projection);
-						GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-						//BB_3d.Draw("draw_elements");
-
-						float bounding_box_vertex_4point[] = {
-							boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
-							boundingbox.bb_v.x_max,	boundingbox.bb_v.y_min,	0.f,  // bottom right
-							boundingbox.bb_v.x_min,	boundingbox.bb_v.y_min,	0.f,  // bottom left
-							boundingbox.bb_v.x_min,	boundingbox.bb_v.y_max,	0.f
-						};
-
-						//2dBounding Box
-						VertexBuffer BB_2d(bounding_box_vertex_4point,
-							boundingbox.bounding_box_vertex_4point_indecies,
-							sizeof(bounding_box_vertex_4point) / sizeof(bounding_box_vertex_4point[0]),
-							sizeof(float),
-							sizeof(boundingbox.bounding_box_vertex_4point_indecies) / sizeof(boundingbox.bounding_box_vertex_4point_indecies[0]),
-							sizeof(int),
-							AttribPointer_BB,
-							"bb");
-
-						Basic_shader.use();
-						Basic_shader.setMatrix4fv("model", object_model);
-						Basic_shader.setMatrix4fv("view", camera);
-						Basic_shader.setMatrix4fv("projection", projection);
-						GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-						//BB_2d.Draw("draw_elements");
-						GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
-
-						////////////////////////////////////////////////////////////////////////////////////////
-						//draw reference cube, in order to check whether imported vertex data correctly generated by blender
 						if (!ground_truth)
 						{
 							cube = glm::mat4(1.0f);
@@ -665,21 +594,21 @@ int main()
 
 					if (generate_mask)
 					{
-						std::string picture = "E:/data/pose_estimation/continue_rotation_gt/.jpg";
-						picture.insert(45, number_str);
+						std::string picture = "C:/Users/uteln/Pictures/EXP/pose_estimation/mask/.jpg";
+						picture.insert(picture.find_last_of('/')+1, number_str);
 						//std::cout << picture;
 						screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 					}
 					else {
-						std::string picture = "E:/data/pose_estimation/continue_rotation/.jpg";
-						picture.insert(42, number_str);
+						std::string picture = "C:/Users/uteln/Pictures/EXP/pose_estimation/image/.jpg";
+						picture.insert(picture.find_last_of('/')+1, number_str);
 						//std::cout << picture;
 						screenshot_freeimage(picture.c_str(), SCR_WIDTH, SCR_HEIGHT);
 
 					}
 					
 					number += 1;
-					GLCall(glfwSwapBuffers(window[0]));
+					GLCall(glfwSwapBuffers(window));
 					GLCall(glfwPollEvents());
 
 					//std::cin.get();
