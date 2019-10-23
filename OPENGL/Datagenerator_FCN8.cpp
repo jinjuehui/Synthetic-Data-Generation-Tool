@@ -15,14 +15,14 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 #define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
-#define LOAD_MODEL "mesh/obj_05.stl"//"mesh/obj_05_re.stl"//"mesh/obj_05.stl"																								#change model type
+#define LOAD_MODEL "mesh/KITcup.stl"//"mesh/obj_05.stl"//"mesh/obj_05_re.stl"//"mesh/obj_05.stl"																								#change model type
 #define LOAD_CYLINDER "mesh/distractions/cylinder.stl"
 #define LOAD_CONE "mesh/distractions/cone.stl"
 #define LOAD_DONAS  "mesh/distractions/torus.stl"//"mesh/distractions/donas.stl"
 #define LOAD_SPHERE "mesh/distractions/sphere.stl"
 #define BACK_GROUND_IMAGE_PATH "C:\\Users\\uteln\\Pictures\\JPEGImages" //"E:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages"
 #define JSON_LABEL "C:/Users/uteln/Pictures/EXP/label/.json"
-#define SAVE_IMAGE_PATH "C:/Users/uteln/Pictures/EXP/training_data/.jpg"  //D:/data/segmentation/training_data/.jpg
+#define SAVE_IMAGE_PATH "C:/Users/uteln/Pictures/EXP/training_data/04/.jpg"  //D:/data/segmentation/training_data/.jpg
 #define MASK_DATA_PATH "C:/Users/uteln/Pictures/EXP/mask_data/.jpg"
 #define FULL_MASK "C:/Users/uteln/Pictures/EXP/full_mask/.jpg"
 #define USE_SIMPLE_LIGHTNING_MODEL false
@@ -313,7 +313,7 @@ float sigma = 0.8;
 glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
 std::vector<float> light_number_range = { 1.0f, 10.0f };					//minimum>=2	maximum
 std::vector<float> light_position_step = { 1, 2, 3 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
-std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.1f };  //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
+std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.4f };  //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
 std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.05 };	//
 std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.1 };
 //std::vector<float> point_light_position = { 1.0f , 1.0f, 5.0f };			//start position, step size, end position (meter)
@@ -481,14 +481,14 @@ int main()
 		}
 
 		float light_strength = 1.f;
-		random_number_generator.seed(4);//all experiment use 8, evaluation use 4   // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
-		for (int i = 0; i <10000; i++) // 80000 data, i=60000, i<800000
+		random_number_generator.seed(8);//all experiment use 8, evaluation use 4   // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
+		for (int i = 0; i <200000; i++) // 80000 data, i=60000, i<800000
 		{
 			std::cout << "iterations: " << i << std::endl;
 
 			glm::mat4 object_model = glm::mat4(1.0f);  //trainning object matrix 
 			glm::mat4 cube = glm::mat4(1.0f);
-			object_model = glm::scale(object_model, glm::vec3(1.0f, 1.0f, 1.0f));
+			object_model = glm::scale(object_model, glm::vec3(0.001f, 0.001f, 0.001f));
 			//cube = glm::translate(cube, glm::vec3(3.0f, 0.0f, 0.0f));
 			//cube = glm::scale(cube, glm::vec3(0.3f, 0.3f, 0.3f));
 			std::string number = to_format(i);
