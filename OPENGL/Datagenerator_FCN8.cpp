@@ -21,19 +21,17 @@ namespace fs = std::filesystem;
 #define LOAD_DONAS  "mesh/distractions/torus.stl"//"mesh/distractions/donas.stl"
 #define LOAD_SPHERE "mesh/distractions/sphere.stl"
 #define BACK_GROUND_IMAGE_PATH "C:\\Users\\uteln\\Pictures\\JPEGImages" //"E:\\autoencoder_6d_pose_estimation\\backgrounimage\\VOCdevkit\\VOC2012\\JPEGImages"
-#define JSON_LABEL "C:/Users/uteln/Pictures/EXP/label/.json"
-#define SAVE_IMAGE_PATH "C:/Users/uteln/Pictures/EXP/training_data/04/.jpg"  //D:/data/segmentation/training_data/.jpg
-#define MASK_DATA_PATH "C:/Users/uteln/Pictures/EXP/mask_data/.jpg"
-#define FULL_MASK "C:/Users/uteln/Pictures/EXP/full_mask/.jpg"
+#define JSON_LABEL "C:/Users/uteln/Pictures/EXP/generated_data/label/.json"
+#define SAVE_IMAGE_PATH "C:/Users/uteln/Pictures/EXP/generated_data/training_data/.jpg"  //D:/data/segmentation/training_data/.jpg
+#define MASK_DATA_PATH "C:/Users/uteln/Pictures/EXP/generated_data/mask_data/.jpg"
+#define FULL_MASK "C:/Users/uteln/Pictures/EXP/generated_data/full_mask/.jpg"
 #define USE_SIMPLE_LIGHTNING_MODEL false
 #define ROTATE_CAMERA false
-
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define ENABLE_FOREGROUND_OBJECT true
 #define SINGLE_LIGHT false
 #define USE_COLOR_BACKGROUND false
 bool USE_BACKGROUND_IMAGE = true;
-
 bool STATIC_CAMERA_VIEW = true; //set to true,camera won't moved by keybords input
 bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
 bool ROTATE_LIGHT = false;
@@ -48,6 +46,8 @@ light dirLight, pointLight, spotLight, lightning;
 object_setting_for_fragment_shader train_object, cylinder, cone, donas;
 CameraOrientation Setup;
 std::string json_path = JSON_LABEL;
+
+
 float cube_vertex[] = {
 	0.1f,	-0.1f,	-0.1f,	0.0f,	-1.0f,	-0.0f,
 	0.1f,	-0.1f,	0.1f,	0.0f,	-1.0f,	-0.0f,
@@ -88,7 +88,6 @@ unsigned int indicies_cube[] = {
 	 20,  21,  22,
 	 20,  22,  23
 };
-
 
 glm::mat4 model_matrix_generator(glm::mat4 &model, std::default_random_engine &randomizer, std::vector<float> scale_factor, std::vector<float> pose_params)
 {
@@ -286,6 +285,7 @@ void generate_json_label(std::string json_path, int number, glm::mat4 object_mod
 			if (std::abs(pose[u][v]) < 1e-7)
 				pose[u][v] = 0;
 		}
+
 	convert_array(pose, pose_array);
 	quaternion_original = glm::quat_cast(pose);
 	conver_quaternion_to_array(quaternion_original, quaternion);
@@ -310,6 +310,8 @@ void generate_json_label(std::string json_path, int number, glm::mat4 object_mod
 //1. lighting conditions, no spot light now
 int light_num = 1;
 float sigma = 0.8;
+float scale_factor = 0.001; //convert mm to m
+int generat_data_number = 80; // how many data to generate
 glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
 std::vector<float> light_number_range = { 1.0f, 10.0f };					//minimum>=2	maximum
 std::vector<float> light_position_step = { 1, 2, 3 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
@@ -333,7 +335,7 @@ std::vector<float> distractor_diffuse = { 0.5f,0.5f, 0.5f,0.05 };
 std::vector<float> distractor_specular = { 0.1f,0.1f, 0.1f,0.05 };
 std::vector<float> distractor_shininess = { 32.f, 10 * 0.05 };
 //3.object position
-std::vector<float> object_position_distribution = { 0, 0.2, 0.02, 0.07};	//xy_mean, z_mean, xy_sigma, z_sigma
+std::vector<float> object_position_distribution = { 0, 0.1, 0.02, 0.05};	//xy_mean, z_mean, xy_sigma, z_sigma
 std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };				    //minimum maximum
 std::vector<float> obstacles_scale_factor2 = {60.f, 80.f};
 
@@ -349,8 +351,24 @@ int main()
 	window = initialize_window(SCR_WIDTH, SCR_HEIGHT, "Rendering...");
 	glfwSetWindowPos(window, 2000, 100);
 
-	//===============move into vertex classes to parse layout automatically====================
-	std::map<std::string, int> AttribPointer_cube, AttribPointer_Background;
+//Initialize Model object
+	Model TrainingObject(LOAD_MODEL);
+	Model ReferenceObject(LOAD_CUBE_REFERENCE);
+	Model CylinderObject(LOAD_CYLINDER);
+	Model ConeObject(LOAD_CONE);
+	Model SphereObject(LOAD_SPHERE);
+	Model DonasObject(LOAD_DONAS);
+
+//Initialize Shader
+	Shader multiple_lightning_shader("multipleLightSource_vertex.shader", "multipleLightSource_fragment.shader");
+	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader"); //draw 2d bb
+	Shader Boundingbox_8p_shader("boundingbox_8p_vertex.shader", "boundingbox_8p_fragment.shader"); //draw 3d bb
+	Shader Segmentation("semantic_vertex.shader", "semantic_fragment.shader");
+	Shader background_shader("background_vertex.shader", "background_fragment.shader");
+
+//Initialize vertex object. TODO: move into vertex classes to parse layout automatically
+	std::map<std::string, int> AttribPointer_cube, AttribPointer_Background, AttribPointer_BB;
+	//foreground object
 	AttribPointer_cube["layout_0"] = 0;
 	AttribPointer_cube["size_of_vertex_0"] = 3;
 	AttribPointer_cube["stride_0"] = 6 * sizeof(float);
@@ -359,6 +377,7 @@ int main()
 	AttribPointer_cube["size_of_vertex_1"] = 3;
 	AttribPointer_cube["stride_1"] = 6 * sizeof(float);
 	AttribPointer_cube["offset_1"] = 3 * sizeof(float);
+	//bacground object
 	AttribPointer_Background["layout_0"] = 0;
 	AttribPointer_Background["size_of_vertex_0"] = 3;
 	AttribPointer_Background["stride_0"] = 5 * sizeof(float);
@@ -367,49 +386,12 @@ int main()
 	AttribPointer_Background["size_of_vertex_1"] = 2;
 	AttribPointer_Background["stride_1"] = 5 * sizeof(float);
 	AttribPointer_Background["offset_1"] = 3 * sizeof(float);
-	//===============move into vertex classes to parse layout automatically=====================
-
-	std::cout << "creating image list..." << std::endl;
-
-	std::map<std::string, int> Filelist = read_images_in_folder(BACK_GROUND_IMAGE_PATH);//SegmentationClass
-	std::map<std::string, int>::iterator it = Filelist.begin();
-	std::advance(it, 0);  //2000  //3000(80000 data)
-
-
-	std::cout << "image list created!" << std::endl;
-	Model TrainingObject(LOAD_MODEL);
-	Model ReferenceObject(LOAD_CUBE_REFERENCE);
-	Model CylinderObject(LOAD_CYLINDER);
-	Model ConeObject(LOAD_CONE);
-	Model SphereObject(LOAD_SPHERE);
-	Model DonasObject(LOAD_DONAS);
-
-	Shader multiple_lightning_shader("multipleLightSource_vertex.shader", "multipleLightSource_fragment.shader");
-	Shader Basic_shader("Basic_vertex.shader", "Basic_Fragment.shader"); //draw 2d bb
-	Shader Boundingbox_8p_shader("boundingbox_8p_vertex.shader", "boundingbox_8p_fragment.shader"); //draw 3d bb
-	Shader Segmentation("semantic_vertex.shader", "semantic_fragment.shader");
-	Shader Simplelightning_shader("Simple_vertex.shader", "Simple_Fragment.shader");
-	Shader background_shader("background_vertex.shader", "background_fragment.shader");
+	//bounding box
+	AttribPointer_BB["layout_0"] = 0;
+	AttribPointer_BB["size_of_vertex_0"] = 3;
+	AttribPointer_BB["stride_0"] = 3 * sizeof(float);
+	AttribPointer_BB["offset_0"] = 0;
 	BoundingBox boundingbox(TrainingObject);
-
-
-	VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
-	VertexBuffer Cube(cube_vertex,
-		indicies_cube,
-		sizeof(cube_vertex) / sizeof(cube_vertex[0]),
-		sizeof(float),
-		sizeof(indicies_cube) / sizeof(indicies_cube[0]),
-		sizeof(int),
-		AttribPointer_cube);
-	VertexBuffer Background(background,
-		back_indicies,
-		sizeof(background) / sizeof(background[0]),
-		sizeof(float),
-		sizeof(back_indicies) / sizeof(back_indicies[0]),
-		sizeof(int),
-		AttribPointer_Background,
-		"generate texture");
-
 	float bounding_box_vertex_8point[24] =
 	{
 		boundingbox.bb_v_3d.x_max, boundingbox.bb_v_3d.y_min, boundingbox.bb_v_3d.z_max,
@@ -421,95 +403,68 @@ int main()
 		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_min,
 		boundingbox.bb_v_3d.x_min, boundingbox.bb_v_3d.y_max, boundingbox.bb_v_3d.z_max
 	};
-
-	std::map<std::string, int> AttribPointer_BB; //problem by extracting to calss: pass array result in uncorrect bing VAO
-	AttribPointer_BB["layout_0"] = 0;
-	AttribPointer_BB["size_of_vertex_0"] = 3;
-	AttribPointer_BB["stride_0"] = 3 * sizeof(float);
-	AttribPointer_BB["offset_0"] = 0;
-	VertexBuffer BB_3d(bounding_box_vertex_8point,
-		boundingbox.bounding_box_vertex_8point_indecies,
-		sizeof(bounding_box_vertex_8point) / sizeof(bounding_box_vertex_8point[0]),
-		sizeof(float),
-		sizeof(boundingbox.bounding_box_vertex_8point_indecies) / sizeof(boundingbox.bounding_box_vertex_8point_indecies[0]),
-		sizeof(int),
-		AttribPointer_BB,
-		"bb");
-
 	float bounding_box_vertex_4point[] = {
 		boundingbox.bb_v.x_max,	boundingbox.bb_v.y_max,	0.f,  // top right
 		boundingbox.bb_v.x_max,	boundingbox.bb_v.y_min,	0.f,  // bottom right
 		boundingbox.bb_v.x_min,	boundingbox.bb_v.y_min,	0.f,  // bottom left
 		boundingbox.bb_v.x_min,	boundingbox.bb_v.y_max,	0.f
 	};
-	VertexBuffer BB_2d(bounding_box_vertex_4point,
-		boundingbox.bounding_box_vertex_4point_indecies,
-		sizeof(bounding_box_vertex_4point) / sizeof(bounding_box_vertex_4point[0]),
-		sizeof(float),
-		sizeof(boundingbox.bounding_box_vertex_4point_indecies) / sizeof(boundingbox.bounding_box_vertex_4point_indecies[0]),
-		sizeof(int),
-		AttribPointer_BB,
-		"bb");
+	
+	VertexBuffer Lightning(verticesLight, 108, sizeof(float), 0, 3, 3 * sizeof(float), 0);
+	VertexBuffer Cube(cube_vertex, indicies_cube, sizeof(cube_vertex) / sizeof(cube_vertex[0]), sizeof(float), sizeof(indicies_cube) / sizeof(indicies_cube[0]), sizeof(int), AttribPointer_cube);
+	VertexBuffer Background(background, back_indicies, sizeof(background) / sizeof(background[0]), sizeof(float), sizeof(back_indicies) / sizeof(back_indicies[0]), sizeof(int), AttribPointer_Background, "generate texture");
+	VertexBuffer BB_3d(bounding_box_vertex_8point, boundingbox.bounding_box_vertex_8point_indecies, sizeof(bounding_box_vertex_8point) / sizeof(bounding_box_vertex_8point[0]), sizeof(float), sizeof(boundingbox.bounding_box_vertex_8point_indecies) / sizeof(boundingbox.bounding_box_vertex_8point_indecies[0]), sizeof(int), AttribPointer_BB, "bb");
+	VertexBuffer BB_2d(bounding_box_vertex_4point, boundingbox.bounding_box_vertex_4point_indecies, sizeof(bounding_box_vertex_4point) / sizeof(bounding_box_vertex_4point[0]), sizeof(float), sizeof(boundingbox.bounding_box_vertex_4point_indecies) / sizeof(boundingbox.bounding_box_vertex_4point_indecies[0]), sizeof(int), AttribPointer_BB,"bb");
 
-	GLCall(glEnable(GL_DEPTH_TEST));
-	std::cout << "rendering..." << std::endl;
-	bool ground_truth = false;
-	bool full_mask = false;
-	std::default_random_engine random_number_generator;
-	//std::vector<float> camera_intrin = { 810.4968405, 0.0, 487.5509672, 0.0, 810.61326022, 354.6674888, 0.0, 0.0, 1.0 };
+//===============Initialize vertex object, finished.=====================
+
+// creating list for background images
+	std::cout << "creating background image list..." << std::endl;
+	std::map<std::string, int> Filelist = read_images_in_folder(BACK_GROUND_IMAGE_PATH);//SegmentationClass
+	std::map<std::string, int>::iterator it = Filelist.begin();
+	std::advance(it, 0);  //2000  //3000(80000 data)
+    std::cout << "image list created!" << std::endl;
+
+// initialize camera object
 	std::vector<float> camera_intrin = { 1059.4995, 0.0, 453.441, 0.0, 1059.912, 338.125, 0.0, 0.0, 1.0 };
-
 	Camera real_camera(camera_intrin[0], camera_intrin[4], camera_intrin[2], camera_intrin[5], SCR_WIDTH, SCR_HEIGHT, 0.1, 10000);
 	real_camera.perspective_NDC[1][1] = -real_camera.perspective_NDC[1][1];
-	//glm::mat3 mat, mat1, mat2;
-	//mat1 = {{1,2,3}, {3,4,5},{1,2,3}};
-	//mat2 = {{5,6,7}, {7,8,9},{3,4,5}};
-	//mat = glm::transpose(glm::transpose(mat1)*glm::transpose(mat2));
-	//std::cout << "test mat multiply" << std::endl;
-	//std::cout << mat[0][0] << ", " << mat[0][1] << ", " << mat[0][2] << std::endl;
-	//std::cout << mat[1][0] << ", " << mat[1][1] << ", " << mat[1][2] << std::endl;
-	//std::cout << mat[2][0] << ", " << mat[2][1] << ", " << mat[2][2] << std::endl;
+	//projection = glm::perspective(glm::radians(30.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f); //OpenGL original projection matrix
+	glm::mat4 camera = glm::mat4(1.0f);
+	glm::mat4 projection = glm::mat4(1.0f);
+	projection = glm::transpose(real_camera.perspective_NDC); //physical projection matrix with camera intrinsic
+	camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
+// initialize random engine
+	std::default_random_engine random_number_generator;
+	
+	bool ground_truth = false;
+	bool full_mask = false;
+	GLCall(glEnable(GL_DEPTH_TEST));
+
+// rendering loop
+	std::cout << "rendering..." << std::endl;
 	while (!glfwWindowShouldClose(window))  //start the game
 	{
-
-		glm::mat4 camera = glm::mat4(1.0f);
-		glm::mat4 projection = glm::mat4(1.0f);
-
+		//set random seed
+		random_number_generator.seed(8);
 		if (ground_truth)
 		{
 			USE_BACKGROUND_IMAGE = false;
 		}
 
-		float light_strength = 1.f;
-		random_number_generator.seed(8);//all experiment use 8, evaluation use 4   // 5, //2000 pic, seed3; 10000 pic seed1; 10000 seed2; 40000, seed4; 60000, seed5; 80000, seed6
-		for (int i = 0; i <200000; i++) // 80000 data, i=60000, i<800000
+		for (int i = 0; i <generat_data_number; i++) // 80000 data, i=60000, i<800000
 		{
-			std::cout << "iterations: " << i << std::endl;
-
-			glm::mat4 object_model = glm::mat4(1.0f);  //trainning object matrix 
+			std::cout << std::endl;
+			std::cout << "generating the: " << i <<"th image"<< std::endl;
+			glm::mat4 object_model = glm::mat4(1.0f);  //trainning object matrix, need tobe initialized here, since pose generated is relative to the last pose 
 			glm::mat4 cube = glm::mat4(1.0f);
-			object_model = glm::scale(object_model, glm::vec3(0.001f, 0.001f, 0.001f));
+			object_model = glm::scale(object_model, glm::vec3(scale_factor, scale_factor, scale_factor));
 			//cube = glm::translate(cube, glm::vec3(3.0f, 0.0f, 0.0f));
 			//cube = glm::scale(cube, glm::vec3(0.3f, 0.3f, 0.3f));
 			std::string number = to_format(i);
 			std::string picture = SAVE_IMAGE_PATH;
 			
-			//create light and cube vertex setting in OpenGL
-
-			//std::cout << "create Background buffers and layout!" << std::endl;
-			std::vector<glm::vec3> light_positions;
-			if (!SINGLE_LIGHT)
-			{
-				light_num = int(random_float(random_number_generator, light_number_range[0], light_number_range[1]));
-			}
-			else
-				light_num = 1;
-
-			//std::cout << "light position check: " << light_positions[0].x<<" "<<light_positions[0].y<<" "<<light_positions[0].z << std::endl;
-			//projection = glm::perspective(glm::radians(30.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
-			projection = glm::transpose(real_camera.perspective_NDC);
-
-			camera = glm::lookAt(Setup.camera_pose, Setup.camera_pose + Setup.camera_front, Setup.camera_up);
+		// background setting			
 			std::vector<float> gl_random_color = { random_float(random_number_generator, 0, 1),random_float(random_number_generator, 0, 1),random_float(random_number_generator, 0, 1)};
 			if (USE_COLOR_BACKGROUND&&!ground_truth)
 			{
@@ -584,9 +539,18 @@ int main()
 			multiple_lightning_shader.setVector3f("directionlight.ambient", dirLight.ambient);
 			multiple_lightning_shader.setVector3f("directionlight.diffuse", dirLight.diffuse);
 			multiple_lightning_shader.setVector3f("directionlight.specular", dirLight.specular);
-						
-			//if ((i + 1) % int(light_position_step[0]) == 0)
-			//	light_strength += light_position_step[1];
+
+		// setting parameters for point light 
+			// random light number
+			if (!SINGLE_LIGHT)
+			{
+				light_num = int(random_float(random_number_generator, light_number_range[0], light_number_range[1]));
+			}
+			else
+				light_num = 1;
+
+			// random light position
+			std::vector<glm::vec3> light_positions;
 			for (int n = 0; n < light_num; n++)
 			{
 				
@@ -650,10 +614,11 @@ int main()
 			glm::vec3 ObjectPosition = set_random_with_distribution(random_number_generator, object_position_distribution[0], object_position_distribution[1], object_position_distribution[2], object_position_distribution[3]);                //object position 0.03, 0.02
 			//glm::vec3 ObjectPosition = glm::vec3(0.1f, 0.050f, 0.1f);
 			//std::cout << "position: " << " "<<ObjectPosition[0] <<" "<< ObjectPosition[1] <<" "<< ObjectPosition[2] <<std::endl;
+			ObjectPosition = ObjectPosition / scale_factor;
 			object_model = glm::translate(object_model, ObjectPosition);
 			//object_model = glm::translate(object_model, glm::vec3(0.1, 0.0, 0.25));
 			std::vector<float> angle = rotate_object_3axis_randomly(object_model, random_number_generator);
-			//std::cout << "object model:" << std::endl;
+			std::cout << "object model:" << ObjectPosition.x << ObjectPosition.y << ObjectPosition.z <<std::endl;
 			
 			//glm::mat4 rotation_matrix = object_model = glm::rotate(object_model, float(0), glm::vec3(1.0f, 0.0f, 0.0f));
 			multiple_lightning_shader.setMatrix4fv("model", object_model);
@@ -663,7 +628,6 @@ int main()
 	
 			if (ground_truth)
 			{
-
 				Segmentation.use();
 				glm::vec3 train_object_color(1.0f, 1.0f, 1.0f);
 				Segmentation.setMatrix4fv("view", camera);
@@ -680,11 +644,6 @@ int main()
 				//DonasObject.Draw(multiple_lightning_shader);
 			}
 			
-			
-			//TrainingObject.Draw(multiple_lightning_shader);//main object for training
-			//object_model = glm::rotate(object_model, -float(glm::radians(1.0)), glm::vec3(1.0, 0.0, 0.0));
-			//inverse_object_3axis_rotation(object_model, angle);
-			//object_model = glm::translate(object_model, -ObjectPosition); //after drawing the object traslate it back to origin
 
 			/*std::cout << "NDC matrix:" << std::endl;
 			std::cout << "	" << real_camera.perspective_NDC[0][0] << "	" << real_camera.perspective_NDC[0][1] << "	" << real_camera.perspective_NDC[0][2] << "	" << real_camera.perspective_NDC[0][3] << "	" << std::endl;
@@ -709,9 +668,8 @@ int main()
 			std::cout << "	" << projection[2][0] << "	" << projection[2][1] << "	" << projection[2][2] << "	" << projection[2][3] << "	" << std::endl;
 			std::cout << "	" << projection[3][0] << "	" << projection[3][1] << "	" << projection[3][2] << "	" << projection[3][3] << "	" << std::endl;
 			*/
-			//std::cout <<"object: "<< object_model[0][0] << std::endl;
 
-			//////////////////////using bounding box//////////////////////////////////////////////////////
+		//////////////////////visualize bounding box//////////////////////////////////////////////////////
 
 			//boundingbox.fill_bb_glm_vec3(bounding_box_vertex_8point);
 			//boundingbox.generate_bounding_box_labels_3d(SCR_WIDTH, SCR_HEIGHT, P, Y, R, projection, camera, object_model, jsonfile, json_path);
@@ -722,14 +680,9 @@ int main()
 			Boundingbox_8p_shader.setMatrix4fv("view", camera);
 			Boundingbox_8p_shader.setMatrix4fv("projection", projection);
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-			//BB_3d.Draw("draw_elements");
-			
+			//BB_3d.Draw("draw_elements");			
 			//boundingbox.generate_bounding_box_3d_2d(projection, camera, object_model, int(SCR_WIDTH), int(SCR_HEIGHT));
-
-
 			//2dBounding Box
-
-
 			Basic_shader.use();
 			Basic_shader.setMatrix4fv("model", object_model);
 			Basic_shader.setMatrix4fv("view", camera);
@@ -738,7 +691,7 @@ int main()
 			//BB_2d.Draw("draw_elements");
 			GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 
-			////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////////
 
 			object_setting_for_fragment_shader obstacles, cones, spheres, donass;
 
@@ -825,7 +778,7 @@ int main()
 			GLCall(glfwSwapBuffers(window));
 			GLCall(glfwPollEvents());
 
-			std::cin.get();
+			//std::cin.get();
 
 		}
 
@@ -843,6 +796,5 @@ int main()
 	}//<--while loop
 	exit(EXIT_SUCCESS);
 	return 0;
-
 
 }//<--end of main
