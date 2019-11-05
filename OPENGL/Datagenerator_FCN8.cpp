@@ -14,8 +14,8 @@
 #include <string>
 #include <filesystem>
 namespace fs = std::filesystem;
-#define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
 #define LOAD_MODEL "mesh/KITcup.stl"//"mesh/obj_05.stl"//"mesh/obj_05_re.stl"//"mesh/obj_05.stl"																								#change model type
+#define LOAD_CUBE_REFERENCE "mesh/nanosuit/chess/test/untitled.obj"
 #define LOAD_CYLINDER "mesh/distractions/cylinder.stl"
 #define LOAD_CONE "mesh/distractions/cone.stl"
 #define LOAD_DONAS  "mesh/distractions/torus.stl"//"mesh/distractions/donas.stl"
@@ -311,7 +311,7 @@ void generate_json_label(std::string json_path, int number, glm::mat4 object_mod
 int light_num = 1;
 float sigma = 0.8;
 float scale_factor = 0.001; //convert mm to m
-int generat_data_number = 80; // how many data to generate
+int generat_data_number = 4000; // how many data to generate
 glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
 std::vector<float> light_number_range = { 1.0f, 10.0f };					//minimum>=2	maximum
 std::vector<float> light_position_step = { 1, 2, 3 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
@@ -325,7 +325,7 @@ std::vector<float> direction_light_diffuse = { 0.4f,0.4f,0.4f, 0.05 };
 std::vector<float> direction_light_specular = { 0.5f,0.5,0.5f, 0.1 };
 //2. object material	
 //std::vector<float> train_color = { 0.5f,0.5f, 0.5f, 0.01f };
-std::vector<float> train_ambient = { 0.1,0.1,0.1, 0.05 };//{ 0.1f,0.1f, 0.1, 0.01f };
+std::vector<float> train_ambient = { 0.1,0.1,0.1, 0.05 };		//{ 0.1f,0.1f, 0.1, 0.01f };
 std::vector<float> train_diffuse = { 0.55f,0.55f, 0.55,0.05 };
 std::vector<float> train_specular = { 0.2f,0.2f, 0.2f, 0.05 };
 std::vector<float> train_shininess = { 20.f, 10*0.05 };						//minimum, maximum
