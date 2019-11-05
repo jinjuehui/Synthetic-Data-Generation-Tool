@@ -7,11 +7,11 @@
 4. change Debug to x86.
 5. project settings: <br />
 	1. Include folder list:
-	![Alt Text](read_me/include_list.png)
+	![Alt Text](OPENGL/read_me/include_list.png)
 	2. Linker setting:
-    ![Alt Text](read_me/linker.png)
+    ![Alt Text](OPENGL/read_me/linker.png)
 	3. Library:
-    ![Alt Text](read_me/linker.png)
+    ![Alt Text](OPENGL/read_me/linker.png)
 6. copy following library to directory
 	Dependencies/ASSIMP/lib/
 	Dependencies/DevIL/lib/
