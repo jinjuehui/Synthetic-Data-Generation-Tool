@@ -6,16 +6,16 @@
 3. git clone this repo.
 4. change Debug to x86.
 5. project settings: <br />
-    1. Adjust general project setting according to your windows SDK and plattform version:
-	![Alt Text](OPENGL/read_me/general_setting.png)
-    2. c++ standard setting:
-	![Alt Text](OPENGL/read_me/cpp_setting.png)    
-	3. Include folder list:
-	![Alt Text](OPENGL/read_me/include_list.png)
-	4. Linker setting:
-    ![Alt Text](OPENGL/read_me/linker.png)
-	5. Library:
-    ![Alt Text](OPENGL/read_me/lib.png)
+    1. Adjust general project setting according to your windows SDK and plattform version: <br />
+	![Alt Text](OPENGL/read_me/general_setting.png) <br />
+    2. c++ standard setting: <br />
+	![Alt Text](OPENGL/read_me/cpp_setting.png) <br />    
+	3. Include folder list: <br />
+	![Alt Text](OPENGL/read_me/include_list.png) <br />
+	4. Linker setting: <br />
+    ![Alt Text](OPENGL/read_me/linker.png) <br />
+	5. Library: <br />
+    ![Alt Text](OPENGL/read_me/lib.png) <br />
 6. copy following library to directory
 	Dependencies/ASSIMP/lib/
 	Dependencies/DevIL/lib/
