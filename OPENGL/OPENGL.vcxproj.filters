@@ -75,7 +75,6 @@
     <None Include="semantic_fragment.shader">
       <Filter>Shader</Filter>
     </None>
-    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp">
