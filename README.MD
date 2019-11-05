@@ -21,7 +21,7 @@
 	Dependencies/DevIL/lib/<br />
 	Dependencies/GLEW/lib/<br />
 	Dependencies/GLFW/lib/<br />
-7. copy dll to Project/Debug/ folder, you can find these dlls in folder "\OPENGL\dll\" <br />
+7. copy dll to "Project/Debug/" folder, you can find these dlls in folder "/OPENGL/dll/" <br />
 	assimp-vc-140-mt.dll<br />
 	DevIL.dll<br />
 	FreeImg.dll<br />
@@ -36,8 +36,33 @@
     y -> up
     z -> out of image plane
 
-## Data Generation for Detection and Segmentation Comparison
-file name: Experiment1_dection_or_segmentation.cpp
+## Semantic Segmentation Data Generation
+file name: <b>Datagenerator_FCN8.cpp</b> modify following configurations:<br />
+1. find follwing code and change the path to the model you want to render, and the background images you want to use<br />
+```cpp
+#define LOAD_MODEL "mesh/obj_05.stl"  //model to render
+#define BACK_GROUND_IMAGE_PATH "C:\\Users\\uteln\\Pictures\\JPEGImages" //background images
+```
+2. setup your output folder path as follows, don't forget the <b>file extensions</b>:<br />
+```cpp
+#define JSON_LABEL "C:/Users/uteln/Pictures/EXP/generated_data/label/.json"
+#define SAVE_IMAGE_PATH "C:/Users/uteln/Pictures/EXP/generated_data/training_data/.jpg"  
+#define MASK_DATA_PATH "C:/Users/uteln/Pictures/EXP/generated_data/mask_data/.jpg"
+#define FULL_MASK "C:/Users/uteln/Pictures/EXP/generated_data/full_mask/.jpg"
+```
+3. Some other settings, change if you need otherwise leave it as it is:<br />
+```cpp
+#define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
+#define ENABLE_FOREGROUND_OBJECT true
+#define SINGLE_LIGHT false
+#define USE_COLOR_BACKGROUND false
+bool USE_BACKGROUND_IMAGE = true;   //use the random background you select
+const unsigned int SCR_WIDTH = 960;  //generated image size
+const unsigned int SCR_HEIGHT = 720;
+```
+
+
+
 1. generated image size: 960x720
 2. image data with whole randomization
 3. mask data with occlusion (* full mask data **not** generated)
@@ -58,6 +83,14 @@ file name: Experiment1_dection_or_segmentation.cpp
  "object_id":"_05.stl"}
 
 ```
+
+
+
+
+
+
+
+
 
 ## Experiment Configurations:
     1. no random

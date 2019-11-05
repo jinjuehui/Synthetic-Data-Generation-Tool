@@ -25,18 +25,15 @@ namespace fs = std::filesystem;
 #define SAVE_IMAGE_PATH "C:/Users/uteln/Pictures/EXP/generated_data/training_data/.jpg"  //D:/data/segmentation/training_data/.jpg
 #define MASK_DATA_PATH "C:/Users/uteln/Pictures/EXP/generated_data/mask_data/.jpg"
 #define FULL_MASK "C:/Users/uteln/Pictures/EXP/generated_data/full_mask/.jpg"
-#define USE_SIMPLE_LIGHTNING_MODEL false
-#define ROTATE_CAMERA false
-#define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
-#define ENABLE_FOREGROUND_OBJECT true
-#define SINGLE_LIGHT false
-#define USE_COLOR_BACKGROUND false
+#define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true //rondomized the light sources
+#define ENABLE_FOREGROUND_OBJECT true //add foreground objects
+#define SINGLE_LIGHT false //use single light source, not multiple light
+#define USE_COLOR_BACKGROUND false //use color background
 bool USE_BACKGROUND_IMAGE = true;
-bool STATIC_CAMERA_VIEW = true; //set to true,camera won't moved by keybords input
-bool ENABLE_USER_INPUT_TO_CONTROL_CAMERA = !STATIC_CAMERA_VIEW;
-bool ROTATE_LIGHT = false;
-const unsigned int SCR_WIDTH = 960;
+const unsigned int SCR_WIDTH = 960;  //generated image size
 const unsigned int SCR_HEIGHT = 720;
+
+
 using json = nlohmann::json;
 std::string const path = LOAD_MODEL;
 glm::mat4 back_position;
