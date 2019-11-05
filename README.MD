@@ -129,12 +129,12 @@ Mask data
 Generated data in general
 ![Alt Text](OPENGL/read_me/generated_data_folder.png) <br />
 
-<b>6.<b/> label data, json format: <br />
+<b>6.</b> label data, json format: <br />
     BoundingBox : [xmin, y_min, x_max, y_max]  ratio of image width and height<br />
-    Orientation : transpose([R|T])
-    Quaternion : [x, y, z, w]
-    center_point : [u_ratio, v_ratio, z_coordinate = -depth]
-```
+    Orientation : transpose([R|T]) <br />
+    Quaternion : [x, y, z, w] <br />
+    center_point : [u_ratio, v_ratio, z_coordinate = -depth] <br />
+```c++
 {"BoundingBox": [0.3763822317123413,0.3385462760925293,0.5609235763549805,0.7096770405769348],
  "Orientation": [[-0.13732697069644928, -0.7196202874183655, -0.6806525588035583,0.0],
                  [-0.09653744846582413, -0.674168050289154,  0.7322417497634888,0.0],
