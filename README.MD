@@ -10,11 +10,11 @@
 	![Alt Text](OPENGL/read_me/general_setting.png)
     2. c++ standard setting:
 	![Alt Text](OPENGL/read_me/cpp_setting.png)    
-	2. Include folder list:
+	3. Include folder list:
 	![Alt Text](OPENGL/read_me/include_list.png)
-	3. Linker setting:
+	4. Linker setting:
     ![Alt Text](OPENGL/read_me/linker.png)
-	4. Library:
+	5. Library:
     ![Alt Text](OPENGL/read_me/lib.png)
 6. copy following library to directory
 	Dependencies/ASSIMP/lib/
