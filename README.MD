@@ -39,21 +39,21 @@
 ## Semantic Segmentation Data Generation
 Headless rendering is <b>not</b> supported and please keep your rendering <b>window</b> open on your desktop layout.
 Modify following code in the file: <b>Datagenerator_FCN8.cpp</b> to change configurations:<br />
-<b>0.</b> Please create your output data folder structure as follows, for convienience, you can just copy the folder "./structure/" to the place you want:
-generated_data
-|->converted
-  |->full_mask_
-  |->gt_one_hot
-  |->gt_one_hot_full_mask
-  |->image
-  |->mask
-|->full_mask
-|->gt_one_hot
-|->label
-|->mask_data
-|->pose_estimation
-|->training_data
-|->config_
+<b>0.</b> Please create your output data folder structure as follows, for convienience, you can just copy the folder "./structure/" to the place you want:<br />
+generated_data<br />
+|->converted<br />
+---|->full_mask_<br />
+---|->gt_one_hot<br />
+---|->gt_one_hot_full_mask<br />
+---|->image<br />
+---|->mask<br />
+|->full_mask<br />
+|->gt_one_hot<br />
+|->label<br />
+|->mask_data<br />
+|->pose_estimation<br />
+|->training_data<br />
+|->config<br />
 <b>1.</b> Change the path to the model you want to render, and the background images you want to use<br />
 ```cpp
 #define LOAD_MODEL "mesh/obj_05.stl"  //model to render
@@ -66,14 +66,14 @@ generated_data
 #define MASK_DATA_PATH "C:/Users/uteln/Pictures/EXP/generated_data/mask_data/.jpg"
 #define FULL_MASK "C:/Users/uteln/Pictures/EXP/generated_data/full_mask/.jpg"
 ```
-<b>3.</b> Enable backgrounds and image size. Change if you need otherwise leave it as it is:<br />
+<b>3.</b> Change if you need otherwise leave it as it is:<br />
 ```cpp
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define ENABLE_FOREGROUND_OBJECT true
 #define SINGLE_LIGHT false
 #define USE_COLOR_BACKGROUND false
 bool USE_BACKGROUND_IMAGE = true;   //use the random background you select
-const unsigned int SCR_WIDTH = 960;  //generated image size
+const unsigned int SCR_WIDTH = 960;  //size of generated images
 const unsigned int SCR_HEIGHT = 720;
 ```
 <b>4.</b> rendering settings: chage scaling factor, if the mesh file is in mm, convert it to m. Set the data number you want.
