@@ -21,7 +21,7 @@
 	Dependencies/DevIL/lib/<br />
 	Dependencies/GLEW/lib/<br />
 	Dependencies/GLFW/lib/<br />
-7. copy dll to "Project/Debug/" folder, you can find these dlls in folder "/OPENGL/dll/" <br />
+7. copy dll to "Project/Debug/" folder, you can find these dlls in folder "./dll/" <br />
 	assimp-vc-140-mt.dll<br />
 	DevIL.dll<br />
 	FreeImg.dll<br />
@@ -37,20 +37,36 @@
     z -> out of image plane
 
 ## Semantic Segmentation Data Generation
-file name: <b>Datagenerator_FCN8.cpp</b> modify following configurations:<br />
-1. find follwing code and change the path to the model you want to render, and the background images you want to use<br />
+Headless rendering is <b>not</b> supported and please keep your rendering <b>window</b> open on your desktop layout.
+Modify following code in the file: <b>Datagenerator_FCN8.cpp</b> to change configurations:<br />
+<b>0.</b> Please create your output data folder structure as follows, for convienience, you can just copy the folder "./structure/" to the place you want:
+generated_data
+|->converted
+  |->full_mask_
+  |->gt_one_hot
+  |->gt_one_hot_full_mask
+  |->image
+  |->mask
+|->full_mask
+|->gt_one_hot
+|->label
+|->mask_data
+|->pose_estimation
+|->training_data
+|->config_
+<b>1.</b> Change the path to the model you want to render, and the background images you want to use<br />
 ```cpp
 #define LOAD_MODEL "mesh/obj_05.stl"  //model to render
 #define BACK_GROUND_IMAGE_PATH "C:\\Users\\uteln\\Pictures\\JPEGImages" //background images
 ```
-2. setup your output folder path as follows, don't forget the <b>file extensions</b>:<br />
+<b>2.</b> Setup your output folder path as follows, don't forget the <b>file extensions</b>:<br />
 ```cpp
 #define JSON_LABEL "C:/Users/uteln/Pictures/EXP/generated_data/label/.json"
 #define SAVE_IMAGE_PATH "C:/Users/uteln/Pictures/EXP/generated_data/training_data/.jpg"  
 #define MASK_DATA_PATH "C:/Users/uteln/Pictures/EXP/generated_data/mask_data/.jpg"
 #define FULL_MASK "C:/Users/uteln/Pictures/EXP/generated_data/full_mask/.jpg"
 ```
-3. Some other settings, change if you need otherwise leave it as it is:<br />
+<b>3.</b> Enable backgrounds and image size. Change if you need otherwise leave it as it is:<br />
 ```cpp
 #define ENABLE_RANDOM_LIGHT_SOURCE_POSITION true
 #define ENABLE_FOREGROUND_OBJECT true
@@ -60,13 +76,60 @@ bool USE_BACKGROUND_IMAGE = true;   //use the random background you select
 const unsigned int SCR_WIDTH = 960;  //generated image size
 const unsigned int SCR_HEIGHT = 720;
 ```
+<b>4.</b> rendering settings: chage scaling factor, if the mesh file is in mm, convert it to m. Set the data number you want.
+```cpp
+float scale_factor = 0.001; //convert mm to m
+int generat_data_number = 4000; // how many data to generate
+//******************************************************//
+//***you may not need to change the following params****//
+//**these parameter value are teseted with experiments**//
+//*****modify when you want do your own exoeriments*****//
 
+int light_num = 1;//used when single light model is on
+glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
+std::vector<float> light_number_range = { 1.0f, 10.0f };					//minimum	maximum
+std::vector<float> light_position_step = { 1, 2, 3 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
+std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.4f };  //r mean, g mean, b mean, standard deviation
+std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.05 };	   //r mean, g mean, b mean, standard deviation
+std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.1 };     //r mean, g mean, b mean, standard deviation
 
+std::vector<float> direction_light_direction = { -0.2f,-1.0f,-0.3f, 0.1 }; //x mean, y mean, z mean, standard deviation(uniform distribution is beeter)
+std::vector<float> direction_light_ambient = { 0.15f,0.15f,0.15f, 0.2};    //r mean, g mean, b mean, standard deviation
+std::vector<float> direction_light_diffuse = { 0.4f,0.4f,0.4f, 0.05 };     //r mean, g mean, b mean, standard deviation
+std::vector<float> direction_light_specular = { 0.5f,0.5,0.5f, 0.1 };      //r mean, g mean, b mean, standard deviation
+//2. object material	
+//std::vector<float> train_color = { 0.5f,0.5f, 0.5f, 0.01f };             //r mean, g mean, b mean, standard deviation
+std::vector<float> train_ambient = { 0.1,0.1,0.1, 0.05 };		             //r mean, g mean, b mean, standard deviation
+std::vector<float> train_diffuse = { 0.55f,0.55f, 0.55,0.05 };             //r mean, g mean, b mean, standard deviation
+std::vector<float> train_specular = { 0.2f,0.2f, 0.2f, 0.05 };             //r mean, g mean, b mean, standard deviation
+std::vector<float> train_shininess = { 20.f, 10*0.05 };					  //mean, standard deviation
+std::vector<float> distractor_color = { 0.1f,0.1f, 0.1f,0.05 };            //r mean, g mean, b mean, standard deviation
+std::vector<float> distractor_ambient = { 0.5f,0.5f, 0.5f,0.05 };          //r mean, g mean, b mean, standard deviation
+std::vector<float> distractor_diffuse = { 0.5f,0.5f, 0.5f,0.05 };          //r mean, g mean, b mean, standard deviation
+std::vector<float> distractor_specular = { 0.1f,0.1f, 0.1f,0.05 };         //r mean, g mean, b mean, standard deviation
+std::vector<float> distractor_shininess = { 32.f, 10 * 0.05 };             //mean standard deviation
+//3.object position
+std::vector<float> object_position_distribution = { 0, 0.1, 0.02, 0.05};	//xy_mean, z_mean, xy_sigma, z_sigma
+std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };				    //minimum maximum
+std::vector<float> obstacles_scale_factor2 = {60.f, 80.f};                //minimum maximum
 
-1. generated image size: 960x720
-2. image data with whole randomization
-3. mask data with occlusion (* full mask data **not** generated)
-4. label data, json format: <br />
+std::vector<float> cube_position = { 0.f, 3.14f, 0.0, 0.4, 0.01, 0.1 };		//angle min,max, traslation xy_mean, z_mean, xy_sigma, z_sigma	
+std::vector<float> cone_position = { 0.f, 7.f, 0.0, 0.4, 0.01, 0.1 };        //angle min,max, traslation xy_mean, z_mean, xy_sigma, z_sigma	
+std::vector<float> sphere_position = { 0.f, 3.65f, 0.0, 0.4, 0.01, 0.1 };    //angle min,max, traslation xy_mean, z_mean, xy_sigma, z_sigma	
+std::vector<float> donas_position = { 0.f, 2.48f, 0.0, 0.4, 0.01, 0.1 };     //angle min,max, traslation xy_mean, z_mean, xy_sigma, z_sigma	
+
+//******************************************************//
+```
+
+<b>5.</b> Hit <b>F5</b> start rendering.<br />
+RGB data
+![Alt Text](OPENGL/read_me/rgb.jpg) <br />
+Mask data    
+![Alt Text](OPENGL/read_me/mask.jpg) <br />
+Generated data in general
+![Alt Text](OPENGL/read_me/generated_data_folder.png) <br />
+
+<b>6.<b/> label data, json format: <br />
     BoundingBox : [xmin, y_min, x_max, y_max]  ratio of image width and height<br />
     Orientation : transpose([R|T])
     Quaternion : [x, y, z, w]
@@ -83,64 +146,3 @@ const unsigned int SCR_HEIGHT = 720;
  "object_id":"_05.stl"}
 
 ```
-
-
-
-
-
-
-
-
-
-## Experiment Configurations:
-    1. no random
-    not really no random, basic randomization with background, position and pose
-    
-    
-```c++
-#define ENABLE_RANDOM_LIGHT_SOURCE_POSITION false
-#define ENABLE_FOREGROUND_OBJECT false
-#define SINGLE_LIGHT true
-
-int light_num = 1;
-glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
-std::vector<float> light_number_range = { 1.0f, 5.0f };						    //minimum>=2	maximum
-std::vector<float> light_position_step = { 2000, 0.5 };						    //step_number, step_size, x,y,z min=-step_size and max=step_size
-std::vector<float> point_light_ambient_color = { 0.1f,0.1f,0.1f,0.04f };     //{ 0.08f,0.08f,0.08f,0.4f };	// r mean, g mean, b mean, sigma  last change step, 0.1,0.2...
-std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.01f };	    //
-std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.01f };
-//std::vector<float> point_light_position = { 1.0f , 1.0f, 5.0f };			    //start position, step size, end position (meter)
-std::vector<float> direction_light_direction = { -0.2f,-1.0f,-0.3f, 0.5f };     //
-std::vector<float> direction_light_ambient = { 0.15f,0.15f,0.15f,0.01f };
-std::vector<float> direction_light_diffuse = { 0.4f,0.4f,0.4f,0.01f };
-std::vector<float> direction_light_specular = { 0.5f,0.5,0.5f,0.01f };
-//2. object material	
-//std::vector<float> train_color = { 0.5f,0.5f, 0.5f, 0.01f };
-std::vector<float> train_ambient = { 0.2,0.2,0.2, 0.01 };                      //{ 0.1f,0.1f, 0.1, 0.01f };
-std::vector<float> train_diffuse = { 0.55f,0.55f, 0.55,0.01f };
-std::vector<float> train_specular = { 0.2f,0.2f, 0.2f, 0.01f };
-std::vector<float> train_shininess = { 0.1f, 16.0f };						       //minimum, maximum
-std::vector<float> distractor_color = { 0.5f,0.5f, 0.5f,0.8f };
-std::vector<float> distractor_ambient = { 0.5f,0.5f, 0.5f,0.3f };
-std::vector<float> distractor_diffuse = { 0.5f,0.5f, 0.5f,0.3f };
-std::vector<float> distractor_specular = { 0.1f,0.1f, 0.1f,0.3f };
-std::vector<float> distractor_shininess = { 0.1f, 16.0f };
-//3.object position
-std::vector<float> object_position_distribution = { 0, 0.2, 0.02, 0.07};	      //xy_mean, z_mean, xy_sigma, z_sigma
-std::vector<float> obstacles_scale_factor = { 0.2, 0.5 };						   //minimum maximum
-std::vector<float> obstacles_scale_factor2 = {60.f, 80.f};
-
-std::vector<float> cube_position = { 0.f, 3.14f, 0.0, 0.4, 0.01, 0.1 };		   //angle min,max, traslation xy_mean, z_mean, xy_sigma, z_sigma	
-std::vector<float> cone_position = { 0.f, 7.f, 0.0, 0.4, 0.01, 0.1 };
-std::vector<float> sphere_position = { 0.f, 3.65f, 0.0, 0.4, 0.01, 0.1 };
-std::vector<float> donas_position = { 0.f, 2.48f, 0.0, 0.4, 0.01, 0.1 };
-```
-| Experiment|bg|fg|light_number|light_position(m) |pl_ambient(mean, sigma)|pl_diffuse(mean, sigma)|pl_specular(mean, sigma)|dr_direction(mean(x,y,z), sigma)|dr_ambient(mean, sigma)|dr_diffuse(mean, sigma)|dr_specular(mean, sigma)|ma_ambient(mean, sigma)|ma_diffuse(mean, sigma)|ma_speclar(mean, sigma)|ma_shiness(min, max)|_
-|----------|:-------------:|------:|
-| number |image|none|  1 | x=0.4,y=0.4,z=0.4 |0.1, 0.04|0.8, 0.01| 1.0, 0.01|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.01|0.4, 0.01|0.5, 0.01|0.2, 0.01|0.55,0.01|0.2, 0.01| 0.1, 16.0 |
-| number,position |image|none|    1,10   |  -1.0~1.0 |0.1, 0.04|0.8, 0.1| 1.0, 0.01|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.01|0.4, 0.01|0.5, 0.01|0.1, 0.01|0.55,0.01|0.2, 0.01| 0.f, 16.0| 
-| number,position,color |image|none| 1-10 |    -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1|0.5, 0.1|0.1, 0.01|0.55,0.01|0.2, 0.01| 0.1, 16.0|
-| number,position,color,material |image|none| 1-10 | -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1| 0.5, 0.1|0.1, 0.2|0.55,0.1|0.2, 0.1| 0.1, 16.0 |
-| number,position,color,material, background |color|none| 1-10 | -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1| 0.5, 0.1|0.1, 0.2|0.55,0.1|0.2, 0.1| 0.1, 16.0 |
-|  |image|none| 1-10 | -1.0~1.0 |0.1, 0.5|0.8, 0.2| 1.0, 0.2|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1| 0.5, 0.1|0.1, 0.2|0.55,0.1|0.2, 0.1| 0.1, 16.0 |
-| number,position,color,material, background, foreground |image|cube, cone, torus, sphere| 1-10 | -1.0~1.0 |0.1, 0.4|0.8, 0.1| 1.0, 0.1|(-0.2f,-1.0f,-0.3f), 0.5f|0.15, 0.1|0.4, 0.1| 0.5, 0.1|0.1, 0.2|0.55,0.1|0.2, 0.1| 0.1, 16.0 |
