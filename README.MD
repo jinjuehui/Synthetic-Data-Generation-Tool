@@ -131,6 +131,7 @@ Generated data in general
 
 <b>6.</b> label data, json format: <br />
     BoundingBox : [xmin, y_min, x_max, y_max]  ratio of image width and height<br />
+    (in the final version, bounding box is calculated in data preprocessing stage in training framework. So you might get all value 0 here.)
     Orientation : transpose([R|T]) <br />
     Quaternion : [x, y, z, w] <br />
     center_point : [u_ratio, v_ratio, z_coordinate = -depth] <br />
