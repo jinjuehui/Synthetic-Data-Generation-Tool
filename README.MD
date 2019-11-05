@@ -123,9 +123,9 @@ std::vector<float> donas_position = { 0.f, 2.48f, 0.0, 0.4, 0.01, 0.1 };     //a
 
 <b>5.</b> Hit <b>F5</b> start rendering.<br />
 RGB data
-![Alt Text](OPENGL/read_me/rgb.jpg) <br />
+![Alt Text](OPENGL/read_me/RGB.gif) <br />
 Mask data    
-![Alt Text](OPENGL/read_me/mask.jpg) <br />
+![Alt Text](OPENGL/read_me/Mask.gif) <br />
 Generated data in general
 ![Alt Text](OPENGL/read_me/generated_data_folder.png) <br />
 
