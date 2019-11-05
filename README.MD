@@ -16,12 +16,12 @@
     ![Alt Text](OPENGL/read_me/linker.png) <br />
 	5. Library: <br />
     ![Alt Text](OPENGL/read_me/lib.png) <br />
-6. copy following library to directory
-	Dependencies/ASSIMP/lib/
-	Dependencies/DevIL/lib/
-	Dependencies/GLEW/lib/
-	Dependencies/GLFW/lib/
-7. copy dll to Project/Debug/ folder<br />
+6(optional). copy following library to directory if the lib file is not there<br />
+	Dependencies/ASSIMP/lib/<br />
+	Dependencies/DevIL/lib/<br />
+	Dependencies/GLEW/lib/<br />
+	Dependencies/GLFW/lib/<br />
+7. copy dll to Project/Debug/ folder, you can find these dlls in folder "\OPENGL\dll\" <br />
 	assimp-vc-140-mt.dll<br />
 	DevIL.dll<br />
 	FreeImg.dll<br />
