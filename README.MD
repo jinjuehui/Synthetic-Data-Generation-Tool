@@ -1,4 +1,4 @@
-# 6D Data Generation Tool
+# Synthetic Data Generation Tool
 
 ## Setup Environemnt
 1. Install Gitlab extensions in visual studio.
