@@ -306,7 +306,7 @@ void generate_json_label(std::string json_path, int number, glm::mat4 object_mod
 //Randomization factors
 //1. lighting conditions, no spot light now
 float scale_factor = 0.001; //convert mm to m
-int generat_data_number = 40; // how many data to generate
+int generat_data_number = 40000; // how many data to generate
 //******************************************************//
 //***you may not need to change the following params****//
 //**these parameter value are teseted with experiments**//
@@ -316,7 +316,7 @@ int light_num = 1;//used when single light model is on
 glm::vec3 light_fix_position = glm::vec3(0.4, 0.4, 0.4);
 std::vector<float> light_number_range = { 1.0f, 10.0f };					//minimum	maximum
 std::vector<float> light_position_step = { 1, 2, 3 };						//step_number, step_size, x,y,z min=-step_size and max=step_size
-std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.4f };  //r mean, g mean, b mean, standard deviation
+std::vector<float> point_light_ambient_color = { 0.08f,0.08f,0.08f,0.1f };  //r mean, g mean, b mean, standard deviation
 std::vector<float> point_light_diffuse_color = { 0.8f,0.8f,0.8f,0.05 };	   //r mean, g mean, b mean, standard deviation
 std::vector<float> point_light_specular_color = { 1.0f,1.0f,1.0f,0.1 };     //r mean, g mean, b mean, standard deviation
 
